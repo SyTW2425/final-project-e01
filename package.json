@@ -1,0 +1,23 @@
+{
+  "name": "final-project-sytw",
+  "version": "1.0.0",
+  "description": "Final project for the subject of Web Systems and Technologies",
+  "authors": "- Javier Almenara Herrera - Pablo Rodríguez de la Rosa - Omar Suárez Doro",
+  "main": "index.js",
+  "scripts": {
+    "dev:frontend": "npm --workspace=packages/frontend run dev",
+    "dev:backend": "npm --workspace=packages/backend run dev",
+    "build:frontend": "npm --workspace=packages/frontend run build",
+    "build:backend": "npm --workspace=packages/backend run build",
+    "start:backend": "npm --workspace=packages/backend run start",
+    "start:frontend": "npm --workspace=packages/frontend run serve"
+  },
+  "workspaces": [
+    "packages/frontend",
+    "packages/backend"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
