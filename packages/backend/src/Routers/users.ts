@@ -88,9 +88,9 @@ usersRouter.post('/login', async (req, res) => {
       expiresIn: '1h'
     });
 
-    res.json({ token });
+    res.status(201).json({ token });
   } catch (error) {
-    res.json('Error: ' + error);
+    res.status(505).json('Error: ' + error);
   }
 });
 
