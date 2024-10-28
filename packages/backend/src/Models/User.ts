@@ -1,6 +1,18 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *  
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 28/10/2024
+ * @brief Model of User
+ */
 
 import { Document, Schema, model } from 'mongoose';
-
 
 /**
  * Enum of Role
@@ -18,7 +30,7 @@ export interface UserDocumentInterface extends Document {
   password: string;
   email: string;
   role: Role;
-  projects: string[];
+  projects?: Schema.Types.ObjectId[];
 }
 
 /**
@@ -56,14 +68,15 @@ const UserSchema = new Schema<UserDocumentInterface>({
       },
     },
   },
-  projects: {
-    type: [String],
-    default: [],
-  },
   role: {
     type: String,
     enum: [Role.Admin, Role.User],
     default: Role.User
+  },
+  projects: {
+    type: [Schema.Types.ObjectId],
+    ref: 'Projects',
+    default: [],
   },
 });
 
