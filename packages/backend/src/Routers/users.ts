@@ -94,6 +94,38 @@ usersRouter.post('/login', async (req, res) => {
   }
 });
 
+usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
+  try {
+    // Extrae el userId del usuario autenticado
+    const { userId } = req;
+    if (!userId) {
+      res.status(401).send('Unauthorized');
+      return;
+    }
+    const userDelete = await User.findById(userId);
+    const { username, email } = req.body;
+    if (userDelete?.username === username) {
+      await User.findOneAndDelete({ username, email });
+      res.status(200).send('User deleted');
+      return
+    } else {
+      res.status(403).send('Unauthorized');
+    }
+    if (userDelete?.role === 'admin') {
+      await User.findOneAndDelete({ username, email });
+      res.status(200).send('User deleted');
+      return
+    } else {
+      res.status(403).send('Unauthorized');
+    }
+  } catch (error) {
+    res.status(500).send('Error deleting user');
+    return
+  }
+});
+      
+    
+    
 
 /**
  * This function checks the search users request
