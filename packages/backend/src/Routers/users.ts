@@ -1,145 +1,187 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *  
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 28/10/2024
+ * @brief Main 
+ */
+
 import 'dotenv/config';
 import Express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 
-import { User } from '../Models/User.js';
+import { User, Role } from '../Models/User.js';
 
 const JWT_SECRET  = process.env.JWT_SECRET || 'CHILINDRINA';
 
 export const usersRouter = Express.Router();
 
+/**
+ * @brief This endpoint is used to search for users
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 usersRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
-    const query = searchUsersChecks(req);
-    if (typeof query === 'string') {
-      res.status(400).send(query);
-      return;
-    }
-    const author = req.body.author;
+    const query = buildSearchQuery(req);
+    let admin : boolean = await isAdmin(req);
+    const usersRaw = await User.find(query);
+    const authorUser = await User.findById(req.userId)
+      .select('-password').
+      populate('projects');
 
-    const usersRaw = await User.find(query)
-    .select('-password')
-    .select('-projects')
-    .select('-__v')
-    .select('-_id');
-    const authorUser = await User.find({ username: author });
-
-    if (!query || !authorUser) {
+    if (!authorUser) {
       res.status(404).send('Failed to search users!');
       return;
     }
-
-    // Check if the author is in the same project as the users, to filter the email
-    for (let user of usersRaw) {
-      let inSameProject: Boolean = authorUser[0].projects.some(
-        (project_author) => {
-          return user.projects.includes(project_author);
-        },
-      );
-      user.email = inSameProject ? user.email : '';
+    
+    // Need to remove administrative fields if the user is not an admin
+    // Also, remove the email if the user is not in the same project as the author
+    // of the query.
+    if (!admin) {
+      usersRaw.forEach((user) => {
+        user.toObject();
+        if (authorUser.projects && !authorUser.projects.some((project) => user.projects?.includes(project))) {
+          user.email = '';
+        }
+        delete user._id;
+        delete user.__v;
+        delete user.projects;  
+      });
     }
-
     res.send(usersRaw);
   } catch (error) {
     res.status(500).send('Error searching users!');
   }
 });
 
+/**
+ * @brief This endpoint is used to register a new user
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 usersRouter.post('/register', async (req, res) => {
   try {
     let { username, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = new User({ 
       username, 
       email, 
-      password: hashedPassword
+      role: Role.User,
+      password: await bcrypt.hash(password, 10)
     });
     await user.save();
+    
+    res.status(201).send({
+      result: 'User registered',
+      userInfo: {
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
 
-    user.populate('-__v');
-    user.populate('-_id');
-
-    res.status(201).send(user);
   } catch (error) {
     res.status(500).send('Error: ' + error);
   }
 });
 
+/**
+ * @brief This endpoint is used to login a user
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 usersRouter.post('/login', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
+    // TODO: VALIDATION OF USERNAME, EMAIL AND PASSWORD
     const query = { $or: [{ username }, { email }] };
 
     const user = await User.findOne(query);
+
     if (!user) {
-      res.status(404).json({error: 'Authentication failed'});
+      res.status(404).json({result: 'Authentication failed by user'});
       return;
     }
    const passwordMatch = bcrypt.compareSync(password, user.password);
     if (!passwordMatch) {
-      res.status(404).json({error: 'Authentication failed'});
+      res.status(404).json({result: 'Authentication failed by user'});
       return;
     }
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
       expiresIn: '1h'
     });
 
-    res.status(201).json({ token });
+    res.status(201).json({ 
+      result: 'Authentication successful',
+      token
+    });
   } catch (error) {
-    res.status(505).json('Error: ' + error);
+    res.status(505).json({result: 'Authentication failed by server'});
   }
 });
 
+/**
+ * @brief This endpoint is used to delete a user
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
   try {
-    // Extrae el userId del usuario autenticado
-    const { userId } = req;
-    if (!userId) {
-      res.status(401).send('Unauthorized');
+    let userToDelete = req.userId;
+    const admin : boolean = await isAdmin(req);
+    userToDelete = !admin ? userToDelete : (req.body.username ?? req.body.email);
+   
+    const userDelete = await User.findOneAndDelete({ $or: [{ _id: userToDelete }, { username: userToDelete }, { email: userToDelete }] });
+    if (!userDelete) {
+      res.status(404).json({result: 'Delete failed by user'});
       return;
     }
-    const userDelete = await User.findById(userId);
-    const { username, email } = req.body;
-    if (userDelete?.username === username) {
-      await User.findOneAndDelete({ username, email });
-      res.status(200).send('User deleted');
-      return
-    } else {
-      res.status(403).send('Unauthorized');
-    }
-    if (userDelete?.role === 'admin') {
-      await User.findOneAndDelete({ username, email });
-      res.status(200).send('User deleted');
-      return
-    } else {
-      res.status(403).send('Unauthorized');
-    }
+    res.status(201).json({result: 'User deleted'});
   } catch (error) {
-    res.status(500).send('Error deleting user');
+    res.status(500).json('Error deleting user');
     return
   }
 });
       
-    
-    
+/**
+ * @brief This function checks if the user is an admin
+ * @param req The request object
+ * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin 
+ */ 
+async function isAdmin(req: Express.Request) : Promise<boolean> {
+  const { userId } = req;
+  const user = await User.findById(userId);
+  return user?.role === Role.Admin;
+}
 
 /**
- * This function checks the search users request
+ * @brief This function checks if the user is an admin and if the search query is valid
+ * @param req The request object
+ * @returns object
  */
-function searchUsersChecks(req: Express.Request): object | string {
+function buildSearchQuery(req: Express.Request): object {
   const { username, email, author } = req.body;
   const query: any = {};
   // Validations
   if (!username && !email) {
-    return 'You must provide a username or email to search for users';
+    throw Error('You must provide a username or email to search for users');
   }
   if (!author) {
-    return 'You must provide an author to search for users';
+    throw Error('You must provide an author to search for users');
   }
+
   // Build the query
   if (username) {
     query.username = { $regex: `^${username}`, $options: 'i' };
