@@ -172,16 +172,12 @@ async function isAdmin(req: Express.Request) : Promise<boolean> {
  * @returns object
  */
 function buildSearchQuery(req: Express.Request): object {
-  const { username, email, author } = req.body;
+  const { username, email } = req.body;
   const query: any = {};
   // Validations
   if (!username && !email) {
     throw Error('You must provide a username or email to search for users');
   }
-  if (!author) {
-    throw Error('You must provide an author to search for users');
-  }
-
   // Build the query
   if (username) {
     query.username = { $regex: `^${username}`, $options: 'i' };
