@@ -154,6 +154,40 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
     return
   }
 });
+
+/**
+ * @brief This endpoint is used to update a user
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
+  try {
+    const updaterUserId = req.userId;
+    const isAdminUser = await isAdmin(req);
+    const { username, email, password, role } = req.body;
+    const user = isAdminUser ? await User.findOne({ username }) : await User.findById(updaterUserId);
+    if (!user) {
+      res.status(404).json({ result: 'User not found or unauthorized' });
+      return;
+    }
+    if (isAdminUser) {
+      if (username) user.username = username;
+      if (email) user.email = email;
+      if (password) user.password = password;
+      if (role) user.role = role;
+    } else {
+      if (username) user.username = username;
+      if (email) user.email = email;
+      if (password) user.password = password;
+    }
+    await user.save();
+    res.status(201).json({result: 'User updated'});
+  } catch (error) {
+    res.status(500).json('Error updating user');
+    return;
+  }
+});
       
 /**
  * @brief This function checks if the user is an admin
@@ -172,7 +206,8 @@ async function isAdmin(req: Express.Request) : Promise<boolean> {
  * @returns object
  */
 function buildSearchQuery(req: Express.Request): object {
-  const { username, email } = req.body;
+  const { username, email } = req.query;
+  console.log(username, email);
   const query: any = {};
   // Validations
   if (!username && !email) {
