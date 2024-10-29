@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -31,7 +31,7 @@ export type Sprint = {
   startDate: Date;
   endDate: Date;
   tasks: Schema.Types.ObjectId[];
-}
+};
 
 /**
  * Type of users
@@ -41,8 +41,7 @@ export type Users = {
   role: Role;
   tasks: Schema.Types.ObjectId[];
   productivity: number;
-}
-
+};
 
 /**
  * Interface of Project
@@ -93,56 +92,63 @@ const ProjectSchema = new Schema<ProjectInterface>({
     },
   },
   users: {
-    type: [{
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: 'Users',
+    type: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'Users',
+        },
+        role: {
+          type: String,
+          enum: Object.values(Role),
+        },
+        tasks: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: 'Tasks',
+          },
+        ],
+        productivity: {
+          type: Number,
+          min: 0,
+          max: 100,
+        },
       },
-      role: {
-        type: String,
-        enum: Object.values(Role),
-      },
-      tasks: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tasks',
-      }],
-      productivity: {
-        type: Number,
-        min: 0,
-        max: 100,
-      },
-    }],
+    ],
     required: true,
   },
   sprints: {
-    type: [{
-      name: {
-        type: String,
-        required: true,
-        minlength: 3,
-        maxlength: 20,
+    type: [
+      {
+        name: {
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 20,
+        },
+        description: {
+          type: String,
+          required: true,
+          minlength: 3,
+        },
+        startDate: {
+          type: Date,
+          required: true,
+        },
+        endDate: {
+          type: Date,
+          required: true,
+        },
+        tasks: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: 'Tasks',
+          },
+        ],
       },
-      description: {
-        type: String,
-        required: true,
-        minlength: 3,
-      },
-      startDate: {
-        type: Date,
-        required: true,
-      },
-      endDate: {
-        type: Date,
-        required: true,
-      },
-      tasks: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tasks',
-      }],
-    }],
+    ],
     required: true,
   },
-
 });
 
 export const User = model<ProjectInterface>('Users', ProjectSchema);

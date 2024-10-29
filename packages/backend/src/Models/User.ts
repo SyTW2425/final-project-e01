@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -71,7 +71,7 @@ const UserSchema = new Schema<UserDocumentInterface>({
   role: {
     type: String,
     enum: [Role.Admin, Role.User],
-    default: Role.User
+    default: Role.User,
   },
   projects: {
     type: [Schema.Types.ObjectId],
