@@ -16,6 +16,7 @@ import express from 'express';
 import chalk from 'chalk';
 import { connect } from 'mongoose';
 import { usersRouter } from './Routers/users.js';
+import { projectsRouter } from '../src/Routers/projects.js';
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/test';
@@ -44,6 +45,7 @@ export const app = express();
 
 app.use(express.json());
 app.use('/user', usersRouter);
+app.use('/project', projectsRouter);
 console.log(chalk.green(`[Server_start] Server started at port ${PORT}!`));
 app.listen(PORT);
 startDB();

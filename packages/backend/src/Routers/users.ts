@@ -160,7 +160,7 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
  * @param req The request object
  * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin 
  */ 
-async function isAdmin(req: Express.Request) : Promise<boolean> {
+export async function isAdmin(req: Express.Request) : Promise<boolean> {
   const { userId } = req;
   const user = await User.findById(userId);
   return user?.role === Role.Admin;

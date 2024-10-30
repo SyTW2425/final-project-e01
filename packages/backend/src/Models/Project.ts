@@ -15,11 +15,11 @@
 import { Document, Schema, model } from 'mongoose';
 
 export enum Role {
-  OWNER = 'owner',
-  DEVELOPER = 'developer',
-  SCRUM_MASTER = 'scrum_master',
-  PRODUCT_OWNER = 'product_owner',
-  STAKEHOLDER = 'stakeholder',
+  DEVELOPER,
+  PRODUCT_OWNER,
+  SCRUM_MASTER, 
+  ADMIN,
+  OWNER
 }
 
 /**
@@ -43,23 +43,44 @@ export type Users = {
   productivity: number;
 }
 
+export type projectSettings = {
+  minimalRoleToUpdateUsers : Role;
+  minimalRoleToDeleteUsers : Role;
+  minimalRoleToCreateSprints : Role;
+  minimalRoleToDeleteSprints : Role;
+  minimalRoleToCreateTasks : Role;
+  minimalRoleToDeleteTasks : Role;
+  minimalRoleToEditTasks : Role;
+  minimalRoleToEditProject : Role;
+  minimalRoleToDeleteProject : Role;
+  minimalRoleToCreateUsers : Role;
+  isPublic : boolean;
+
+}
 
 /**
  * Interface of Project
  */
 export interface ProjectInterface extends Document {
+  organization: Schema.Types.ObjectId;
   name: string;
   description: string;
   startDate: Date;
   endDate: Date;
   users: Users[];
   sprints: Sprint[];
+  settings: projectSettings;
 }
 
 /**
  * Schema of User
  */
 const ProjectSchema = new Schema<ProjectInterface>({
+  organization: {
+    type: Schema.Types.ObjectId,
+    ref: 'Organizations',
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -99,7 +120,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
         ref: 'Users',
       },
       role: {
-        type: String,
+        type: Number,
         enum: Object.values(Role),
       },
       tasks: [{
@@ -142,7 +163,54 @@ const ProjectSchema = new Schema<ProjectInterface>({
     }],
     required: true,
   },
-
+  settings: {
+    type: {
+      minimalRoleToUpdateUsers: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToDeleteUsers: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToCreateSprints: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToDeleteSprints: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToCreateTasks: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToDeleteTasks: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToEditTasks: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToEditProject: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToDeleteProject: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      minimalRoleToCreateUsers: {
+        type: Number,
+        enum: Object.values(Role),
+      },
+      isPublic: {
+        type: Boolean,
+        required: true,
+      },
+    },
+  },
 });
 
-export const User = model<ProjectInterface>('Users', ProjectSchema);
+export const Project = model<ProjectInterface>('Projects', ProjectSchema);
