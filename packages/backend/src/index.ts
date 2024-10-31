@@ -13,6 +13,7 @@
  */
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import chalk from 'chalk';
 import { connect } from 'mongoose';
 import { usersRouter } from './Routers/users.js';
@@ -42,6 +43,7 @@ function startDB(): void {
 // Initialize the express server
 export const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use('/user', usersRouter);
 console.log(chalk.green(`[Server_start] Server started at port ${PORT}!`));
