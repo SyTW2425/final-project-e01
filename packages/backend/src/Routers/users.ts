@@ -220,7 +220,6 @@ async function isAdmin(req: Express.Request): Promise<boolean> {
  */
 function buildSearchQuery(req: Express.Request): object {
   const { username, email } = req.query;
-  console.log(username, email);
   const query: any = {};
   // Validations
   if (!username && !email) {
