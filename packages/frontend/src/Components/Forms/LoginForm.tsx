@@ -13,6 +13,7 @@
  */
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export const LOCAL_STORAGE_NAME = 'token';
 const BACKEND_LOGIN_URL = 'http://localhost:3000/user/login';
@@ -71,7 +72,10 @@ const LoginForm: React.FC = () => {
           className="w-full px-3 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter your password"
         />
-
+        <p className="mb-4 text-center">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-500 hover:text-blue-700">Register</Link>
+        </p>
         <button
           type="submit"
           className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
@@ -79,7 +83,6 @@ const LoginForm: React.FC = () => {
           Login
         </button>
       </form>
-
     </div>
   );
 };
