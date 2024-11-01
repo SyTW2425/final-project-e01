@@ -14,6 +14,42 @@
 
 import React, { useState } from 'react';
 
+export const LOCAL_STORAGE_NAME = 'token';
+const BACKEND_REGISTER_URL = 'http://localhost:3000/user/register';
+const BACKEND_LOGIN_URL = 'http://localhost:3000/user/login';
+
+const handleRegister = async (email: string, username: string, password: string, passwordConfirmation: string) => {
+  if (password !== passwordConfirmation) {
+    console.error('Passwords do not match');
+    return;
+  }
+  const response_register = await fetch(BACKEND_REGISTER_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, username, password }),
+  });
+  if (response_register.ok) {
+    const response_login = await fetch(BACKEND_LOGIN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    if (response_login.ok) {
+      const data = await response_login.json();
+      console.log(data);
+      localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
+      window.location.href = '/home';
+    } else {
+      console.error('Failed to login');
+    }
+  }
+}
+
+
 /**
  * RegisterForm Component
  * @returns JSX.Element
@@ -24,9 +60,11 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
 
+  const handleSubmit = (_: React.FormEvent) => handleRegister(email, username, password, passwordConfirmation);
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form className="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Register</h2>
         {/* Need to introduce username */}
         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Username:</label>
