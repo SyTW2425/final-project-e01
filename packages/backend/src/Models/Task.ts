@@ -51,6 +51,8 @@ export interface TaskInterface extends Document {
   updatedAt: Date;
   status: status;
   comments?: string[];
+  users?: Schema.Types.ObjectId[];
+  project: Schema.Types.ObjectId;
 }
 
 /**
@@ -131,6 +133,17 @@ export const TaskSchema = new Schema<TaskInterface>({
   comments: { 
     type: [String], 
   },
+  users: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: 'Users',
+    _id: false   
+  }],
+  project: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Projects',
+    required: true,
+    _id: false
+  }
 });
 
 export const Task = model<TaskInterface>('Tasks', TaskSchema);

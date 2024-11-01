@@ -37,12 +37,11 @@ export type Sprint = {
  * Type of users
  */
 export type Users = {
+  _id: any;
   user: Schema.Types.ObjectId;
   role: Role;
-  tasks: Schema.Types.ObjectId[];
   productivity: number;
 }
-
 
 /**
  * Interface of Project
@@ -65,7 +64,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
     required: true,
     unique: true,
     minlength: 3,
-    maxlength: 20,
+    maxlength: 50,
   },
   description: {
     type: String,
@@ -102,10 +101,6 @@ const ProjectSchema = new Schema<ProjectInterface>({
         type: String,
         enum: Object.values(Role),
       },
-      tasks: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tasks',
-      }],
       productivity: {
         type: Number,
         min: 0,
@@ -113,6 +108,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     }],
     required: true,
+    _id: false // Do not create an _id for this subdocument
   },
   sprints: {
     type: [{
@@ -139,10 +135,10 @@ const ProjectSchema = new Schema<ProjectInterface>({
         type: Schema.Types.ObjectId,
         ref: 'Tasks',
       }],
+      _id: false 
     }],
     required: true,
-  },
-
+  }
 });
 
-export const User = model<ProjectInterface>('Users', ProjectSchema);
+export const Project = model<ProjectInterface>('Projects', ProjectSchema);
