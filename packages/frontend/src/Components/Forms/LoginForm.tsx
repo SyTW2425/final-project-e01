@@ -44,7 +44,7 @@ const LoginForm: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const handleSubmit = (_: React.FormEvent) => handleLogin(email, password);
+  const handleSubmit = () => handleLogin(email, password);
   
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

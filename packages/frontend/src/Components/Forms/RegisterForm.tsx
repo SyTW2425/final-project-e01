@@ -60,7 +60,7 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
 
-  const handleSubmit = (_: React.FormEvent) => handleRegister(email, username, password, passwordConfirmation);
+  const handleSubmit = () => handleRegister(email, username, password, passwordConfirmation);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

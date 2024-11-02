@@ -1,7 +1,7 @@
 import React from 'react';
 import LoginForm from '../Components/Forms/LoginForm';
 
-let HomePage : React.FC = () => {
+const LoginPage : React.FC = () => {
   return (
     <>
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -11,4 +11,4 @@ let HomePage : React.FC = () => {
   );
 }
 
-export default HomePage;
+export default LoginPage;
