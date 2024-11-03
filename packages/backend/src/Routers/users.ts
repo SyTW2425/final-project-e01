@@ -35,15 +35,16 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
     const query = buildSearchQuery(req);
     let admin: boolean = await isAdmin(req);
     const usersRaw = await User.find(query);
+    console.log(req.userId);
     const authorUser = await User.findById(req.userId)
-      .select('-password')
-      .populate('projects');
-
+    .select('-password')
+    .populate('projects');
+    console.log(authorUser); 
     if (!authorUser) {
       res.status(404).send('Failed to search users!');
       return;
     }
-
+    
     // Need to remove administrative fields if the user is not an admin
     // Also, remove the email if the user is not in the same project as the author
     // of the query.
@@ -54,19 +55,19 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
           authorUser.projects &&
           !authorUser.projects.some((project) =>
             user.projects?.includes(project),
-          )
-        ) {
-          user.email = '';
-        }
-        delete user._id;
-        delete user.__v;
-        delete user.projects;
-      });
-    }
-    res.send(usersRaw);
-  } catch (error) {
-    res.status(500).send('Error searching users!');
+        )
+      ) {
+        user.email = '';
+      }
+      delete user._id;
+      delete user.__v;
+      delete user.projects;
+    });
   }
+  res.send(usersRaw);
+} catch (error) {
+  res.status(500).send('Error searching users!');
+}
 });
 
 /**
@@ -108,6 +109,7 @@ usersRouter.post('/register', async (req, res) => {
 usersRouter.post('/login', async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(username, email, password);
     // TODO: VALIDATION OF USERNAME, EMAIL AND PASSWORD
     const query = { $or: [{ username }, { email }] };
 

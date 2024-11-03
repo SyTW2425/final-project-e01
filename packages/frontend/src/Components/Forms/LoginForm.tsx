@@ -12,12 +12,18 @@
  * @brief Componente de formulario de inicio de sesión
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+
 
 export const LOCAL_STORAGE_NAME = 'token';
 const BACKEND_LOGIN_URL = 'http://localhost:3000/user/login';
 
+/**
+ * Function to handle login
+ * @param email 
+ * @param password 
+ */
 const handleLogin = async (email: string, password: string) => {
   const response = await fetch(BACKEND_LOGIN_URL, {
     method: 'POST',
@@ -26,24 +32,19 @@ const handleLogin = async (email: string, password: string) => {
     },
     body: JSON.stringify({ email, password }),
   });
-  if (response.ok) {
-    const data = await response.json();
-    localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
-    window.location.href = '/home';
-  } else {
-    console.error('Failed to login');
-  }
+  if (response.status < 200 || response.status >= 400) throw new Error('Failed to login');
+  const data = await response.json();
+  localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
+  window.location.href = '/home';
 }
-
 
 /**
  * LoginForm Component
  * @returns JSX.Element
  */
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-
+  const [email, setEmail] = React.useState<string>('');
+  const [password, setPassword] = React.useState<string>('');
   const handleSubmit = () => handleLogin(email, password);
   
   return (

@@ -14,8 +14,9 @@
 
 import React, { useState } from 'react';
 
-export const LOCAL_STORAGE_NAME = 'token';
 const BACKEND_REGISTER_URL = 'http://localhost:3000/user/register';
+
+export const LOCAL_STORAGE_NAME = 'token';
 const BACKEND_LOGIN_URL = 'http://localhost:3000/user/login';
 
 const handleRegister = async (email: string, username: string, password: string, passwordConfirmation: string) => {

@@ -37,6 +37,7 @@ export interface UserDocumentInterface extends Document {
  * Schema of User
  */
 const UserSchema = new Schema<UserDocumentInterface>({
+  _id : String,
   username: {
     type: String,
     required: true,
