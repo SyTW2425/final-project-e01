@@ -49,7 +49,7 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
     // Also, remove the email if the user is not in the same project as the author
     // of the query.
     if (!admin) {
-      usersRaw.forEach((user) => {
+      usersRaw.forEach((user : any) => {
         user.toObject();
         if (
           authorUser.projects &&
