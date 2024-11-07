@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -13,6 +13,7 @@
  */
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import chalk from 'chalk';
 import { connect } from 'mongoose';
 import { usersRouter } from './Routers/users.js';
@@ -43,6 +44,7 @@ function startDB(): void {
 // Initialize the express server
 export const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use('/user', usersRouter);
 app.use('/project', projectsRouter);

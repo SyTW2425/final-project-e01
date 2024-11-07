@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -31,7 +31,7 @@ export type Sprint = {
   startDate: Date;
   endDate: Date;
   tasks: Schema.Types.ObjectId[];
-}
+};
 
 /**
  * Type of users
@@ -55,8 +55,8 @@ export type projectSettings = {
   minimalRoleToDeleteProject : Role;
   minimalRoleToCreateUsers : Role;
   isPublic : boolean;
+};
 
-}
 
 /**
  * Interface of Project
@@ -113,6 +113,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     },
   },
+  
   users: {
     type: [{
       user: {
@@ -130,37 +131,41 @@ const ProjectSchema = new Schema<ProjectInterface>({
       productivity: {
         type: Number,
         min: 0,
-        max: 100,
+        max: 100
       },
-    }],
+    ],
     required: true,
   },
   sprints: {
-    type: [{
-      name: {
-        type: String,
-        required: true,
-        minlength: 3,
-        maxlength: 20,
+    type: [
+      {
+        name: {
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 20,
+        },
+        description: {
+          type: String,
+          required: true,
+          minlength: 3,
+        },
+        startDate: {
+          type: Date,
+          required: true,
+        },
+        endDate: {
+          type: Date,
+          required: true,
+        },
+        tasks: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: 'Tasks',
+          },
+        ],
       },
-      description: {
-        type: String,
-        required: true,
-        minlength: 3,
-      },
-      startDate: {
-        type: Date,
-        required: true,
-      },
-      endDate: {
-        type: Date,
-        required: true,
-      },
-      tasks: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tasks',
-      }],
-    }],
+    ],
     required: true,
   },
   settings: {
