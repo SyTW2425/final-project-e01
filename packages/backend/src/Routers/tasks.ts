@@ -101,7 +101,6 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
     if (projects.length === 0) {
       return res.status(404).json({ error: 'Project not found' });
     }
-    console.log(`projects: ${projects}`);
 
     // Verificar si el usuario actual es miembro de alguno de los proyectos encontrados
     // Buscar el proyecto en el que el usuario es miembro

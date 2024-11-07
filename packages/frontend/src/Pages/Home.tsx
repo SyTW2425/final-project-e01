@@ -15,11 +15,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import InfoSection from '../Components/Information/InfoSection';
+import NavbarHome from '../Components/NavBars/NavBarHome';
 
 
 const HomePage: React.FC = () => {
   return (
     <>
+    <NavbarHome />
     <div id="home" className="pt-4 flex items-center justify-center min-h-screen bg-blue-700 text-white pb-4">
       <div className="border-4 border-white p-16 rounded-lg max-w-xl">
         <div className="text-center">

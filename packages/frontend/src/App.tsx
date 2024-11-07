@@ -30,15 +30,10 @@ import RegisterPage from './Pages/Register';
 
 
 function App() {
-  const regex = new RegExp('(.+)/home');
   return (
     <>
     {/* <Provider store={store}> */}
       <Router>
-        {!(localStorage.getItem('token')) && 
-        <NavbarHome 
-        isHomePage={(regex.test(window.location.href)) ? true : false}  
-        />}
         <Routes>
           <Route path="/" Component={HomePage} />
           <Route path="/login" Component={LoginPage} />
