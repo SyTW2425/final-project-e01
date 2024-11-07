@@ -4,9 +4,9 @@
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
  *
- * @author Pablo Rodríguez de la Rosa
- * @author Javier Almenara Herrera
- * @author Omar Suárez Doro
+ * @autor Pablo Rodríguez de la Rosa
+ * @autor Javier Almenara Herrera
+ * @autor Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
  * @brief Model of Project
@@ -37,9 +37,9 @@ export type Sprint = {
  * Type of users
  */
 export type Users = {
+  _id: any;
   user: Schema.Types.ObjectId;
   role: Role;
-  tasks: Schema.Types.ObjectId[];
   productivity: number;
 };
 
@@ -64,7 +64,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
     required: true,
     unique: true,
     minlength: 3,
-    maxlength: 20,
+    maxlength: 50,
   },
   description: {
     type: String,
@@ -116,6 +116,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     ],
     required: true,
+    _id: false, // Do not create an _id for this subdocument
   },
   sprints: {
     type: [
