@@ -132,8 +132,8 @@ const ProjectSchema = new Schema<ProjectInterface>({
         type: Number,
         min: 0,
         max: 100
-      },
-    ],
+      }
+    }],
     required: true,
     _id: false, // Do not create an _id for this subdocument
   },
