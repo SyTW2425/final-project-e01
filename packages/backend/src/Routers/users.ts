@@ -207,9 +207,9 @@ usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
 /**
  * @brief This function checks if the user is an admin
  * @param req The request object
- * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin
- */
-async function isAdmin(req: Express.Request): Promise<boolean> {
+ * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin 
+ */ 
+export async function isAdmin(req: Express.Request) : Promise<boolean> {
   const { userId } = req;
   const user = await User.findById(userId);
   return user?.role === Role.Admin;
