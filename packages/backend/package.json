@@ -8,7 +8,7 @@
     "start": "tsc && eslint ./src --fix && node ./dist/index.js",
     "dev": "tsc-watch --onSuccess \"node dist/index.js\"",
     "build": "eslint ./src --fix && tsc",
-    "test": "tsc && mocha 'dist/test/**/*.js'"
+    "test": "tsc && mocha --exit 'dist/test/**/*.js'"
   },
   "license": "ISC",
   "devDependencies": {
