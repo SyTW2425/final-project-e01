@@ -151,4 +151,4 @@ const ProjectSchema = new Schema<ProjectInterface>({
   },
 });
 
-export const User = model<ProjectInterface>('Users', ProjectSchema);
+export const Project = model<ProjectInterface>('Projects', ProjectSchema);
