@@ -3,13 +3,13 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief organizations.ts file that contains the routes for the organizations 
+ * @brief organizations.ts file that contains the routes for the organizations
  */
 
 import Express from 'express';
@@ -40,22 +40,24 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
     }
 
     // Buscar los ObjectId de los usuarios basados en sus nombres de usuario
-    const membersWithObjectIds = await Promise.all(members.map(async (member: { user: any; role: any; }) => {
-      const foundUser = await User.findOne({ username: member.user });
-      if (!foundUser) throw new Error(`User ${member.user} not found`);
-      return {
-        user: foundUser._id, // Usar el ObjectId del usuario encontrado
-        role: member.role
-      };
-    }));
-    
+    const membersWithObjectIds = await Promise.all(
+      members.map(async (member: { user: any; role: any }) => {
+        const foundUser = await User.findOne({ username: member.user });
+        if (!foundUser) throw new Error(`User ${member.user} not found`);
+        return {
+          user: foundUser._id, // Usar el ObjectId del usuario encontrado
+          role: member.role,
+        };
+      }),
+    );
+
     /// No añadir ningún proyecto al inicio ---- SOLUCIONAR ESTO SI SE NECESITA
-    const projects_: typeof Project[] = [];
+    const projects_: (typeof Project)[] = [];
     // Crear la nueva organización con los ObjectId de los usuarios
     const newOrganization = new Organization({
       name,
       members: membersWithObjectIds,
-      projects_
+      projects_,
     });
     // Guardar la organización en la base de datos
     const savedOrganization = await newOrganization.save();
@@ -73,29 +75,31 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
  */
 organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
-    /// Obtener el usuario del JWT  
+    /// Obtener el usuario del JWT
     if (!req.headers['authorization']) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
     const user = await getUserofJWT(req.headers['authorization']);
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
-    }    
+    }
     const organizations = await Organization.find({ 'members.user': user._id });
     /// SOLO DEVOLVER LOS NOMBRES DE LAS ORGANIZACIONES --- CAMBIAR SI SE NECESITA
     res.status(200).json({
       result: 'Organizations found',
-      organizations: organizations.map((organization) => organization.name)
+      organizations: organizations.map((organization) => organization.name),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'No se pudieron obtener las organizaciones' });
+    res
+      .status(500)
+      .json({ error: 'No se pudieron obtener las organizaciones' });
   }
 });
 
@@ -111,16 +115,16 @@ organizationsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
@@ -132,22 +136,26 @@ organizationsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
       return;
     }
 
     // Comprobar si el usuario actual es administrador en la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member || member.role !== 'admin') {
       res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
       return;
     }
 
     // Asegúrate de convertir cada ObjectId a una cadena
-    const projectIds = organization.projects.map((projectId) => projectId.toString());
+    const projectIds = organization.projects.map((projectId) =>
+      projectId.toString(),
+    );
     console.log(projectIds);
 
     // Eliminar todos los proyectos que están en la lista de IDs
@@ -176,16 +184,16 @@ organizationsRouter.get('/members', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
@@ -197,16 +205,18 @@ organizationsRouter.get('/members', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
       return;
     }
 
     // Comprobar si el usuario actual es miembro de la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member) {
       res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
       return;
     }
@@ -214,17 +224,20 @@ organizationsRouter.get('/members', jwtMiddleware, async (req, res) => {
     // Responder solo con los nombres de los miembros de la organización --- CAMBIAR SI SE NECESITA
     res.status(200).json({
       result: 'Members found',
-      members: await Promise.all(organization.members.map(async (member) => {
-        const user = await User.findById(member.user); // Buscar el usuario por su ObjectId
-        return user?.username;
-      }))
+      members: await Promise.all(
+        organization.members.map(async (member) => {
+          const user = await User.findById(member.user); // Buscar el usuario por su ObjectId
+          return user?.username;
+        }),
+      ),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'No se pudieron obtener los miembros de la organización' });
+    res.status(500).json({
+      error: 'No se pudieron obtener los miembros de la organización',
+    });
   }
 });
-
 
 /**
  * @brief This endpoint is used to add a new member to an organization
@@ -238,16 +251,16 @@ organizationsRouter.post('/members', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
@@ -259,16 +272,18 @@ organizationsRouter.post('/members', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
       return;
     }
 
     // Comprobar si el usuario actual es administrador en la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member || member.role !== 'admin') {
       res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
       return;
     }
@@ -281,14 +296,19 @@ organizationsRouter.post('/members', jwtMiddleware, async (req, res) => {
     }
 
     // Añadir el nuevo miembro a la organización
-    organization.members.push({ user: foundUser._id as Schema.Types.ObjectId, role });
+    organization.members.push({
+      user: foundUser._id as Schema.Types.ObjectId,
+      role,
+    });
     await organization.save();
 
     // Responder con la organización actualizada
     res.status(201).json(organization);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'No se pudo añadir el miembro a la organización' });
+    res
+      .status(500)
+      .json({ error: 'No se pudo añadir el miembro a la organización' });
   }
 });
 
@@ -304,16 +324,16 @@ organizationsRouter.delete('/members', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
@@ -325,16 +345,18 @@ organizationsRouter.delete('/members', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
       return;
     }
 
     // Comprobar si el usuario actual es administrador en la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member || member.role !== 'admin') {
       res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
       return;
     }
@@ -347,14 +369,20 @@ organizationsRouter.delete('/members', jwtMiddleware, async (req, res) => {
     }
 
     // Eliminar el miembro de la organización
-    organization.members = organization.members.filter((member) => member.user.toString() !== (foundUser._id as Schema.Types.ObjectId).toString());
+    organization.members = organization.members.filter(
+      (member) =>
+        member.user.toString() !==
+        (foundUser._id as Schema.Types.ObjectId).toString(),
+    );
     await organization.save();
 
     // Responder con la organización eliminanda
     res.status(200).json(organization);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'No se pudo eliminar el miembro de la organización' });
+    res
+      .status(500)
+      .json({ error: 'No se pudo eliminar el miembro de la organización' });
   }
 });
 
@@ -370,16 +398,16 @@ organizationsRouter.get('/projects', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
       return;
     }
@@ -391,16 +419,18 @@ organizationsRouter.get('/projects', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
       return;
     }
 
     // Comprobar si el usuario actual es miembro de la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member) {
       res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
       return;
     }
@@ -408,13 +438,17 @@ organizationsRouter.get('/projects', jwtMiddleware, async (req, res) => {
     // Responder solo con los nombres de los proyectos de la organización --- CAMBIAR SI SE NECESITA
     res.status(200).json({
       result: 'Projects found',
-      projects: await Promise.all(organization.projects.map(async (projectId) => {
-        const project = await Project.findById(projectId); // Buscar el proyecto por su ObjectId
-        return project?.name;
-      }))
+      projects: await Promise.all(
+        organization.projects.map(async (projectId) => {
+          const project = await Project.findById(projectId); // Buscar el proyecto por su ObjectId
+          return project?.name;
+        }),
+      ),
     });
   } catch (error) {
-    res.status(500).json({ error: 'No se pudieron obtener los proyectos de la organización' });
+    res.status(500).json({
+      error: 'No se pudieron obtener los proyectos de la organización',
+    });
   }
 });
 
@@ -430,15 +464,15 @@ organizationsRouter.post('/projects', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       return res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       return res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
     }
 
@@ -449,16 +483,18 @@ organizationsRouter.post('/projects', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       return res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
     }
 
     // Comprobar si el usuario actual es administrador en la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString()); 
-    console.log(member);   
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
+    console.log(member);
     if (!member || member.role !== 'admin') {
       return res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
     }
 
@@ -466,26 +502,28 @@ organizationsRouter.post('/projects', jwtMiddleware, async (req, res) => {
     const projects = await Project.find({ name: projectName });
     if (!projects.length) {
       return res.status(404).send({
-        error: 'Project not found'
+        error: 'Project not found',
       });
     }
 
     // Verificar si el usuario es miembro de alguno de los proyectos encontrados
-    const project = projects.find((p) => p.users.some((u) => u.user.toString() === user._id.toString()));
+    const project = projects.find((p) =>
+      p.users.some((u) => u.user.toString() === user._id.toString()),
+    );
     if (!project) {
       return res.status(403).send({
-        error: 'Forbidden: You are not a member of any matching projects'
+        error: 'Forbidden: You are not a member of any matching projects',
       });
     }
     console.log(project);
 
     // Verificar si el proyecto ya está en la organización
     const projectInOrganization = organization.projects.some(
-      (p) => p.toString() === (project._id as Schema.Types.ObjectId).toString()
-    ); 
+      (p) => p.toString() === (project._id as Schema.Types.ObjectId).toString(),
+    );
     if (projectInOrganization) {
       return res.status(409).send({
-        error: 'Project already in organization'
+        error: 'Project already in organization',
       });
     }
 
@@ -495,11 +533,13 @@ organizationsRouter.post('/projects', jwtMiddleware, async (req, res) => {
 
     // Responder con la organización actualizada
     return res.status(201).json({
-      result: 'Project added to organization'
+      result: 'Project added to organization',
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'No se pudo añadir el proyecto a la organización' });
+    return res
+      .status(500)
+      .json({ error: 'No se pudo añadir el proyecto a la organización' });
   }
 });
 
@@ -515,15 +555,15 @@ organizationsRouter.delete('/projects', jwtMiddleware, async (req, res) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
       return res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       return res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
     }
 
@@ -534,15 +574,17 @@ organizationsRouter.delete('/projects', jwtMiddleware, async (req, res) => {
     const organization = await Organization.findOne({ name: organizationName });
     if (!organization) {
       return res.status(404).send({
-        error: 'Organization not found'
+        error: 'Organization not found',
       });
     }
 
     // Comprobar si el usuario actual es administrador en la organización
-    const member = organization.members.find((member) => member.user.toString() === user._id.toString());
+    const member = organization.members.find(
+      (member) => member.user.toString() === user._id.toString(),
+    );
     if (!member || member.role !== 'admin') {
       return res.status(403).send({
-        error: 'Forbidden'
+        error: 'Forbidden',
       });
     }
 
@@ -550,41 +592,44 @@ organizationsRouter.delete('/projects', jwtMiddleware, async (req, res) => {
     const projects = await Project.find({ name: projectName });
     if (!projects || projects.length === 0) {
       return res.status(404).send({
-        error: 'Project not found'
+        error: 'Project not found',
       });
     }
 
-
     // Comprobar que el usuario esté en al menos uno de los proyectos
-    const project = projects.find((p) => p.users.some((u) => u.user.toString() === user._id.toString()));
+    const project = projects.find((p) =>
+      p.users.some((u) => u.user.toString() === user._id.toString()),
+    );
     if (!project) {
       return res.status(403).send({
-        error: 'Forbidden: You are not a member of any matching projects'
+        error: 'Forbidden: You are not a member of any matching projects',
       });
     }
 
     // Comprobar si el proyecto está en la lista de proyectos de la organización
     const projectInOrganization = organization.projects.some(
-      (p) => p.toString() === (project._id as Schema.Types.ObjectId).toString()
+      (p) => p.toString() === (project._id as Schema.Types.ObjectId).toString(),
     );
     if (!projectInOrganization) {
       return res.status(404).send({
-        error: 'Project not in organization'
+        error: 'Project not in organization',
       });
     }
 
     // Eliminar el proyecto de la organización
     organization.projects = organization.projects.filter(
-      (p) => p.toString() !== (project._id as Schema.Types.ObjectId).toString()
+      (p) => p.toString() !== (project._id as Schema.Types.ObjectId).toString(),
     );
     await organization.save();
 
     // Responder con un mensaje de éxito
     return res.status(200).json({
-      message: 'Project removed from organization'
+      message: 'Project removed from organization',
     });
   } catch (error) {
     console.error('Error deleting project from organization:', error);
-    return res.status(500).json({ error: 'No se pudo eliminar el proyecto de la organización' });
+    return res
+      .status(500)
+      .json({ error: 'No se pudo eliminar el proyecto de la organización' });
   }
 });

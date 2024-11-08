@@ -8,7 +8,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief Main 
+ * @brief Main
  */
 
 import 'dotenv/config';
@@ -20,16 +20,20 @@ import { Project } from '../Models/Project.js';
 
 export const projectsRouter = Express.Router();
 
-
-async function executeQuery(req : Express.Request, isAdminUser : boolean) {
-  const query = req.query.name ? { name: { $regex: req.query.name, $options: 'i' } } : {};
+async function executeQuery(req: Express.Request, isAdminUser: boolean) {
+  const query = req.query.name
+    ? { name: { $regex: req.query.name, $options: 'i' } }
+    : {};
   let projects = null;
   if (isAdminUser) return await Project.find(query).select('-id -__v');
-  if (req.query.searching) return await Project.find(query).select('name organization description').limit(5);
+  if (req.query.searching)
+    return await Project.find(query)
+      .select('name organization description')
+      .limit(5);
 
   switch (req.params.toList) {
     case 'sprints':
-      projects = await Project.find(query).select('sprints -id -__v'); 
+      projects = await Project.find(query).select('sprints -id -__v');
       break;
     case 'users':
       projects = await Project.find(query).select('users -id -__v');
@@ -53,8 +57,10 @@ async function executeQuery(req : Express.Request, isAdminUser : boolean) {
 projectsRouter.get('/:tolist', jwtMiddleware, async (req, res) => {
   try {
     let { name } = req.query;
-    
-    const projects = await Project.find({name: { $regex: new RegExp('^' + name as string, 'i') }}).select('-sprints -users');
+
+    const projects = await Project.find({
+      name: { $regex: new RegExp(('^' + name) as string, 'i') },
+    }).select('-sprints -users');
     res.status(200).send(projects);
   } catch (error) {
     res.status(500).send('Failed to search projects!');
@@ -77,7 +83,9 @@ projectsRouter.get('/:toList', jwtMiddleware, async (req, res) => {
       if (project.settings.isPublic) return;
       if (project.users.some((user) => user.user === req.userId)) return;
       if (req.query.searching) return;
-      res.status(403).send('You do not have permission to access this project!');
+      res
+        .status(403)
+        .send('You do not have permission to access this project!');
     });
 
     res.status(200).json(resultQuery);
@@ -85,7 +93,6 @@ projectsRouter.get('/:toList', jwtMiddleware, async (req, res) => {
     res.status(500).send('Failed to search projects!');
   }
 });
-
 
 /**
  * @brief This endpoint is used to search for projects
@@ -96,7 +103,9 @@ projectsRouter.get('/:toList', jwtMiddleware, async (req, res) => {
 projectsRouter.get('/users', jwtMiddleware, async (req, res) => {
   try {
     let { name } = req.query;
-    const projects = await Project.find({name: { $regex: new RegExp('^' + name as string, 'i') }}).select('-name -description -startDate -endDate -sprints');
+    const projects = await Project.find({
+      name: { $regex: new RegExp(('^' + name) as string, 'i') },
+    }).select('-name -description -startDate -endDate -sprints');
     res.status(200).send(projects);
   } catch (error) {
     res.status(500).send('Failed to search projects!');

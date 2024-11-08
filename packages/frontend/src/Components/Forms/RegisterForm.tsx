@@ -25,6 +25,8 @@ const handleRegister = async (email: string, username: string, password: string,
     console.error('Passwords do not match');
     return;
   }
+  console.log(BACKEND_REGISTER_URL)
+  console.log(email)
   const response_register = await fetch(BACKEND_REGISTER_URL, {
     method: 'POST',
     headers: {
@@ -44,7 +46,7 @@ const handleRegister = async (email: string, username: string, password: string,
       const data = await response_login.json();
       console.log(data);
       localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
-      window.location.href = '/home';
+      window.location.href = '/';
     } else {
       console.error('Failed to login');
     }
@@ -62,7 +64,10 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
 
-  const handleSubmit = () => handleRegister(email, username, password, passwordConfirmation);
+  const handleSubmit = ( e: React.FormEvent<HTMLFormElement>) =>  {
+    e.preventDefault();
+    handleRegister(email, username, password, passwordConfirmation);
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

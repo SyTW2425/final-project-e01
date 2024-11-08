@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -60,7 +60,7 @@ export interface TaskInterface extends Document {
  * @brief Schema that defines the properties of a task
  */
 export const TaskSchema = new Schema<TaskInterface>({
-  startDate: { 
+  startDate: {
     type: Date,
     required: true,
     validate: {
@@ -70,7 +70,7 @@ export const TaskSchema = new Schema<TaskInterface>({
       },
     },
   },
-  endDate: { 
+  endDate: {
     type: Date,
     required: true,
     validate: {
@@ -78,19 +78,19 @@ export const TaskSchema = new Schema<TaskInterface>({
       message: (props) => {
         return `${props.value} is not a valid date. The end date must be greater than the current date.`;
       },
-    },  
+    },
   },
-  name: { 
-    type: String, 
+  name: {
+    type: String,
     required: true,
     validate: {
       validator: (v: string) => v.length > 0,
       message: (props) => {
         return `${props.value} is not a valid name. The name must be greater than 0 characters.`;
       },
-    },  
+    },
   },
-  type: { 
+  type: {
     type: String,
     required: true,
     validate: {
@@ -100,50 +100,52 @@ export const TaskSchema = new Schema<TaskInterface>({
       },
     },
   },
-  progress: { 
-    type: Number, 
+  progress: {
+    type: Number,
     required: true,
     min: 0,
-    max: 100
+    max: 100,
   },
-  description: { 
-    type: String 
+  description: {
+    type: String,
   },
-  priority: { 
-    type: String, 
+  priority: {
+    type: String,
     enum: Object.values(priority),
-    required: true
+    required: true,
   },
-  dependenciesTasks: { 
-    type: [String], 
+  dependenciesTasks: {
+    type: [String],
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   },
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: Object.values(status),
-    required: true
+    required: true,
   },
-  comments: { 
-    type: [String], 
+  comments: {
+    type: [String],
   },
-  users: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: 'Users',
-    _id: false   
-  }],
-  project: { 
-    type: Schema.Types.ObjectId, 
+  users: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Users',
+      _id: false,
+    },
+  ],
+  project: {
+    type: Schema.Types.ObjectId,
     ref: 'Projects',
     required: true,
-    _id: false
-  }
+    _id: false,
+  },
 });
 
 export const Task = model<TaskInterface>('Tasks', TaskSchema);

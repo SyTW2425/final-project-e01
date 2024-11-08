@@ -3,7 +3,7 @@
  * Asignatura: Sistemas y Tecnologías Web
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
- *  
+ *
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
@@ -21,7 +21,7 @@ import { Project } from '../Models/Project.js';
 import { ObjectId } from 'mongoose';
 export const tasksRouter = Express.Router();
 
-const JWT_SECRET  = process.env.JWT_SECRET || 'CHILINDRINA';
+const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
 
 /**
  * @brief This endpoint is used to search for tasks
@@ -37,33 +37,39 @@ tasksRouter.get('/', jwtMiddleware, async (req, res) => {
         error: 'Unauthorized',
       });
     }
-    const user = await getUserofJWT(req.headers['authorization']) as { _id: string };
+    const user = (await getUserofJWT(req.headers['authorization'])) as {
+      _id: string;
+    };
     if (!user) {
       return res.status(401).send({
-        error: 'Unauthorized'
+        error: 'Unauthorized',
       });
     }
     console.log(user);
     /// Obtener el nombre del proyecto que viene en la request
     let { projectName } = req.body;
     console.log(projectName);
-    const projects = await Project.find({ name: projectName })
+    const projects = await Project.find({ name: projectName });
     if (projects.length === 0) {
       return res.status(404).json({ error: 'Project not found' });
     }
     console.log(`projects: ${projects}`);
     // Verificar si el usuario actual es miembro de alguno de los proyectos encontrados
-    // Buscar el proyecto en el que el usuario es miembro    
-    const project = projects.find((p) => p.users.some((u) => u.user.toString() === user._id.toString()));
+    // Buscar el proyecto en el que el usuario es miembro
+    const project = projects.find((p) =>
+      p.users.some((u) => u.user.toString() === user._id.toString()),
+    );
     if (!project) {
       return res.status(403).send({
-        error: 'Forbidden: You are not a member of any matching projects'
+        error: 'Forbidden: You are not a member of any matching projects',
       });
     }
     console.log(`project: ${project}`);
     // Si el usuario no está en ningún proyecto, devolver un error
     if (!project) {
-      return res.status(403).json({ error: 'User is not a member of any matching projects' });
+      return res
+        .status(403)
+        .json({ error: 'User is not a member of any matching projects' });
     }
     // Buscar todas las tareas que pertenezcan al proyecto
     const tasks = await Task.find({ project: project._id });
@@ -73,7 +79,7 @@ tasksRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 });
 
-/** 
+/**
  * @brief This endpoint is used to create a task
  * @param req The request object
  * @param res The response object
@@ -88,41 +94,65 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     // Obtener los datos de la tarea y el nombre del proyecto desde la solicitud
-    const { startDate, endDate, name, type, progress, description, priority, dependenciesTasks, createdAt, updatedAt, status, comments, users: usersNames, project: projectName } = req.body;
+    const {
+      startDate,
+      endDate,
+      name,
+      type,
+      progress,
+      description,
+      priority,
+      dependenciesTasks,
+      createdAt,
+      updatedAt,
+      status,
+      comments,
+      users: usersNames,
+      project: projectName,
+    } = req.body;
 
     // Buscar todos los proyectos que coincidan con el nombre del proyecto
-    const projects = await Project.find({ name: projectName })
+    const projects = await Project.find({ name: projectName });
     if (projects.length === 0) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
     // Verificar si el usuario actual es miembro de alguno de los proyectos encontrados
     // Buscar el proyecto en el que el usuario es miembro
-    const project = projects.find((p) => p.users.some((u) => u.user.toString() === user._id.toString()));
+    const project = projects.find((p) =>
+      p.users.some((u) => u.user.toString() === user._id.toString()),
+    );
     if (!project) {
       return res.status(403).send({
-        error: 'Forbidden: You are not a member of any matching projects'
+        error: 'Forbidden: You are not a member of any matching projects',
       });
     }
-    console.log(`project: ${project}`); 
+    console.log(`project: ${project}`);
 
     // Si el usuario no está en ningún proyecto, devolver un error
     if (!project) {
-      return res.status(403).json({ error: 'User is not a member of any matching projects' });
+      return res
+        .status(403)
+        .json({ error: 'User is not a member of any matching projects' });
     }
 
     // Obtener los ObjectId de los usuarios especificados en `usersNames` que pertenezcan al proyecto
     const assignedUsers = [];
     for (const username of usersNames) {
-      const projectUser = project.users.find((u) => (u.user as unknown as UserDocumentInterface).username === username);
+      const projectUser = project.users.find(
+        (u) =>
+          (u.user as unknown as UserDocumentInterface).username === username,
+      );
       if (projectUser) {
-        assignedUsers.push((projectUser.user as unknown as UserDocumentInterface)._id); // Agregar el ObjectId del usuario al array de asignados
+        assignedUsers.push(
+          (projectUser.user as unknown as UserDocumentInterface)._id,
+        ); // Agregar el ObjectId del usuario al array de asignados
       }
     }
 
@@ -168,16 +198,31 @@ tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
     }
 
     // Obtener el usuario del JWT
-    const user = await getUserofJWT(authorizationHeader) as { _id: string };
+    const user = (await getUserofJWT(authorizationHeader)) as { _id: string };
     if (!user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     // Obtener los datos de la tarea y el nombre del proyecto desde la solicitud
-    const { startDate, endDate, name, type, progress, description, priority, dependenciesTasks, createdAt, updatedAt, status, comments, users: usersNames, project: projectName } = req.body;
+    const {
+      startDate,
+      endDate,
+      name,
+      type,
+      progress,
+      description,
+      priority,
+      dependenciesTasks,
+      createdAt,
+      updatedAt,
+      status,
+      comments,
+      users: usersNames,
+      project: projectName,
+    } = req.body;
 
     // Buscar todos los proyectos que coincidan con el nombre del proyecto
-    const projects = await Project.find({ name: projectName })
+    const projects = await Project.find({ name: projectName });
     if (projects.length === 0) {
       return res.status(404).json({ error: 'Project not found' });
     }
@@ -185,25 +230,34 @@ tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
 
     // Verificar si el usuario actual es miembro de alguno de los proyectos encontrados
     // Buscar el proyecto en el que el usuario es miembro
-    const project = projects.find((p) => p.users.some((u) => u.user.toString() === user._id.toString()));
+    const project = projects.find((p) =>
+      p.users.some((u) => u.user.toString() === user._id.toString()),
+    );
     if (!project) {
       return res.status(403).send({
-        error: 'Forbidden: You are not a member of any matching projects'
+        error: 'Forbidden: You are not a member of any matching projects',
       });
     }
-    console.log(`project: ${project}`); 
+    console.log(`project: ${project}`);
 
     // Si el usuario no está en ningún proyecto, devolver un error
     if (!project) {
-      return res.status(403).json({ error: 'User is not a member of any matching projects' });
+      return res
+        .status(403)
+        .json({ error: 'User is not a member of any matching projects' });
     }
 
     // Obtener los ObjectId de los usuarios especificados en `usersNames` que pertenezcan al proyecto
     const assignedUsers = [];
     for (const username of usersNames) {
-      const projectUser = project.users.find((u) => (u.user as unknown as UserDocumentInterface).username === username);
+      const projectUser = project.users.find(
+        (u) =>
+          (u.user as unknown as UserDocumentInterface).username === username,
+      );
       if (projectUser) {
-        assignedUsers.push((projectUser.user as unknown as UserDocumentInterface)._id); // Agregar el ObjectId del usuario al array de asignados
+        assignedUsers.push(
+          (projectUser.user as unknown as UserDocumentInterface)._id,
+        ); // Agregar el ObjectId del usuario al array de asignados
       }
     }
 

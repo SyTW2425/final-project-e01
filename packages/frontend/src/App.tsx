@@ -19,9 +19,6 @@
 // Routing
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-// Custom components
-import NavbarHome from './Components/NavBars/NavBarHome';
-
 //  Import Pages
 import HomePage from './Pages/Home';
 import LoginPage from './Pages/Login';

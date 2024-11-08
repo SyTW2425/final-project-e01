@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import sinon from 'sinon';
-import {app} from '../index.js'; // Adjust path as needed
+import { app } from '../index.js'; // Adjust path as needed
 import bcrypt from 'bcrypt';
 import { User, Role } from '../Models/User.js'; // Adjust path as needed
 
 // Initialize the Express app and apply middleware
-
 
 describe('POST /user/register', () => {
   let saveStub: sinon.SinonStub;
@@ -22,12 +21,14 @@ describe('POST /user/register', () => {
   });
 
   it('should register a new user and return a success message', async () => {
-    const newUser = { username: 'testUser', email: 'test@example.com', password: 'password123' };
+    const newUser = {
+      username: 'testUser',
+      email: 'test@example.com',
+      password: 'password123',
+    };
     saveStub.resolves(newUser); // Mock successful save operation
 
-    const res = await request(app)
-      .post('/user/register')
-      .send(newUser);
+    const res = await request(app).post('/user/register').send(newUser);
 
     expect(res.status).to.equal(201);
     expect(res.body.result).to.equal('User registered');
@@ -41,9 +42,11 @@ describe('POST /user/register', () => {
   it('should return a 500 error if a problem occurs', async () => {
     saveStub.rejects(new Error('Error saving user')); // Mock a failed save operation
 
-    const res = await request(app)
-      .post('/user/register')
-      .send({ username: 'testUser', email: 'test@example.com', password: 'password123' });
+    const res = await request(app).post('/user/register').send({
+      username: 'testUser',
+      email: 'test@example.com',
+      password: 'password123',
+    });
 
     expect(res.status).to.equal(500);
     expect(res.text).to.contain('Error:');
@@ -85,9 +88,7 @@ describe('POST /user/login', () => {
       password: 'password123',
     };
 
-    const res = await request(app)
-      .post('/user/login')
-      .send(loginData);
+    const res = await request(app).post('/user/login').send(loginData);
 
     expect(res.status).to.equal(201);
     expect(res.body.result).to.equal('Authentication successful');
@@ -104,9 +105,7 @@ describe('POST /user/login', () => {
       password: 'password123',
     };
 
-    const res = await request(app)
-      .post('/user/login')
-      .send(loginData);
+    const res = await request(app).post('/user/login').send(loginData);
 
     expect(res.status).to.equal(404);
     expect(res.body.result).to.equal('Authentication failed by user');
@@ -130,9 +129,7 @@ describe('POST /user/login', () => {
       password: 'wrongPassword',
     };
 
-    const res = await request(app)
-      .post('/user/login')
-      .send(loginData);
+    const res = await request(app).post('/user/login').send(loginData);
 
     expect(res.status).to.equal(404);
     expect(res.body.result).to.equal('Authentication failed by user');
@@ -147,12 +144,9 @@ describe('POST /user/login', () => {
       password: 'password123',
     };
 
-    const res = await request(app)
-      .post('/user/login')
-      .send(loginData);
+    const res = await request(app).post('/user/login').send(loginData);
 
     expect(res.status).to.equal(505);
     expect(res.body.result).to.equal('Authentication failed by server');
   });
 });
-

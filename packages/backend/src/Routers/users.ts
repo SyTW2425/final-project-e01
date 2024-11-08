@@ -37,37 +37,37 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
     const usersRaw = await User.find(query);
     console.log(req.userId);
     const authorUser = await User.findById(req.userId)
-    .select('-password')
-    .populate('projects');
-    console.log(authorUser); 
+      .select('-password')
+      .populate('projects');
+    console.log(authorUser);
     if (!authorUser) {
       res.status(404).send('Failed to search users!');
       return;
     }
-    
+
     // Need to remove administrative fields if the user is not an admin
     // Also, remove the email if the user is not in the same project as the author
     // of the query.
     if (!admin) {
-      usersRaw.forEach((user : any) => {
+      usersRaw.forEach((user: any) => {
         user.toObject();
         if (
           authorUser.projects &&
           !authorUser.projects.some((project) =>
             user.projects?.includes(project),
-        )
-      ) {
-        user.email = '';
-      }
-      delete user._id;
-      delete user.__v;
-      delete user.projects;
-    });
+          )
+        ) {
+          user.email = '';
+        }
+        delete user._id;
+        delete user.__v;
+        delete user.projects;
+      });
+    }
+    res.send(usersRaw);
+  } catch (error) {
+    res.status(500).send('Error searching users!');
   }
-  res.send(usersRaw);
-} catch (error) {
-  res.status(500).send('Error searching users!');
-}
 });
 
 /**
@@ -86,7 +86,6 @@ usersRouter.post('/register', async (req, res) => {
       password: await bcrypt.hash(password, 10),
     });
     await user.save();
-
     res.status(201).send({
       result: 'User registered',
       userInfo: {
@@ -95,7 +94,9 @@ usersRouter.post('/register', async (req, res) => {
         role: user.role,
       },
     });
+
   } catch (error) {
+    console.log(error);
     res.status(500).send('Error: ' + error);
   }
 });
@@ -109,7 +110,6 @@ usersRouter.post('/register', async (req, res) => {
 usersRouter.post('/login', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    console.log(username, email, password);
     // TODO: VALIDATION OF USERNAME, EMAIL AND PASSWORD
     const query = { $or: [{ username }, { email }] };
 
@@ -132,6 +132,7 @@ usersRouter.post('/login', async (req, res) => {
       result: 'Authentication successful',
       token,
     });
+
   } catch (error) {
     res.status(505).json({ result: 'Authentication failed by server' });
   }
@@ -178,14 +179,14 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
 usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
   try {
     const updaterUserId = req.userId;
-    const isUpdatingSelf : boolean = Boolean(req.headers.modifyself) ?? false;
+    const isUpdatingSelf: boolean = Boolean(req.headers.modifyself) ?? false;
     const isAdminUser = await isAdmin(req);
     const { username, email, password, role } = req.body;
-    
+
     const user = isUpdatingSelf
       ? await User.findById(updaterUserId)
       : await User.findOne({ username });
-      
+
     if (!user) {
       res.status(404).json({ result: 'User not found or unauthorized' });
       return;
@@ -195,7 +196,7 @@ usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
     if (email) user.email = email;
     if (password) user.password = password;
     if (isAdminUser && role) user.role = role;
-    
+
     await user.save();
     res.status(201).json({ result: 'User updated' });
   } catch (error) {
@@ -207,9 +208,9 @@ usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
 /**
  * @brief This function checks if the user is an admin
  * @param req The request object
- * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin 
- */ 
-export async function isAdmin(req: Express.Request) : Promise<boolean> {
+ * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin
+ */
+export async function isAdmin(req: Express.Request): Promise<boolean> {
   const { userId } = req;
   const user = await User.findById(userId);
   return user?.role === Role.Admin;

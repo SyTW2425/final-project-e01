@@ -17,9 +17,9 @@ import { Document, Schema, model } from 'mongoose';
 export enum Role {
   DEVELOPER,
   PRODUCT_OWNER,
-  SCRUM_MASTER, 
+  SCRUM_MASTER,
   ADMIN,
-  OWNER
+  OWNER,
 }
 
 /**
@@ -41,22 +41,21 @@ export type Users = {
   user: Schema.Types.ObjectId;
   role: Role;
   productivity: number;
-}
-
-export type projectSettings = {
-  minimalRoleToUpdateUsers : Role;
-  minimalRoleToDeleteUsers : Role;
-  minimalRoleToCreateSprints : Role;
-  minimalRoleToDeleteSprints : Role;
-  minimalRoleToCreateTasks : Role;
-  minimalRoleToDeleteTasks : Role;
-  minimalRoleToEditTasks : Role;
-  minimalRoleToEditProject : Role;
-  minimalRoleToDeleteProject : Role;
-  minimalRoleToCreateUsers : Role;
-  isPublic : boolean;
 };
 
+export type projectSettings = {
+  minimalRoleToUpdateUsers: Role;
+  minimalRoleToDeleteUsers: Role;
+  minimalRoleToCreateSprints: Role;
+  minimalRoleToDeleteSprints: Role;
+  minimalRoleToCreateTasks: Role;
+  minimalRoleToDeleteTasks: Role;
+  minimalRoleToEditTasks: Role;
+  minimalRoleToEditProject: Role;
+  minimalRoleToDeleteProject: Role;
+  minimalRoleToCreateUsers: Role;
+  isPublic: boolean;
+};
 
 /**
  * Interface of Project
@@ -113,27 +112,31 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     },
   },
-  
+
   users: {
-    type: [{
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: 'Users',
+    type: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'Users',
+        },
+        role: {
+          type: Number,
+          enum: Object.values(Role),
+        },
+        tasks: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: 'Tasks',
+          },
+        ],
+        productivity: {
+          type: Number,
+          min: 0,
+          max: 100,
+        },
       },
-      role: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      tasks: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Tasks',
-      }],
-      productivity: {
-        type: Number,
-        min: 0,
-        max: 100
-      }
-    }],
+    ],
     required: true,
     _id: false, // Do not create an _id for this subdocument
   },

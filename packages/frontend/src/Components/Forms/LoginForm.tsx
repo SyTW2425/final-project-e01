@@ -35,7 +35,7 @@ const handleLogin = async (email: string, password: string) => {
   if (response.status < 200 || response.status >= 400) throw new Error('Failed to login');
   const data = await response.json();
   localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
-  window.location.href = '/home';
+  window.location.href = '/';
 }
 
 /**
@@ -45,8 +45,10 @@ const handleLogin = async (email: string, password: string) => {
 const LoginForm: React.FC = () => {
   const [email, setEmail] = React.useState<string>('');
   const [password, setPassword] = React.useState<string>('');
-  const handleSubmit = () => handleLogin(email, password);
-  
+  const handleSubmit = (e : React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleLogin(email, password);
+  }
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg">

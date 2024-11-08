@@ -47,7 +47,7 @@ const HomePage: React.FC = () => {
           "With Velia, you can organize your tasks, assign them to your teammates, and track their progress.",
           "All this in an intuitive and easy-to-use platform."
         ]}
-        image="../../public/blank_logo.png"
+        image="blank_logo.png"
         position="left"
       />
       {/* Why Velia Section */}
@@ -70,7 +70,7 @@ const HomePage: React.FC = () => {
             "Thousands of users trust Velia to achieve their project goals. Start your free trial today and experience the future of project management."
           ]
         }
-        image="../../public/project-manager.png"
+        image="project-manager.png"
         position="right"
       />
 
