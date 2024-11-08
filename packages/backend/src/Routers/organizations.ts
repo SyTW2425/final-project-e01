@@ -13,14 +13,28 @@
  */
 
 import Express from 'express';
-import jwtMiddleware from '../Middleware/authMiddleware.js';
-import { Organization } from '../Models/Organization.js';
-import { User } from '../Models/User.js';
-import { Project } from '../Models/Project.js';
-import { getUserofJWT } from '../Routers/tasks.js';
 import { Schema } from 'mongoose';
+import jwtMiddleware from '../Middleware/authMiddleware.js';
+import Project from '../Models/Project.js';
+import { getUserofJWT } from '../Utils/CRUD-util-functions.js';
+import User, { UserDocumentInterface } from '../Models/User.js';
+import Organization, {OrganizationInterface, OrgMember } from '../Models/Organization.js';
+
+
 
 export const organizationsRouter = Express.Router();
+
+
+/**
+ * This function checks if an organization exists
+ * @param name The name of the organization
+ * @returns the organization if it exists, null otherwise
+ */
+async function checkIfOrganizationExists(name: string) : Promise<OrganizationInterface | null> {
+  return Organization.findOne({ name: name });
+}
+
+
 
 /**
  * @brief This endpoint is used create a new organization
@@ -32,25 +46,23 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, members } = req.body;
 
-    /// Comprobar si la organización ya existe
-    const organizationExists = await Organization.findOne({ name: name });
+   // We need to check if the organization exists
+    const organizationExists = await checkIfOrganizationExists(name);
     if (organizationExists) {
       res.status(409).json({ error: 'Organization already exists' });
       return;
     }
-
-    // Buscar los ObjectId de los usuarios basados en sus nombres de usuario
-    const membersWithObjectIds = await Promise.all(
-      members.map(async (member: { user: any; role: any }) => {
-        const foundUser = await User.findOne({ username: member.user });
-        if (!foundUser) throw new Error(`User ${member.user} not found`);
-        return {
-          user: foundUser._id, // Usar el ObjectId del usuario encontrado
-          role: member.role,
-        };
-      }),
-    );
-
+    
+    // We need to search for each user in the database and get their ObjectId
+    const membersWithObjectIds : UserDocumentInterface[] = await members.map(async (member : OrgMember) => {
+      const foundUser = await User.findOne({ username: member.user });
+      if (!foundUser) throw new Error(`User ${member.user} not found`);
+      return {
+        user: foundUser._id,
+        role: member.role,
+      };
+    });
+    
     /// No añadir ningún proyecto al inicio ---- SOLUCIONAR ESTO SI SE NECESITA
     const projects_: (typeof Project)[] = [];
     // Crear la nueva organización con los ObjectId de los usuarios

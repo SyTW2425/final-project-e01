@@ -26,17 +26,17 @@ export enum OrgRole {
  * Type of member in the organization
  */
 export interface OrgMember {
-  user: Schema.Types.ObjectId; // Referencia al esquema de usuario
-  role: OrgRole; // Rol del miembro en la organización
+  user: Schema.Types.ObjectId; // Reference to the user object
+  role: OrgRole; // The role of the user in the organization
 }
 
 /**
  * Interface of Organization
  */
 export interface OrganizationInterface extends Document {
-  name: string; // Nombre de la organización
-  members: OrgMember[]; // Lista de miembros y sus roles
-  projects: Schema.Types.ObjectId[]; // Lista de proyectos en la organización
+  name: string; // Name of the organization
+  members: OrgMember[]; // List of members in the organization
+  projects: Schema.Types.ObjectId[]; // List of projects in the organization
 }
 
 /**
@@ -54,7 +54,7 @@ const OrganizationSchema = new Schema<OrganizationInterface>({
     {
       user: {
         type: Schema.Types.ObjectId,
-        ref: 'Users', // Referencia al esquema de usuarios
+        ref: 'Users',
         required: true,
         _id: false,
       },
@@ -69,14 +69,16 @@ const OrganizationSchema = new Schema<OrganizationInterface>({
   projects: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Projects', // Referencia al esquema de proyectos
+      ref: 'Projects',
       required: true,
       _id: false,
     },
   ],
 });
 
-export const Organization = model<OrganizationInterface>(
+const Organization = model<OrganizationInterface>(
   'Organization',
   OrganizationSchema,
 );
+
+export default Organization;

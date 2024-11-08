@@ -30,7 +30,7 @@ export interface UserDocumentInterface extends Document {
   password: string;
   email: string;
   role: Role;
-  projects?: Schema.Types.ObjectId[];
+  organizations: Schema.Types.ObjectId[];
 }
 
 /**
@@ -73,11 +73,18 @@ const UserSchema = new Schema<UserDocumentInterface>({
     enum: [Role.Admin, Role.User],
     default: Role.User,
   },
-  projects: {
-    type: [Schema.Types.ObjectId],
-    ref: 'Projects',
-    default: [],
-  },
+  organizations: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      required: true,
+      validate: {
+        validator: (v: Schema.Types.ObjectId[]) => v.length > 0,
+        message: 'You must belong to at least one organization',
+      },
+    },
+  ],
 });
 
-export const User = model<UserDocumentInterface>('Users', UserSchema);
+const User = model<UserDocumentInterface>('Users', UserSchema);
+export default User;

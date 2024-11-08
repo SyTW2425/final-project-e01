@@ -9,8 +9,9 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief Model of Project
+ * @brief Model of Task
  */
+
 
 import { Document, Schema, model } from 'mongoose';
 
@@ -42,16 +43,15 @@ export interface TaskInterface extends Document {
   startDate: Date;
   endDate: Date;
   name: string;
-  type: string;
   progress: number;
-  description?: string;
+  description: string;
   priority: priority;
-  dependenciesTasks?: string[];
+  dependenciesTasks: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   status: status;
-  comments?: string[];
-  users?: Schema.Types.ObjectId[];
+  comments: string[];
+  users: Schema.Types.ObjectId[];
   project: Schema.Types.ObjectId;
 }
 
@@ -90,16 +90,6 @@ export const TaskSchema = new Schema<TaskInterface>({
       },
     },
   },
-  type: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (v: string) => v.length > 0,
-      message: (props) => {
-        return `${props.value} is not a valid type. The type must be greater than 0 characters.`;
-      },
-    },
-  },
   progress: {
     type: Number,
     required: true,
@@ -115,7 +105,7 @@ export const TaskSchema = new Schema<TaskInterface>({
     required: true,
   },
   dependenciesTasks: {
-    type: [String],
+    type: [Schema.Types.ObjectId],
   },
   createdAt: {
     type: Date,
@@ -148,4 +138,5 @@ export const TaskSchema = new Schema<TaskInterface>({
   },
 });
 
-export const Task = model<TaskInterface>('Tasks', TaskSchema);
+const Task = model<TaskInterface>('Tasks', TaskSchema);
+export default Task;

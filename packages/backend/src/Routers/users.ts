@@ -12,17 +12,22 @@
  * @brief Main
  */
 
-import 'dotenv/config';
 import Express from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+
+import UserLogic from '../Class/UsersLogic.js';
+import MongoDB from '../Class/DBAdapter.js';
+import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
+
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 
-import { User, Role } from '../Models/User.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
 
 export const usersRouter = Express.Router();
+
+
+// Initialize the logic
+const dbAdapter = new MongoDB();
+const userLogic = new UserLogic(dbAdapter);
+
 
 /**
  * @brief This endpoint is used to search for users
@@ -30,43 +35,18 @@ export const usersRouter = Express.Router();
  * @param res The response object
  * @returns void
  */
-usersRouter.get('/', jwtMiddleware, async (req, res) => {
+usersRouter.get('/', jwtMiddleware, async (req, res) => { 
   try {
-    const query = buildSearchQuery(req);
-    let admin: boolean = await isAdmin(req);
-    const usersRaw = await User.find(query);
-    console.log(req.userId);
-    const authorUser = await User.findById(req.userId)
-      .select('-password')
-      .populate('projects');
-    console.log(authorUser);
-    if (!authorUser) {
-      res.status(404).send('Failed to search users!');
+    const { username, email } = req.query;
+    if (!username && !email) {
+      res.status(400).send(createResponseFormat(true, 'You must provide a username or email to search for users'));
       return;
     }
-
-    // Need to remove administrative fields if the user is not an admin
-    // Also, remove the email if the user is not in the same project as the author
-    // of the query.
-    if (!admin) {
-      usersRaw.forEach((user: any) => {
-        user.toObject();
-        if (
-          authorUser.projects &&
-          !authorUser.projects.some((project) =>
-            user.projects?.includes(project),
-          )
-        ) {
-          user.email = '';
-        }
-        delete user._id;
-        delete user.__v;
-        delete user.projects;
-      });
-    }
-    res.send(usersRaw);
-  } catch (error) {
-    res.status(500).send('Error searching users!');
+    let response = await userLogic.searchUsers(username as string, email as string)
+    res.status(200).send(response);
+  } catch (error : unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
 
@@ -79,25 +59,15 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
 usersRouter.post('/register', async (req, res) => {
   try {
     let { username, email, password } = req.body;
-    const user = new User({
-      username,
-      email,
-      role: Role.User,
-      password: await bcrypt.hash(password, 10),
-    });
-    await user.save();
-    res.status(201).send({
-      result: 'User registered',
-      userInfo: {
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-    });
-
+    if (!username || !email || !password) {
+      res.status(400).send(createResponseFormat(true, 'You must provide a username, email and password to register a user'));
+      return;
+    }
+    const response = await userLogic.registerUser(username, email, password);
+    res.status(201).send(response);
   } catch (error) {
-    console.log(error);
-    res.status(500).send('Error: ' + error);
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
 
@@ -109,32 +79,16 @@ usersRouter.post('/register', async (req, res) => {
  */
 usersRouter.post('/login', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    // TODO: VALIDATION OF USERNAME, EMAIL AND PASSWORD
-    const query = { $or: [{ username }, { email }] };
-
-    const user = await User.findOne(query);
-
-    if (!user) {
-      res.status(404).json({ result: 'Authentication failed by user' });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).send(createResponseFormat(true, 'You must provide an email and password to login'));
       return;
     }
-    const passwordMatch = bcrypt.compareSync(password, user.password);
-    if (!passwordMatch) {
-      res.status(404).json({ result: 'Authentication failed by user' });
-      return;
-    }
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    res.status(201).json({
-      result: 'Authentication successful',
-      token,
-    });
-
+    const response = await userLogic.loginUser(email, password);
+    res.status(200).send(response);
   } catch (error) {
-    res.status(505).json({ result: 'Authentication failed by server' });
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
 
@@ -146,27 +100,11 @@ usersRouter.post('/login', async (req, res) => {
  */
 usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
   try {
-    let userToDelete = req.userId;
-    const admin: boolean = await isAdmin(req);
-    userToDelete = !admin
-      ? userToDelete
-      : (req.body.username ?? req.body.email);
-
-    const userDelete = await User.findOneAndDelete({
-      $or: [
-        { _id: userToDelete },
-        { username: userToDelete },
-        { email: userToDelete },
-      ],
-    });
-    if (!userDelete) {
-      res.status(404).json({ result: 'Delete failed by user' });
-      return;
-    }
-    res.status(201).json({ result: 'User deleted' });
+    const response = await userLogic.deleteUser(req.body.email, req.userId);
+    res.status(200).send(response);
   } catch (error) {
-    res.status(500).json('Error deleting user');
-    return;
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
 
@@ -178,62 +116,16 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
  */
 usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
   try {
-    const updaterUserId = req.userId;
-    const isUpdatingSelf: boolean = Boolean(req.headers.modifyself) ?? false;
-    const isAdminUser = await isAdmin(req);
-    const { username, email, password, role } = req.body;
-
-    const user = isUpdatingSelf
-      ? await User.findById(updaterUserId)
-      : await User.findOne({ username });
-
-    if (!user) {
-      res.status(404).json({ result: 'User not found or unauthorized' });
+    const { username, email,  password, role } = req.body;
+    if (!email) {
+      res.status(400).send(createResponseFormat(true, 'You must provide an email to update a user'));
       return;
     }
-
-    if (username) user.username = username;
-    if (email) user.email = email;
-    if (password) user.password = password;
-    if (isAdminUser && role) user.role = role;
-
-    await user.save();
-    res.status(201).json({ result: 'User updated' });
+    const response = await userLogic.updateUser(email, username ?? null, password ?? null, role ?? null, req.userId);
+    res.status(200).send(response);
   } catch (error) {
-    res.status(500).json('Error updating user');
-    return;
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
 
-/**
- * @brief This function checks if the user is an admin
- * @param req The request object
- * @returns Promise<boolean> A promise that resolves to a boolean indicating if the user is an admin
- */
-export async function isAdmin(req: Express.Request): Promise<boolean> {
-  const { userId } = req;
-  const user = await User.findById(userId);
-  return user?.role === Role.Admin;
-}
-
-/**
- * @brief This function checks if the user is an admin and if the search query is valid
- * @param req The request object
- * @returns object
- */
-function buildSearchQuery(req: Express.Request): object {
-  const { username, email } = req.query;
-  const query: any = {};
-  // Validations
-  if (!username && !email) {
-    throw Error('You must provide a username or email to search for users');
-  }
-  // Build the query
-  if (username) {
-    query.username = { $regex: `^${username}`, $options: 'i' };
-  }
-  if (email) {
-    query.email = { $regex: `^${email}`, $options: 'i' };
-  }
-  return query;
-}
