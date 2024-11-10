@@ -1,0 +1,55 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Tasks",
+    "collectionId": "dc493c84-5448-474f-996c-3148e95a90a6",
+    "dateExported": "2024-11-10T12:32:19.946Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "8a941df3-fda9-45fd-9af6-e548aa6e42e4",
+            "colId": "dc493c84-5448-474f-996c-3148e95a90a6",
+            "containerId": "",
+            "name": "Crear Tarea",
+            "url": "http://localhost:3000/task",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-11-10T12:00:13.253Z",
+            "modified": "2024-11-10T12:00:13.253Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzEyMzY0ODEsImV4cCI6MTczMTI0MDA4MX0.RfSadgbfz6orG-LFI2SoK1PngKG1ZstZkr0imwDXNgw"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"startDate\": \"2024-11-30T00:00:00Z\",\n  \"endDate\": \"2024-12-15T00:00:00Z\",\n  \"name\": \"Implementación de la interfaz de usuario\",\n  \"description\": \"Tarea para desarrollar la interfaz de usuario en el proyecto\",\n  \"priority\": \"high\",\n  \"dependenciesTasks\": [],\n  \"status\": \"in_progress\",\n  \"comments\": [\"Asegurarse de seguir el diseño\", \"Revisar con el equipo de UX\"],\n  \"users\": [\"testUser\", \"testUser2\"],\n  \"projectName\": \"Nuevo Proyecto\",\n  \"organizationName\": \"OrganizationExample\"\n}\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "9bc8fe4a-9ef8-4ddc-880d-b603500dab57",
+            "colId": "dc493c84-5448-474f-996c-3148e95a90a6",
+            "containerId": "",
+            "name": "Buscar Tarea",
+            "url": "http://localhost:3000/task",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-11-10T12:00:21.805Z",
+            "modified": "2024-11-10T12:00:21.805Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzEyMzY0ODEsImV4cCI6MTczMTI0MDA4MX0.RfSadgbfz6orG-LFI2SoK1PngKG1ZstZkr0imwDXNgw"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"Implementación de la interfaz de usuario\",\n  \"projectName\": \"Nuevo Proyecto\",\n  \"organizationName\": \"OrganizationExample\"\n}\n",
+                "form": []
+            }
+        }
+    ],
+    "ref": "xTu8ZHd8yKBHiCF6NqPzrRRhdDpnwjejzMcJxEOulWJMNlv0O7R-Yq5sSxJTuZtZ0yPg6IsuR8rn5RAZnfkWhA"
+}

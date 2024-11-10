@@ -1,0 +1,55 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Proyect",
+    "collectionId": "c645523b-0ea0-4158-ac64-fda97ebf5e5a",
+    "dateExported": "2024-11-10T12:32:41.516Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "40a4a9cd-ddd1-4980-ab67-fae37a1dea8a",
+            "colId": "c645523b-0ea0-4158-ac64-fda97ebf5e5a",
+            "containerId": "",
+            "name": "Buscar Proyecto",
+            "url": "http://localhost:3000/project",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2024-11-10T12:00:53.636Z",
+            "modified": "2024-11-10T12:00:53.636Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzEyMzY0ODEsImV4cCI6MTczMTI0MDA4MX0.RfSadgbfz6orG-LFI2SoK1PngKG1ZstZkr0imwDXNgw"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"organization\": \"OrganizationExample\",\n  \"name\": \"Nuevo Proyecto\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "1c41265e-170d-4500-a8f0-434728810888",
+            "colId": "c645523b-0ea0-4158-ac64-fda97ebf5e5a",
+            "containerId": "",
+            "name": "Crear Proyecto",
+            "url": "http://localhost:3000/project",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-11-10T12:01:03.099Z",
+            "modified": "2024-11-10T12:01:03.099Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzEyMzY0ODEsImV4cCI6MTczMTI0MDA4MX0.RfSadgbfz6orG-LFI2SoK1PngKG1ZstZkr0imwDXNgw"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"organization\": \"OrganizationExample\",\n  \"name\": \"Nuevo Proyecto\",\n  \"description\": \"Este es un proyecto de ejemplo\",\n  \"startDate\": \"2024-11-30T00:00:00Z\",\n  \"endDate\": \"2025-01-30T00:00:00Z\",\n  \"users\": [\n    {\n      \"user\": \"testUser2\",\n      \"role\": \"admin\"\n    }\n  ]\n}\n",
+                "form": []
+            }
+        }
+    ],
+    "ref": "gNYMJTmCHMclPSDltoV2SZFCIIaD63N-NE7jYDckD5pneip7dUh0HiGjzFq_-fdjiX7KJJkG11qo0TDI7y0chQ"
+}
