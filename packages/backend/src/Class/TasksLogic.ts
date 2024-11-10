@@ -16,6 +16,7 @@ import 'dotenv/config';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, TasksAPI, databaseAdapter } from '../types/APITypes.js';
 import Task from '../Models/Task.js';
+import Organization from '../Models/Organization.js';
 
 /**
  * Class that contains the logic of the tasks
@@ -55,6 +56,26 @@ export default class TasksLogic implements TasksAPI {
       organization
     });
     return createResponseFormat(false, task_saved); 
+  }
+
+  async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, state: string | null, project: string, assignedTo: string | null): Promise<APIResponseFormat> {
+    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project, Organization }, '');
+    if (!taskToUpdate) {
+      throw new Error('Task not found');
+    }
+    let obj: any = {};
+    if (description) obj['description'] = description;
+    if (endDate) obj['endDate'] = endDate;
+    if (priority) obj['priority'] = priority ;
+    if (state) obj['state'] = state;
+    if (assignedTo) obj['assignedTo'] = assignedTo;
+    const task = await this.dbAdapter.updateOne(Task, { name }, obj);
+    return createResponseFormat(false, task);
+  }
+
+  async deleteTask(taskToDelete: string, projectTask: string): Promise<APIResponseFormat> {
+    const taskDelete = await this.dbAdapter.deleteOne(Task, { name: taskToDelete, project: projectTask });
+    return createResponseFormat(false, taskDelete);
   }
 
   private buildSearchQuery(name: string | null, projectID: string, organizationID: string): any {

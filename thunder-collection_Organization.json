@@ -1,0 +1,99 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Organization",
+    "collectionId": "dabdbe2a-12ce-41d1-92f4-f20aa56eab04",
+    "dateExported": "2024-11-10T12:32:57.881Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "6edc751b-17e3-4654-813e-64a0d9431f94",
+            "colId": "dabdbe2a-12ce-41d1-92f4-f20aa56eab04",
+            "containerId": "",
+            "name": "Crear Organization",
+            "url": "http://localhost:3000/organization",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-11-10T00:50:18.911Z",
+            "modified": "2024-11-10T00:50:18.911Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzExOTgyMDksImV4cCI6MTczMTIwMTgwOX0.IZ-1xB71HafIY8aorNnlldZcKPfSKjQVUkLI-Uy5UxM"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{ \"name\": \"OrganizationExample\",\n  \"members\": [\n    {\"user\": \"testUser2\",\n     \"role\": \"member\"\n    }\n  ] \n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "9a61e9dc-05f3-4f1b-bf26-34f9e5bf5f38",
+            "colId": "dabdbe2a-12ce-41d1-92f4-f20aa56eab04",
+            "containerId": "",
+            "name": "Buscar Organization",
+            "url": "http://localhost:3000/organization",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-11-10T00:50:32.430Z",
+            "modified": "2024-11-10T00:50:32.430Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzExOTA4NjUsImV4cCI6MTczMTE5NDQ2NX0.R-vnc_c7WqU5Ra4slYN46e8o7JFtzVTj0AhJNWoSCU8"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{ \"name\": \"OrganizationE\" }",
+                "form": []
+            }
+        },
+        {
+            "_id": "df37c8d4-f53e-4fdb-9062-d2078e8b826f",
+            "colId": "dabdbe2a-12ce-41d1-92f4-f20aa56eab04",
+            "containerId": "",
+            "name": "Eliminar Organization",
+            "url": "http://localhost:3000/organization",
+            "method": "DELETE",
+            "sortNum": 30000,
+            "created": "2024-11-10T00:51:12.519Z",
+            "modified": "2024-11-10T00:51:12.519Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzExOTgyMDksImV4cCI6MTczMTIwMTgwOX0.IZ-1xB71HafIY8aorNnlldZcKPfSKjQVUkLI-Uy5UxM"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{ \n  \"name\": \"OrganizationExample\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "d8f29cd5-eb88-40fd-81d2-aeb864347d01",
+            "colId": "dabdbe2a-12ce-41d1-92f4-f20aa56eab04",
+            "containerId": "",
+            "name": "Modificar Organization",
+            "url": "http://localhost:3000/organization",
+            "method": "PUT",
+            "sortNum": 40000,
+            "created": "2024-11-10T00:52:04.178Z",
+            "modified": "2024-11-10T00:52:04.178Z",
+            "headers": [
+                {
+                    "name": "authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzJmZDE0NzU0ZDBjOWEyODEwZTJhN2IiLCJpYXQiOjE3MzExOTgyMDksImV4cCI6MTczMTIwMTgwOX0.IZ-1xB71HafIY8aorNnlldZcKPfSKjQVUkLI-Uy5UxM"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{ \n  \"name\": \"Organization\",\n  \"members\": [\n    {\n     \"user\": \"testUser2\",\n     \"role\": \"admin\"\n    }  \n  ] \n}",
+                "form": []
+            }
+        }
+    ],
+    "ref": "XfziaBxw57OvpN-skjqkWPihNC8258Bc8HP1n885ua1icjmqHOF68NyqtiWlx4EZ5yEG7snFaS9_BCHl2NZ4xA"
+}

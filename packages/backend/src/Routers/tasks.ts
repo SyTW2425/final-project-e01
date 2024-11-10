@@ -77,3 +77,49 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
+
+/**
+ * @brief This endpoint is used to delete a task
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.delete('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { name, projectName, organizationName } = req.body;
+    if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
+    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+    if (authResult.status !== 200) {
+      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      return;
+    }
+    const response = await taskLogic.deleteTask(name, authResult.projectId.toString());
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to update a task
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.put('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { name, description, deadline, priority, state, project, assignedTo, projectName, organizationName } = req.body;
+    if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
+    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+    if (authResult.status !== 200) {
+      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      return;
+    }
+    const response = await taskLogic.updateTask(name, description, deadline, priority, state, project, assignedTo);
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+})
