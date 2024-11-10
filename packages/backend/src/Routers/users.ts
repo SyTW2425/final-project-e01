@@ -13,21 +13,16 @@
  */
 
 import Express from 'express';
-
 import UserLogic from '../Class/UsersLogic.js';
 import MongoDB from '../Class/DBAdapter.js';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
-
 import jwtMiddleware from '../Middleware/authMiddleware.js';
-
 
 export const usersRouter = Express.Router();
 
-
 // Initialize the logic
 const dbAdapter = new MongoDB();
-const userLogic = new UserLogic(dbAdapter);
-
+export const userLogic = new UserLogic(dbAdapter);
 
 /**
  * @brief This endpoint is used to search for users
@@ -128,4 +123,3 @@ usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
-

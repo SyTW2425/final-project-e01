@@ -12,7 +12,6 @@
  * @brief Model of Task
  */
 
-
 import { Document, Schema, model } from 'mongoose';
 
 /**
@@ -43,7 +42,7 @@ export interface TaskInterface extends Document {
   startDate: Date;
   endDate: Date;
   name: string;
-  progress: number;
+  progress: number; // 
   description: string;
   priority: priority;
   dependenciesTasks: Schema.Types.ObjectId[];
@@ -53,6 +52,7 @@ export interface TaskInterface extends Document {
   comments: string[];
   users: Schema.Types.ObjectId[];
   project: Schema.Types.ObjectId;
+  organization: Schema.Types.ObjectId;
 }
 
 /**
@@ -133,6 +133,12 @@ export const TaskSchema = new Schema<TaskInterface>({
   project: {
     type: Schema.Types.ObjectId,
     ref: 'Projects',
+    required: true,
+    _id: false,
+  },
+  organization: {
+    type: Schema.Types.ObjectId,
+    ref: 'Organizations',
     required: true,
     _id: false,
   },

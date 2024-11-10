@@ -18,11 +18,11 @@ import { Document, Schema, model } from 'mongoose';
  * Enum of roles
  */
 export enum Role {
-  DEVELOPER,
-  PRODUCT_OWNER,
-  SCRUM_MASTER,
-  ADMIN,
-  OWNER,
+  DEVELOPER = 'developer',
+  PRODUCT_OWNER = 'product_owner',
+  SCRUM_MASTER = 'scrum_master',
+  ADMIN = 'admin',
+  OWNER = 'owner',
 }
 
 /**
@@ -108,15 +108,9 @@ const ProjectSchema = new Schema<ProjectInterface>({
           ref: 'Users',
         },
         role: {
-          type: Number,
-          enum: Object.values(Role),
+          type: String, 
+          enum: Object.values(Role)
         },
-        tasks: [
-          {
-            type: Schema.Types.ObjectId,
-            ref: 'Tasks',
-          },
-        ]
       },
     ],
     required: true,

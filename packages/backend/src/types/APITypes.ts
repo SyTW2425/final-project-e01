@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 28/10/2024
+ * @brief API Types file, contains the interfaces of the API
+ */
+
 import { Model } from "mongoose";
 
 /**
@@ -39,10 +53,10 @@ export interface UsersAPI {
  * @brief This interface is used to define the methods that the organization API must implement
  */
 export interface TasksAPI {
-  searchTasks(name : string) : Promise<APIResponseFormat>;
-  createTask(name : string, description : string, deadline : string, priority : string, state : string, project : string, assignedTo : string) : Promise<APIResponseFormat>;
-  deleteTask(taskToDelete : string) : Promise<APIResponseFormat>;
-  updateTask(name : string, description : string, deadline : string, priority : string, state : string, project : string, assignedTo : string) : Promise<APIResponseFormat>;
+  searchTasks(name : string, project: string, organization : string) : Promise<APIResponseFormat>;
+  createTask(name : string, startDate : string, endDate : string, description : string, priority : string, dependenciesTasks : string[], status : string, comments : string[], users : string[], project : string, organization : string) : Promise<APIResponseFormat>;
+  // deleteTask(taskToDelete : string) : Promise<APIResponseFormat>;
+  // updateTask(name : string, description : string, deadline : string, priority : string, state : string, project : string, assignedTo : string) : Promise<APIResponseFormat>;
 }
 
 
@@ -51,10 +65,10 @@ export interface TasksAPI {
  * @description Projects API
  */
 export interface ProjectsAPI {
-  searchProjects(name : string) : Promise<APIResponseFormat>;
-  createProject(name : string, description : string, deadline : string, priority : string, state : string, organization : string) : Promise<APIResponseFormat>;
-  deleteProject(projectToDelete : string) : Promise<APIResponseFormat>;
-  updateProject(name : string, description : string, deadline : string, priority : string, state : string, organization : string) : Promise<APIResponseFormat>;
+  searchProjects(nameOrg : string, nameProject : string) : Promise<APIResponseFormat>;
+  createProject(organization : string, name : string, description : string, startDate : string, endDate : string, users : any) : Promise<APIResponseFormat>;
+  // deleteProject(nameOrg: string, projectToDelete : string) : Promise<APIResponseFormat>;
+  // updateProject(nameProject : string, description : string, startDate : string, endDate : string, users : string[], sprints : any) : Promise<APIResponseFormat>;
 }
 
 
@@ -64,9 +78,9 @@ export interface ProjectsAPI {
  */
 export interface OrganizationsAPI {
   searchOrganizations(name : string) : Promise<APIResponseFormat>;
-  createOrganization(name : string, description : string, deadline : string, priority : string, state : string) : Promise<APIResponseFormat>;
+  createOrganization(name : string, members : any) : Promise<APIResponseFormat>;
   deleteOrganization(organizationToDelete : string) : Promise<APIResponseFormat>;
-  updateOrganization(name : string, description : string, deadline : string, priority : string, state : string) : Promise<APIResponseFormat>;
+  updateOrganization(name : string, newName:string, members : any) : Promise<APIResponseFormat>;
 }
 
 

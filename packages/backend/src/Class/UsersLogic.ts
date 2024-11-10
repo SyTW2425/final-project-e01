@@ -15,25 +15,23 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 import User, { Role } from "../Models/User.js";
-
 import { createResponseFormat } from "../Utils/CRUD-util-functions.js";
 import { APIResponseFormat, UsersAPI, databaseAdapter } from "../types/APITypes.js";
 
-
 const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
 
-
-
+/** 
+ * Class that contains the logic of the users
+ * @class
+ * @implements UsersAPI
+ */
 export default class UserLogic implements UsersAPI {
   private dbAdapter : databaseAdapter;
   
   constructor(dbAdapter : databaseAdapter) {
     this.dbAdapter = dbAdapter;
   }
-
-  // Start of the methods of the UsersAPI interface
 
   async searchUsers(username : string | null, email : string | null) : Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(username, email);
@@ -96,6 +94,16 @@ export default class UserLogic implements UsersAPI {
     const user = await this.dbAdapter.findOne(User, { _id: userId }, '');
     if (!user) return false;
     return user?.role === Role.Admin;
+  }
+
+  public async searchUserById(userId : any) : Promise<APIResponseFormat> {
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, '');
+    return user;
+  }
+
+  public async searchUser(name : string) : Promise<APIResponseFormat> {
+    const user = await this.dbAdapter.findOne(User, { username: name }, '');
+    return user;
   }
 
   private buildSearchQuery(username : string | null, email : string | null) : any {
