@@ -108,7 +108,7 @@ tasksRouter.delete('/', jwtMiddleware, async (req, res) => {
  * @returns void
  */
 tasksRouter.put('/', jwtMiddleware, async (req, res) => {
-  try {
+  try { 
     const { name, description, deadline, priority, state, project, assignedTo, projectName, organizationName } = req.body;
     if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
     const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
