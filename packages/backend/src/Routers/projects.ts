@@ -120,3 +120,84 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, error.message));
   }
 });
+
+/**
+ * @brief This endpoint is used to update a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.put('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { organization, name, description, startDate, endDate, users, sprints } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin of the organization
+    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    if (!isAdmin) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      return;
+    }
+    // Obtain the users with their roles
+    const usersWithRoles = await Promise.all(users.map(async (userEntry: any) => {
+      const userResult = await userLogic.searchUser(userEntry.user) as any;
+      if (!userResult) {
+        throw new Error(`User ${userEntry.user} not found`);
+      }
+      return {
+        user: userResult._id,
+        role: userEntry.role
+      };
+    }));
+    // Update the project
+    const projectUpdate = await projectLogic.updateProject(name, description, startDate, endDate, usersWithRoles, sprints);
+    res.status(200).send(projectUpdate);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to delete a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { organization, project } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin of the organization
+    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    if (!isAdmin) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      return;
+    }
+    // Delete the project
+    const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
+    res.status(200).send(projectDelete);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});

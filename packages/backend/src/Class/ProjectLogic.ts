@@ -62,6 +62,25 @@ export default class ProjectLogic implements ProjectsAPI {
     return false;
   }
 
+  public async deleteProject(nameOrg: string, projectToDelete: string): Promise<APIResponseFormat> {
+    const query = this.buildSearchQuery(nameOrg, projectToDelete);
+    const project = await this.dbAdapter.deleteOne(Project, query);
+    return createResponseFormat(false, project);
+  }
+
+  public async updateProject(nameProject: string, description: string, startDate: string, endDate: string, users: string[], sprints: any): Promise<APIResponseFormat> {
+    const query = this.buildSearchQuery('', nameProject);
+    const data = {
+      description,
+      startDate,
+      endDate,
+      users,
+      sprints
+    };
+    const project = await this.dbAdapter.updateOne(Project, query, data);
+    return createResponseFormat(false, project);
+  }
+
   private buildSearchQuery(orgID: string, projectName: string): any {
     let query: any = {};
     if (orgID) {
