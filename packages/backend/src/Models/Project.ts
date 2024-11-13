@@ -4,9 +4,9 @@
  * Grado en Ingeniería Informática
  * Universidad de La Laguna
  *
- * @autor Pablo Rodríguez de la Rosa
- * @autor Javier Almenara Herrera
- * @autor Omar Suárez Doro
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
  * @brief Model of Project
@@ -14,12 +14,15 @@
 
 import { Document, Schema, model } from 'mongoose';
 
+/**
+ * Enum of roles
+ */
 export enum Role {
-  DEVELOPER,
-  PRODUCT_OWNER,
-  SCRUM_MASTER,
-  ADMIN,
-  OWNER,
+  DEVELOPER = 'developer',
+  PRODUCT_OWNER = 'product_owner',
+  SCRUM_MASTER = 'scrum_master',
+  ADMIN = 'admin',
+  OWNER = 'owner',
 }
 
 /**
@@ -37,25 +40,10 @@ export type Sprint = {
  * Type of users
  */
 export type Users = {
-  _id: any;
   user: Schema.Types.ObjectId;
   role: Role;
-  productivity: number;
 };
 
-export type projectSettings = {
-  minimalRoleToUpdateUsers: Role;
-  minimalRoleToDeleteUsers: Role;
-  minimalRoleToCreateSprints: Role;
-  minimalRoleToDeleteSprints: Role;
-  minimalRoleToCreateTasks: Role;
-  minimalRoleToDeleteTasks: Role;
-  minimalRoleToEditTasks: Role;
-  minimalRoleToEditProject: Role;
-  minimalRoleToDeleteProject: Role;
-  minimalRoleToCreateUsers: Role;
-  isPublic: boolean;
-};
 
 /**
  * Interface of Project
@@ -68,7 +56,6 @@ export interface ProjectInterface extends Document {
   endDate: Date;
   users: Users[];
   sprints: Sprint[];
-  settings: projectSettings;
 }
 
 /**
@@ -121,24 +108,13 @@ const ProjectSchema = new Schema<ProjectInterface>({
           ref: 'Users',
         },
         role: {
-          type: Number,
-          enum: Object.values(Role),
-        },
-        tasks: [
-          {
-            type: Schema.Types.ObjectId,
-            ref: 'Tasks',
-          },
-        ],
-        productivity: {
-          type: Number,
-          min: 0,
-          max: 100,
+          type: String, 
+          enum: Object.values(Role)
         },
       },
     ],
     required: true,
-    _id: false, // Do not create an _id for this subdocument
+    _id: false, //  We don't need to create an _id for this subdocument
   },
   sprints: {
     type: [
@@ -171,55 +147,8 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     ],
     required: true,
-  },
-  settings: {
-    type: {
-      minimalRoleToUpdateUsers: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToDeleteUsers: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToCreateSprints: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToDeleteSprints: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToCreateTasks: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToDeleteTasks: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToEditTasks: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToEditProject: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToDeleteProject: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      minimalRoleToCreateUsers: {
-        type: Number,
-        enum: Object.values(Role),
-      },
-      isPublic: {
-        type: Boolean,
-        required: true,
-      },
-    },
-  },
+  }
 });
 
-export const Project = model<ProjectInterface>('Projects', ProjectSchema);
+const Project = model<ProjectInterface>('Projects', ProjectSchema);
+export default Project;

@@ -14,100 +14,190 @@
 import 'dotenv/config';
 import Express from 'express';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
-import { isAdmin } from './users.js';
-
-import { Project } from '../Models/Project.js';
+import MongoDB from '../Class/DBAdapter.js';
+import ProjectLogic from '../Class/ProjectLogic.js';
+import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
+import { Role } from '../Models/Project.js';
+import { getUserFromHeader, isAdminOfOrganization } from '../Utils/CRUD-util-functions.js';
+import { organizationLogic } from './organizations.js';
+import { userLogic } from './users.js';
 
 export const projectsRouter = Express.Router();
 
-async function executeQuery(req: Express.Request, isAdminUser: boolean) {
-  const query = req.query.name
-    ? { name: { $regex: req.query.name, $options: 'i' } }
-    : {};
-  let projects = null;
-  if (isAdminUser) return await Project.find(query).select('-id -__v');
-  if (req.query.searching)
-    return await Project.find(query)
-      .select('name organization description')
-      .limit(5);
+const dbAdapter = new MongoDB();
+export const projectLogic = new ProjectLogic(dbAdapter);
 
-  switch (req.params.toList) {
-    case 'sprints':
-      projects = await Project.find(query).select('sprints -id -__v');
-      break;
-    case 'users':
-      projects = await Project.find(query).select('users -id -__v');
-      break;
-    case 'settings':
-      projects = await Project.find(query).select('settings -id -__v');
-      break;
-    default:
-      // TODO: REMOVE THIS
-      projects = await Project.find(query).select('-id -__v');
-      break;
-  }
-  return projects;
-}
+
 /**
- * @brief This endpoint is used to search for projects
+ * @brief This endpoint is used to create a new project
  * @param req The request object
  * @param res The response object
  * @returns void
  */
-projectsRouter.get('/:tolist', jwtMiddleware, async (req, res) => {
+projectsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
-    let { name } = req.query;
-
-    const projects = await Project.find({
-      name: { $regex: new RegExp(('^' + name) as string, 'i') },
-    }).select('-sprints -users');
-    res.status(200).send(projects);
-  } catch (error) {
-    res.status(500).send('Failed to search projects!');
-  }
-});
-
-/**
- * @brief This endpoint is used to search for projects
- * @param req The request object
- * @param res The response object
- * @returns void
- */
-projectsRouter.get('/:toList', jwtMiddleware, async (req, res) => {
-  try {
-    const isAdminUser = await isAdmin(req);
-    const resultQuery = await executeQuery(req, isAdminUser);
-    if (isAdminUser) res.status(200).json(resultQuery);
-
-    resultQuery.forEach((project) => {
-      if (project.settings.isPublic) return;
-      if (project.users.some((user) => user.user === req.userId)) return;
-      if (req.query.searching) return;
-      res
-        .status(403)
-        .send('You do not have permission to access this project!');
+    // We need obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const { organization, name, description, startDate, endDate, users } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (organizationResult.length === 0) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    const organizationId = organizationResult._id;
+    // Check if the user is an Admin of the organization
+    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    if (!isAdmin) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      return;
+    }
+    // Obtain the users with their roles
+    const usersWithRoles = await Promise.all(users.map(async (userEntry: any) => {
+      const userResult = await userLogic.searchUser(userEntry.user) as any;
+      if (!userResult) {
+        throw new Error(`User ${userEntry.user} not found`);
+      }
+      return {
+        user: userResult._id,
+        role: userEntry.role
+      };
+    }));
+    // Add the user that creates the project as OWNER
+    usersWithRoles.push({
+      user: user._id,
+      role: Role.OWNER // Asignar el rol de OWNER
     });
+    // Create the project
+    const project_saved = await projectLogic.createProject(
+      organizationId,
+      name,
+      description,
+      startDate,
+      endDate,
+      usersWithRoles
+    );
 
-    res.status(200).json(resultQuery);
-  } catch (error) {
-    res.status(500).send('Failed to search projects!');
+    res.status(201).send(project_saved);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
   }
 });
 
 /**
- * @brief This endpoint is used to search for projects
+ * @brief This endpoint is used to search projects
  * @param req The request object
  * @param res The response object
  * @returns void
  */
-projectsRouter.get('/users', jwtMiddleware, async (req, res) => {
+projectsRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
-    let { name } = req.query;
-    const projects = await Project.find({
-      name: { $regex: new RegExp(('^' + name) as string, 'i') },
-    }).select('-name -description -startDate -endDate -sprints');
+    const { organization, name } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Check if the user is on the organization
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const isUserInOrganization = organizationResult.members.find((member: any) => member.user.toString() === user._id.toString());
+    if (!isUserInOrganization) {
+      res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
+      return;
+    }
+    const projects = await projectLogic.searchProjects(organizationResult._id.toString(), name);
     res.status(200).send(projects);
-  } catch (error) {
-    res.status(500).send('Failed to search projects!');
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to update a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.put('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { organization, name, description, startDate, endDate, users, sprints } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin of the organization
+    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    if (!isAdmin) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      return;
+    }
+    // Obtain the users with their roles
+    const usersWithRoles = await Promise.all(users.map(async (userEntry: any) => {
+      const userResult = await userLogic.searchUser(userEntry.user) as any;
+      if (!userResult) {
+        throw new Error(`User ${userEntry.user} not found`);
+      }
+      return {
+        user: userResult._id,
+        role: userEntry.role
+      };
+    }));
+    // Update the project
+    const projectUpdate = await projectLogic.updateProject(name, description, startDate, endDate, usersWithRoles, sprints);
+    res.status(200).send(projectUpdate);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to delete a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { organization, project } = req.body;
+    // We need search the organization
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin of the organization
+    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    if (!isAdmin) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      return;
+    }
+    // Delete the project
+    const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
+    res.status(200).send(projectDelete);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
   }
 });

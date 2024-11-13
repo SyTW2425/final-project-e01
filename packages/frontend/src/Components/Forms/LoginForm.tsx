@@ -34,7 +34,7 @@ const handleLogin = async (email: string, password: string) => {
   });
   if (response.status < 200 || response.status >= 400) throw new Error('Failed to login');
   const data = await response.json();
-  localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
+  localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
   window.location.href = '/';
 }
 
