@@ -21,12 +21,12 @@ import { databaseAdapter } from '../types/APITypes';
  * @implements databaseAdapter
  */
 export default class MongoDB implements databaseAdapter {
-  async findOne(model : Model<any>, query : any, filter : string = '') : Promise<any> {
-    return await model.findOne(query).select(filter);
+  async findOne(model : Model<any>, query : any, filter : object = {}) : Promise<any> {
+    return await model.findOne(query, filter);
   }
   
-  async find(model : Model<any>, query : any, filter : string = '') : Promise<any> {
-    return await model.find(query).select(filter);
+  async find(model : Model<any>, query : any, filter : object = {}) : Promise<any> {
+    return await model.find(query, filter);
   }
 
   async create(model : Model<any>, data : any) : Promise<any> {

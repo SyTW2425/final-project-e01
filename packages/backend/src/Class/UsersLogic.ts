@@ -35,7 +35,7 @@ export default class UserLogic implements UsersAPI {
 
   async searchUsers(username : string | null, email : string | null) : Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(username, email);
-    let users = await this.dbAdapter.find(User, query, '-password -_id -__v');
+    let users = await this.dbAdapter.find(User, query, {password: 0, _id:0, __v: 0});
     return createResponseFormat(false, users);
   }
 
@@ -51,7 +51,7 @@ export default class UserLogic implements UsersAPI {
   
   async loginUser(email : string, password : string) : Promise<APIResponseFormat> {
     const query = { email };
-    const user = await this.dbAdapter.findOne(User, query, '');
+    const user = await this.dbAdapter.findOne(User, query, {});
     if (!user) throw new Error('User not found');
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new Error('Authentication failed by password');
@@ -68,7 +68,7 @@ export default class UserLogic implements UsersAPI {
 
   async updateUser(email : string, username : string | null, password : string | null, role : string | null, userID : any) : Promise<APIResponseFormat>{
     const isAdminUser = await this.isAdmin(userID);
-    const modifierUser = await this.dbAdapter.find(User, { _id: userID }, '');
+    const modifierUser = await this.dbAdapter.find(User, { _id: userID }, {});
     if (!modifierUser || (modifierUser.length === 0)) throw new Error('User not found');
 
     const isModifyingItself = modifierUser.email === email;
@@ -91,18 +91,18 @@ export default class UserLogic implements UsersAPI {
   }
   
   public async isAdmin(userId : any): Promise<boolean> {
-    const user = await this.dbAdapter.findOne(User, { _id: userId }, '');
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, {});
     if (!user) return false;
     return user?.role === Role.Admin;
   }
 
   public async searchUserById(userId : any) : Promise<APIResponseFormat> {
-    const user = await this.dbAdapter.findOne(User, { _id: userId }, '');
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, {});
     return user;
   }
 
   public async searchUser(name : string) : Promise<APIResponseFormat> {
-    const user = await this.dbAdapter.findOne(User, { username: name }, '');
+    const user = await this.dbAdapter.findOne(User, { username: name }, {});
     return user;
   }
 

@@ -30,7 +30,7 @@ export default class ProjectLogic implements ProjectsAPI {
 
   async searchProjects(orgID: string, projectName: string): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(orgID, projectName);
-    let projects = await this.dbAdapter.find(Project, query, '-_id -__v');
+    let projects = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0});
     return createResponseFormat(false, projects);
   }
 
@@ -47,12 +47,12 @@ export default class ProjectLogic implements ProjectsAPI {
   }
 
   async searchProjectByName(orgID: string, projectName: string) : Promise<any> {
-    return this.dbAdapter.findOne(Project, this.buildSearchQuery(orgID, projectName), '');
+    return this.dbAdapter.findOne(Project, this.buildSearchQuery(orgID, projectName), {});
   }
 
   public async checkifUserIsOnProject(organizationID: string, projectName: string, userID: string): Promise<boolean> {
     const query = this.buildSearchQuery(organizationID, projectName);
-    const project = await this.dbAdapter.find(Project, query, '-_id -__v');
+    const project = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0});
     const users = project[0].users;
     for (let i = 0; i < users.length; i++) {
       if (users[i].user == userID) {

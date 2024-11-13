@@ -14,29 +14,25 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface UserState {
-  name: string;
-  age: number;
+
+interface SessionState {
+  token: string;
 }
 
-const initialState: UserState = {
-  name: '',
-  age: 0,
+const initialState: SessionState = {
+  token : ''
 };
 
-const userSlice = createSlice({
-  name: 'user',
+
+const sessionSlice = createSlice({
+  name: 'session',
   initialState,
   reducers: {
-    setName: (state, action: PayloadAction<string>) => {
-      state.name = action.payload;
-    },
-    setAge: (state, action: PayloadAction<number>) => {
-      state.age = action.payload;
+    setSession: (state, action: PayloadAction<SessionState>) => {
+      state = action.payload;
     },
   },
 });
 
-export const { setName, setAge } = userSlice.actions;
-
-export default userSlice.reducer;
+export const { setSession } = sessionSlice.actions;
+export default sessionSlice.reducer;

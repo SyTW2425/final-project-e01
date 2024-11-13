@@ -32,7 +32,7 @@ export default class TasksLogic implements TasksAPI {
 
   async searchTasks(name: string | null, projectID: string, organizationID: string): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(name, projectID, organizationID);
-    let tasks = await this.dbAdapter.find(Task, query, '-_id -__v');
+    let tasks = await this.dbAdapter.find(Task, query, {_id: 0, __v: 0});
     return createResponseFormat(false, tasks);
   }
 
@@ -59,7 +59,7 @@ export default class TasksLogic implements TasksAPI {
   }
 
   async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, state: string | null, project: string, assignedTo: string | null): Promise<APIResponseFormat> {
-    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project, Organization }, '');
+    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project, Organization }, {});
     if (!taskToUpdate) {
       throw new Error('Task not found');
     }

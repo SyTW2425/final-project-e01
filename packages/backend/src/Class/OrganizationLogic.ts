@@ -30,7 +30,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
 
   async searchOrganizations(name: string | null) : Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(name);
-    let organizations = await this.dbAdapter.find(Organization, query, '-_id -__v -members -projects');
+    let organizations = await this.dbAdapter.find(Organization, query, {_id: 0, __v: 0, members: 0, projects: 0});
     return createResponseFormat(false, organizations);
   }
 
@@ -61,7 +61,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
   }
   
   public searchOrganizationByName(nameOrg: string) : Promise<any> {
-    return this.dbAdapter.findOne(Organization, { name: nameOrg }, '' );
+    return this.dbAdapter.findOne(Organization, { name: nameOrg }, {} );
   }
 
   private buildSearchQuery(name: string | null) : any {

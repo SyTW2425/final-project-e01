@@ -13,10 +13,12 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
+import sectionSlice from '../slices/sectionSlice';
 
 const store = configureStore({
-  reducer: {
   // We need to add slices here so that they can be used in our components
+  reducer: {
+    section: sectionSlice,
 
   },
 });
