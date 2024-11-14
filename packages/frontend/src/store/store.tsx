@@ -13,18 +13,20 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import sectionSlice from '../slices/sectionSlice';
+import sessionSlice from '../slices/sessionSlice';
+
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 const store = configureStore({
-  // We need to add slices here so that they can be used in our components
   reducer: {
-    section: sectionSlice,
-
+    session: sessionSlice,
   },
 });
 
-// We need to export the root state and dispatch types, so that we can use them in our components
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export default store;

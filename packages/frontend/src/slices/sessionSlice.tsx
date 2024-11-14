@@ -14,22 +14,23 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-
 interface SessionState {
   token: string;
+  userInfo: object | null;
 }
 
 const initialState: SessionState = {
-  token : ''
+  token: '',
+  userInfo: null,
 };
-
 
 const sessionSlice = createSlice({
   name: 'session',
   initialState,
   reducers: {
     setSession: (state, action: PayloadAction<SessionState>) => {
-      state = action.payload;
+      state.token = action.payload.token;
+      state.userInfo = action.payload.userInfo;
     },
   },
 });
