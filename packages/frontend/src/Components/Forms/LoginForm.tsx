@@ -68,7 +68,6 @@ const LoginForm: React.FC = () => {
       await handleLogin(email, password, dispatch);
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed");
     }
   };
 

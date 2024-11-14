@@ -17,10 +17,7 @@ import { RootState } from '../../store/store';
 import { useSelector } from 'react-redux';
 
 const MainContent: React.FC = () => {
-  const token = useSelector((state: RootState) => {
-    console.log(state.session.token);
-    return state.session.token
-  });
+  const token = useSelector((state: RootState) => state.session.token);
   return (
     <div className="flex-grow p-8">
       <h2 className="text-2xl font-semibold mb-4">Tus espacios de trabajo</h2>
