@@ -30,6 +30,7 @@ export interface UserDocumentInterface extends Document {
   password: string;
   email: string;
   role: Role;
+  img_path?: string;
   organizations: Schema.Types.ObjectId[];
 }
 
@@ -72,6 +73,10 @@ const UserSchema = new Schema<UserDocumentInterface>({
     type: String,
     enum: [Role.Admin, Role.User],
     default: Role.User,
+  },
+  img_path: {
+    type: String,
+    default: '/userImages/default.jpg',
   },
   organizations: [
     {

@@ -40,7 +40,7 @@ export interface ApplicationAdapter {
  */
 export interface UsersAPI {
   searchUsers(username : string | null, email : string | null) : Promise<APIResponseFormat>;
-  registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat>;
+  registerUser(username : string, email : string, password : string, image?: string) : Promise<APIResponseFormat>;
   loginUser(email : string, password : string) : Promise<APIResponseFormat>;
   deleteUser(userToDelete : string, userId : any) : Promise<APIResponseFormat>;
   updateUser(email : string, username : string | null, password : string | null, role : string | null, userId : any) : Promise<APIResponseFormat>;

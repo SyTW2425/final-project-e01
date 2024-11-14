@@ -15,6 +15,10 @@
 import Express from 'express';
 import UserLogic from '../Class/UsersLogic.js';
 import MongoDB from '../Class/DBAdapter.js';
+import multer from 'multer';
+import path from 'path';
+import bcrypt from 'bcrypt';
+import fs from 'fs';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 
@@ -23,6 +27,52 @@ export const usersRouter = Express.Router();
 // Initialize the logic
 const dbAdapter = new MongoDB();
 export const userLogic = new UserLogic(dbAdapter);
+
+
+
+// Establecer el directorio de destino para las imágenes
+const uploadDir = path.join(process.cwd(), 'userImages');
+
+// Verificar si el directorio existe, si no, crearlo
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });  // 'recursive' crea subdirectorios si no existen
+}
+
+const storage = multer.diskStorage({
+  // @ts-ignore: 'file' is declared but its value is never read
+  destination: (_, file, cb) => {
+    cb(null, uploadDir); 
+  },
+  filename: async (_, file, cb) => {
+    try {
+      const hash = await bcrypt.hash(Date.now().toString(), 10);
+      const filename = `${hash}${path.extname(file.originalname)}`;
+      cb(null, filename);
+    } catch {
+      cb(new Error('Error generating image filename'), '');
+    }
+  }
+});
+
+/**
+ * Multer configuration to accept only images
+ */
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB)
+    // @ts-ignore: 'file' is declared but its value is never read
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
+  }
+});
+
 
 /**
  * @brief This endpoint is used to search for users
@@ -43,7 +93,7 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
-});
+}); 
 
 /**
  * @brief This endpoint is used to register a new user
@@ -51,14 +101,16 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-usersRouter.post('/register', async (req, res) => {
+usersRouter.post('/register', upload.single('profilePic'), async (req, res) => {
   try {
-    let { username, email, password } = req.body;
+    const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      res.status(400).send(createResponseFormat(true, 'You must provide a username, email and password to register a user'));
+      res.status(400).send(createResponseFormat(true, 'You must provide a username, email, and password to register a user'));
       return;
     }
-    const response = await userLogic.registerUser(username, email, password);
+    // Image path if the user uploaded a profile picture
+    const profilePicPath = req.file ? `/userImages/${req.file.filename}` : undefined;
+    const response = await userLogic.registerUser(username, email, password, profilePicPath);
     res.status(201).send(response);
   } catch (error) {
     const errorParsed = error as Error;
