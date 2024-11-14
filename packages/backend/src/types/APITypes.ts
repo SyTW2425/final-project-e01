@@ -39,7 +39,7 @@ export interface ApplicationAdapter {
  * @description Users API
  */
 export interface UsersAPI {
-  searchUsers(username : string | null, email : string | null) : Promise<APIResponseFormat>;
+  searchUsers(username : string | null, email : string | null, page? : number) : Promise<APIResponseFormat>;
   registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat>;
   loginUser(email : string, password : string) : Promise<APIResponseFormat>;
   deleteUser(userToDelete : string, userId : any) : Promise<APIResponseFormat>;
@@ -86,11 +86,12 @@ export interface OrganizationsAPI {
 
 export interface databaseAdapter {
   findOne(model : Model<any>, query : any, filter : object) : Promise<any>;
-  find(model : Model<any>, query : any, filter : object) : Promise<any>
+  find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number) : Promise<any>;
   create : (model : Model<any>, data : any) => Promise<any>;
   updateOne : (model : Model<any>, query : any, data : any) => Promise<any>;
   updateMany: (model: Model<any>, query: any, data: any) => Promise<any>;
   deleteOne : (model : Model<any>, query : any) => Promise<any>;
   deleteMany : (model : Model<any>, query : any) => Promise<any>;
+  countDocuments : (model : Model<any>, query : any) => Promise<number>;
 }
 

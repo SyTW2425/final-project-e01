@@ -20,6 +20,7 @@ import { createResponseFormat } from "../Utils/CRUD-util-functions.js";
 import { APIResponseFormat, UsersAPI, databaseAdapter } from "../types/APITypes.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
+const LIMIT = 10;
 
 /** 
  * Class that contains the logic of the users
@@ -33,10 +34,21 @@ export default class UserLogic implements UsersAPI {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchUsers(username : string | null, email : string | null) : Promise<APIResponseFormat> {
-    const query = this.buildSearchQuery(username, email);
-    let users = await this.dbAdapter.find(User, query, {password: 0, _id:0, __v: 0});
-    return createResponseFormat(false, users);
+  async searchUsers(username : string | null, email : string | null, page : number = 1) : Promise<APIResponseFormat> {
+    try {
+      const limit = LIMIT;
+      const skip = (page - 1) * limit;
+      const query = this.buildSearchQuery(username, email);
+      const users = await this.dbAdapter.find(User, query, {password: 0, _id:0, __v: 0}, skip, limit);
+      const totalUsers = await this.dbAdapter.countDocuments(User, query);
+      const totalPages = Math.ceil(totalUsers / limit);
+      if (page > totalPages) {
+        return createResponseFormat(true, 'Page out of range');
+      }
+      return createResponseFormat(false, { users, totalPages });
+    } catch (error : unknown) {
+      return createResponseFormat(true, (error as Error).message);
+    }
   }
 
   async registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat> {

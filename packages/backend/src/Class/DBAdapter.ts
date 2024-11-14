@@ -14,7 +14,6 @@
 import { Model } from 'mongoose';
 import { databaseAdapter } from '../types/APITypes';
 
-
 /**
  * MongoDB
  * @brief Class that implements the database adapter
@@ -25,8 +24,12 @@ export default class MongoDB implements databaseAdapter {
     return await model.findOne(query, filter);
   }
   
-  async find(model : Model<any>, query : any, filter : object = {}) : Promise<any> {
-    return await model.find(query, filter);
+  async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0) : Promise<any> {
+    if (skip === 0 && limit === 0) {
+      return await model.find(query, filter);
+    } else {
+      return await model.find(query, filter).skip(skip).limit(limit);
+    }
   }
 
   async create(model : Model<any>, data : any) : Promise<any> {
@@ -47,5 +50,9 @@ export default class MongoDB implements databaseAdapter {
 
   async deleteMany(model : Model<any>, query : any) : Promise<any> {
     return await model.deleteMany(query);
+  }
+
+  async countDocuments(model: Model<any>, query: any): Promise<number> {
+    return await model.countDocuments(query);
   }
 }
