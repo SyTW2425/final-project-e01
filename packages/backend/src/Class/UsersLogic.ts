@@ -68,8 +68,7 @@ export default class UserLogic implements UsersAPI {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new Error('Authentication failed by password');
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h'});
-    /// We do not return the password
-    const userObject = { ...user.toObject() }; // Si estás usando Mongoose
+    const userObject = { ...user.toObject() };
     delete userObject.password;
     delete userObject._id;
     delete userObject.__v;
