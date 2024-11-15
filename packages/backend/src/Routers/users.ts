@@ -28,14 +28,12 @@ export const usersRouter = Express.Router();
 const dbAdapter = new MongoDB();
 export const userLogic = new UserLogic(dbAdapter);
 
-
-
-// Establecer el directorio de destino para las imágenes
+// Path to store the user images
 const uploadDir = path.join(process.cwd(), 'public/userImages');
 
-// Verificar si el directorio existe, si no, crearlo
+// Create the directory if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });  // 'recursive' crea subdirectorios si no existen
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
