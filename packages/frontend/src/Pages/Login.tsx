@@ -18,7 +18,7 @@ import LoginForm from '../Components/Forms/LoginForm';
 const LoginPage : React.FC = () => {
   return (
     <>
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-blue-700">
       <LoginForm />
     </div>
     </>
