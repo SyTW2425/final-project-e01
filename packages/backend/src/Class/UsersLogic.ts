@@ -40,7 +40,6 @@ export default class UserLogic implements UsersAPI {
   }
 
   async registerUser(username : string, email : string, password : string, profilePicPath?: string) : Promise<APIResponseFormat> {
-    
     let user_saved = await this.dbAdapter.create(User, {
       username,
       email,
@@ -60,6 +59,7 @@ export default class UserLogic implements UsersAPI {
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h'});
     return createResponseFormat(false, { token });
   }
+
 
   async deleteUser(userToDelete : string, userID : any) : Promise<APIResponseFormat> {
     const isAdminUser = await this.isAdmin(userID);

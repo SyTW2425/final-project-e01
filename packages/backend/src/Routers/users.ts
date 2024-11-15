@@ -31,7 +31,7 @@ export const userLogic = new UserLogic(dbAdapter);
 
 
 // Establecer el directorio de destino para las imágenes
-const uploadDir = path.join(process.cwd(), 'userImages');
+const uploadDir = path.join(process.cwd(), 'public/userImages');
 
 // Verificar si el directorio existe, si no, crearlo
 if (!fs.existsSync(uploadDir)) {
@@ -40,9 +40,7 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   // @ts-ignore: 'file' is declared but its value is never read
-  destination: (_, file, cb) => {
-    cb(null, uploadDir); 
-  },
+  destination: (_, file, cb) => cb(null, uploadDir),
   filename: async (_, file, cb) => {
     try {
       const hash = await bcrypt.hash(Date.now().toString(), 10);
@@ -65,8 +63,9 @@ const upload = multer({
     const fileTypes = /jpeg|jpg|png/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
-
+    
     if (mimetype && extname) {
+      console.log('File accepted');
       return cb(null, true);
     }
     cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
@@ -95,6 +94,7 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 }); 
 
+
 /**
  * @brief This endpoint is used to register a new user
  * @param req The request object
@@ -109,7 +109,7 @@ usersRouter.post('/register', upload.single('profilePic'), async (req, res) => {
       return;
     }
     // Image path if the user uploaded a profile picture
-    const profilePicPath = req.file ? `/userImages/${req.file.filename}` : undefined;
+    const profilePicPath = req.file ? req.file.filename : undefined;
     const response = await userLogic.registerUser(username, email, password, profilePicPath);
     res.status(201).send(response);
   } catch (error) {
@@ -148,7 +148,7 @@ usersRouter.post('/login', async (req, res) => {
 usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
   try {
     const response = await userLogic.deleteUser(req.body.email, req.userId);
-    res.status(200).send(response);
+    res.status(200).send(createResponseFormat(false, response));
   } catch (error) {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));
@@ -169,7 +169,7 @@ usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await userLogic.updateUser(email, username ?? null, password ?? null, role ?? null, req.userId);
-    res.status(200).send(response);
+    res.status(200).send(createResponseFormat(false, response));
   } catch (error) {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));

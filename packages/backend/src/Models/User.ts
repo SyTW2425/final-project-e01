@@ -76,7 +76,7 @@ const UserSchema = new Schema<UserDocumentInterface>({
   },
   img_path: {
     type: String,
-    default: '/userImages/default.jpg',
+    default: 'default.png',
   },
   organizations: [
     {

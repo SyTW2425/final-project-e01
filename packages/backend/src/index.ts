@@ -22,14 +22,14 @@ import { projectsRouter } from './Routers/projects.js';
 import { organizationsRouter } from './Routers/organizations.js';
 
 const PORT = process.env.PORT || 3000;
-const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/test';
+const MONGODB_URL = process.env.MONGODB_URL;
 
 /**
  * Function to start the database connection
  * @returns void
- */
+ */ 
 function startDB(): void {
-  connect(MONGODB_URL)
+  connect(MONGODB_URL!)
     .then(() => {
       console.log(chalk.green('[Server_startdb] Connected to the database'));
     })
@@ -48,6 +48,7 @@ export const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/userImg', express.static('public/userImages'));
 app.use('/user', usersRouter);
 app.use('/task', tasksRouter);
 app.use('/project', projectsRouter);
