@@ -20,19 +20,32 @@ const BACKEND_REGISTER_URL = 'http://localhost:3000/user/register';
 export const LOCAL_STORAGE_NAME = 'token';
 const BACKEND_LOGIN_URL = 'http://localhost:3000/user/login';
 
-const handleRegister = async (email: string, username: string, password: string, passwordConfirmation: string) => {
+const handleRegister = async (
+  email: string,
+  username: string,
+  password: string,
+  passwordConfirmation: string,
+  profilePic: File | null // Nuevo parámetro para la imagen de perfil
+) => {
   if (password !== passwordConfirmation) {
     console.error('Passwords do not match');
     return;
   }
-  console.log(BACKEND_REGISTER_URL)
-  console.log(email)
+
+  // Crear un FormData para enviar los datos y el archivo
+  const formData = new FormData();
+  formData.append('email', email);
+  formData.append('username', username);
+  formData.append('password', password);
+
+  if (profilePic) {
+    formData.append('profilePic', profilePic); // Añadir el archivo si está presente
+  }
+
+  // Enviar el formulario al backend
   const response_register = await fetch(BACKEND_REGISTER_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, username, password }),
+    body: formData, // Cambiar a formData
   });
   if (response_register.ok) {
     const response_login = await fetch(BACKEND_LOGIN_URL, {
@@ -44,7 +57,6 @@ const handleRegister = async (email: string, username: string, password: string,
     });
     if (response_login.ok) {
       const data = await response_login.json();
-      console.log(data);
       localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
       window.location.href = '/';
     } else {
@@ -63,10 +75,11 @@ const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
+  const [profilePic, setProfilePic] = useState<File | null>(null);
 
   const handleSubmit = ( e: React.FormEvent<HTMLFormElement>) =>  {
     e.preventDefault();
-    handleRegister(email, username, password, passwordConfirmation);
+    handleRegister(email, username, password, passwordConfirmation, profilePic);
   }
 
   return (
@@ -122,6 +135,16 @@ const RegisterForm: React.FC = () => {
           onChange={e => setPasswordConfirmation(e.target.value)}
           className="w-full px-3 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Confirm your password"
+        />
+
+        <label htmlFor="profilePic" className="block text-gray-700 text-sm font-bold mb-2">Profile Picture:</label>
+        <input
+          type="file"
+          id="profilePic"
+          name="profilePic"
+          accept="image/*"
+          onChange={e => setProfilePic(e.target.files ? e.target.files[0] : null)}
+          className="w-full px-3 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="mb-4 text-center">
           Do you have an account already? {' '}
