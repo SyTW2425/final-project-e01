@@ -84,7 +84,11 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
       res.status(400).send(createResponseFormat(true, 'You must provide a username or email to search for users'));
       return;
     }
-    let response = await userLogic.searchUsers(username as string, email as string, parseInt(page as string));
+    let pageSelected: number = parseInt(page as string);
+    if (isNaN(pageSelected) || pageSelected < 1) {
+      pageSelected = 1;
+    }
+    let response = await userLogic.searchUsers(username as string, email as string, pageSelected);
     if (response.error) {
       res.status(400).send(response);
       return;

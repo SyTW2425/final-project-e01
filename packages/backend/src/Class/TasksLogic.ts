@@ -17,6 +17,7 @@ import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, TasksAPI, databaseAdapter } from '../types/APITypes.js';
 import Task from '../Models/Task.js';
 import Organization from '../Models/Organization.js';
+import { LIMIT } from './DBAdapter.js';
 
 /**
  * Class that contains the logic of the tasks
@@ -30,10 +31,17 @@ export default class TasksLogic implements TasksAPI {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchTasks(name: string | null, projectID: string, organizationID: string): Promise<APIResponseFormat> {
+  async searchTasks(name: string | null, projectID: string, organizationID: string, page: number = 1): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(name, projectID, organizationID);
-    let tasks = await this.dbAdapter.find(Task, query, {_id: 0, __v: 0});
-    return createResponseFormat(false, tasks);
+    const limit = LIMIT;
+    const skip = (page - 1) * limit;
+    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, skip, limit);
+    const totalTasks = await this.dbAdapter.countDocuments(Task, query);
+    const totalPages = Math.ceil(totalTasks / limit);
+    if (page > totalPages) {
+      return createResponseFormat(true, 'Page out of range');
+    }
+    return createResponseFormat(false, { tasks, totalPages });
   }
 
   async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string, organization: string) : Promise<APIResponseFormat> {
@@ -79,10 +87,13 @@ export default class TasksLogic implements TasksAPI {
   }
 
   private buildSearchQuery(name: string | null, projectID: string, organizationID: string): any {
-    let query = {};
-    if (name) query = { ...query, name };
-    query = { ...query, project: projectID };
-    query = { ...query, organization: organizationID };
-    return query;
+    let query: { [key: string]: any } = {};
+    // We need an regex to search by name
+    if (name) {
+      query['name'] = { $regex: name, $options: 'i' };
+    }
+    query['project'] = projectID;
+    query['organization'] = organizationID;
+    return query; 
   }
 }

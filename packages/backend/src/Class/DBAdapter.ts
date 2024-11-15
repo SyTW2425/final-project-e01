@@ -14,6 +14,8 @@
 import { Model } from 'mongoose';
 import { databaseAdapter } from '../types/APITypes';
 
+export const LIMIT: number = 10;
+
 /**
  * MongoDB
  * @brief Class that implements the database adapter
