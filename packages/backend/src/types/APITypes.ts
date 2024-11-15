@@ -65,7 +65,7 @@ export interface TasksAPI {
  * @description Projects API
  */
 export interface ProjectsAPI {
-  searchProjects(nameOrg : string, nameProject : string) : Promise<APIResponseFormat>;
+  searchProjects(nameOrg : string, nameProject : string, page?: number) : Promise<APIResponseFormat>;
   createProject(organization : string, name : string, description : string, startDate : string, endDate : string, users : any) : Promise<APIResponseFormat>;
   deleteProject(nameOrg: string, projectToDelete : string) : Promise<APIResponseFormat>;
   updateProject(nameProject : string, description : string, startDate : string, endDate : string, users : string[], sprints : any) : Promise<APIResponseFormat>;

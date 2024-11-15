@@ -96,9 +96,9 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
  */
 projectsRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
-    const { organization, name } = req.body;
+    let { organization, name, page } = req.query;
     // We need search the organization
-    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    const organizationResult = await organizationLogic.searchOrganizationByName(organization as string);
     if (!organizationResult) {
       res.status(404).send(createResponseFormat(true, 'Organization not found'));
       return;
@@ -114,8 +114,18 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
       res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
       return;
     }
-    const projects = await projectLogic.searchProjects(organizationResult._id.toString(), name);
-    res.status(200).send(projects);
+    let pageSelected: number = parseInt(page as string);
+    if (isNaN(parseInt(page as string)) || parseInt(page as string) < 1) {
+      pageSelected = 1;
+    }
+    const response = await projectLogic.searchProjects(organizationResult._id.toString(), name as string, pageSelected);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.set('totalPages', response.result.totalPages);
+    response.result = response.result.projects;
+    res.status(200).send(response);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
   }

@@ -38,7 +38,11 @@ tasksRouter.get('/', jwtMiddleware, async (req, res) => {
       res.status(authResult.status).send(createResponseFormat(true, authResult.message));
       return;
     }
-    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), authResult.organizationId.toString(), parseInt(page as string));
+    let pageSelected: number = parseInt(page as string);
+    if (isNaN(pageSelected) || pageSelected < 1) {
+      pageSelected = 1;
+    }
+    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), authResult.organizationId.toString(), pageSelected);
     if (response.error) {
       res.status(404).send(response);
       return;
