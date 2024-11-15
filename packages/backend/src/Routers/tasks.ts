@@ -31,14 +31,20 @@ export const taskLogic = new TasksLogic(dbAdapter);
  */
 tasksRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
-    const { name, projectName, organizationName } = req.body;
-    if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
-    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+    const { name, projectName, organizationName, page } = req.query;
+    if (!validateRequiredFields(req.query, ['name', 'projectName', 'organizationName'], res)) return;
+    const authResult = await authenticateAndAuthorizeUser(req, projectName as string, organizationName as string);
     if (authResult.status !== 200) {
       res.status(authResult.status).send(createResponseFormat(true, authResult.message));
       return;
     }
-    const response = await taskLogic.searchTasks(name, authResult.projectId.toString(), authResult.organizationId.toString());
+    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), authResult.organizationId.toString(), parseInt(page as string));
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.set('totalPages', response.result.totalPages);
+    response.result = response.result.tasks;
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;

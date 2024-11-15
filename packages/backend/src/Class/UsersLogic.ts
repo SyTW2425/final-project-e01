@@ -18,9 +18,9 @@ import jwt from 'jsonwebtoken';
 import User, { Role } from "../Models/User.js";
 import { createResponseFormat } from "../Utils/CRUD-util-functions.js";
 import { APIResponseFormat, UsersAPI, databaseAdapter } from "../types/APITypes.js";
+import { LIMIT } from './DBAdapter.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
-const LIMIT = 10;
 
 /** 
  * Class that contains the logic of the users
