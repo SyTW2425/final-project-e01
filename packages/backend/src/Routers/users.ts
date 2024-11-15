@@ -41,14 +41,15 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.diskStorage({
   // @ts-ignore: 'file' is declared but its value is never read
   destination: (_, file, cb) => cb(null, uploadDir),
-  filename: async (_, file, cb) => {
-    try {
-      const hash = await bcrypt.hash(Date.now().toString(), 10);
+  filename: (_, file, cb) => {
+    bcrypt.hash(Date.now().toString(), 10, (err, hash) => {
+      if (err) {
+        return cb(new Error('Error generating image filename'), '');
+      }
+      
       const filename = `${hash}${path.extname(file.originalname)}`;
-      cb(null, filename);
-    } catch {
-      cb(new Error('Error generating image filename'), '');
-    }
+      cb(null, filename);  // Llama al callback con el nombre del archivo
+    });
   }
 });
 
@@ -65,7 +66,6 @@ const upload = multer({
     const mimetype = fileTypes.test(file.mimetype);
     
     if (mimetype && extname) {
-      console.log('File accepted');
       return cb(null, true);
     }
     cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
@@ -114,6 +114,7 @@ usersRouter.post('/register', upload.single('profilePic'), async (req, res) => {
     res.status(201).send(response);
   } catch (error) {
     const errorParsed = error as Error;
+    console.log(errorParsed);
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
