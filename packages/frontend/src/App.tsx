@@ -13,8 +13,8 @@
  */
 
 // Setting up Redux
-// import store from './store/store.tsx';
-// import { Provider } from 'react-redux';
+import store from './store/store.tsx';
+import { Provider } from 'react-redux';
 
 // Routing
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -30,7 +30,7 @@ import DashboardPage from './Pages/Dashboard';
 function App() {
   return (
     <>
-    {/* <Provider store={store}> */}
+    <Provider store={store}>
       <Router>
         <Routes>
           <Route path="/" Component={HomePage} />
@@ -40,7 +40,7 @@ function App() {
           <Route path="*" Component={HomePage} />
         </Routes>
       </Router>
-    {/* </Provider> */}
+    </Provider>
     </>
   )
 }

@@ -13,11 +13,18 @@
  */
 
 import React from 'react';
+import { RootState } from '../../store/store';
+import { useSelector } from 'react-redux';
 
 const MainContent: React.FC = () => {
+  const token = useSelector((state: RootState) => {
+    console.log(state.session.token);
+    return state.session.token
+  });
   return (
     <div className="flex-grow p-8">
       <h2 className="text-2xl font-semibold mb-4">Tus espacios de trabajo</h2>
+      <p className="mb-4 text-gray-600">Tu token es: {token}</p>
       <div className="bg-gray-200 p-6 rounded-lg">
         <h3 className="text-lg font-semibold">SYTW-2024/25</h3>
         <div className="mt-4">
@@ -40,3 +47,4 @@ const MainContent: React.FC = () => {
 };
 
 export default MainContent;
+
