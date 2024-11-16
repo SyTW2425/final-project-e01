@@ -59,7 +59,7 @@ const handleRegister = async (
     });
     if (response_login.ok) {
       const data = await response_login.json();
-      localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
+      localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
       dispatch(setSession({ token: data.token, userInfo: data.userInfo }));
       navigate('/dashboard', { replace: true });
     } else {
