@@ -13,7 +13,10 @@
  */
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { setSession } from '../../slices/sessionSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store/store';
 
 const BACKEND_REGISTER_URL = 'http://localhost:3000/user/register';
 
@@ -24,13 +27,12 @@ const handleRegister = async (
   email: string,
   username: string,
   password: string,
+  //@ts-ignore
   passwordConfirmation: string,
-  profilePic: File | null // Nuevo parámetro para la imagen de perfil
+  profilePic: File | null, 
+  dispatch: AppDispatch,
+  navigate: any
 ) => {
-  if (password !== passwordConfirmation) {
-    console.error('Passwords do not match');
-    return;
-  }
 
   // Crear un FormData para enviar los datos y el archivo
   const formData = new FormData();
@@ -57,8 +59,9 @@ const handleRegister = async (
     });
     if (response_login.ok) {
       const data = await response_login.json();
-      localStorage.setItem(LOCAL_STORAGE_NAME, data.token);
-      window.location.href = '/';
+      localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
+      dispatch(setSession({ token: data.token, userInfo: data.userInfo }));
+      navigate('/dashboard', { replace: true });
     } else {
       console.error('Failed to login');
     }
@@ -76,14 +79,34 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
   const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const validateInputs = () => {
+    if (!email.trim()) return 'Email is required.';
+    if (!/\S+@\S+\.\S+/.test(email)) return 'Invalid email format.';
+    if (!username.trim()) return 'Username is required.';
+    if (!password.trim()) return 'Password is required.';
+    if (password.length < 8) return 'Password must be at least 8 characters long.';
+    if (!passwordConfirmation.trim()) return 'Password confirmation is required.';
+    return null;
+  }
 
   const handleSubmit = ( e: React.FormEvent<HTMLFormElement>) =>  {
     e.preventDefault();
-    handleRegister(email, username, password, passwordConfirmation, profilePic);
+    setErrorMessage(null);
+
+    const validationError = validateInputs();
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+    handleRegister(email, username, password, passwordConfirmation, profilePic, dispatch, navigate);
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-blue-700">
       <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg">
         <div className="text-center mb-4">
           <img src="blank_logo.png" 
@@ -92,6 +115,8 @@ const RegisterForm: React.FC = () => {
           onClick={() => {window.location.href = '/'} }/>
         </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Register</h2>
+
+        {errorMessage && <p className="bg-red-300 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">{errorMessage}</p>}
         {/* Need to introduce username */}
         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Username:</label>
         <input
