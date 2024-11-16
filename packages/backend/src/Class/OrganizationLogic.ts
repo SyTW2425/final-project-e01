@@ -44,14 +44,13 @@ export default class OrganizationLogic implements OrganizationsAPI {
 
   async updateOrganization(nameOrg: string, members: any, newName: string | null) : Promise<APIResponseFormat> {
     const query = { name: nameOrg };
-    console.log(members);
-    let organization_updated;
+    let organizationToUpdate = await this.dbAdapter.findOne(Organization, query, {});
     if (newName && newName.length > 0) {
-      organization_updated = await this.dbAdapter.updateOne(Organization, query, { name: newName, members: members });
+      organizationToUpdate.name = newName;
     } else {
-      organization_updated = await this.dbAdapter.updateOne(Organization, query, { members: members });
+      organizationToUpdate.members = members;
     }
-    return createResponseFormat(false, organization_updated);
+    return createResponseFormat(false, organizationToUpdate);
   }
 
   async deleteOrganization(nameOrg: string) : Promise<APIResponseFormat> {
