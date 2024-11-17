@@ -93,6 +93,30 @@ describe('POST /task', () => {
   });
 });
 
+describe('POST /task', () => {
+  it('should not create a task with a user that does not exist', async () => {
+    const response = await request(app)
+      .post('/task')
+      .set('Authorization', `${token}`)
+      .send({
+        startDate: "2024-11-30T00:00:00Z",
+        endDate: "2024-12-15T00:00:00Z",
+        name: "Implementación de la interfaz de usuario",
+        description: "Tarea para desarrollar la interfaz de usuario en el proyecto",
+        priority: "high",
+        dependenciesTasks: [],
+        status: "in_progress",
+        comments: ["Asegurarse de seguir el diseño", "Revisar con el equipo de UX"],
+        users: ["nottest_user"],
+        projectName: "Nuevo_Proyecto_2",
+        organizationName: "OrganizationExample_2"
+      });
+
+    expect(response.status).to.equal(404);
+  });
+});
+
+
 describe('GET /task', () => {
 	it('should get the task successfully', async () => {
 		const response = await request(app)
@@ -106,6 +130,33 @@ describe('GET /task', () => {
 		expect(response.status).to.equal(200);
 		expect(response.body.result).to.be.an('array');
 	});
+});
+
+describe('GET /task', () => {
+  it('should not get the task because the user is not authenticated', async () => {
+    const response = await request(app)
+      .get('/task')
+      .query({
+        name: "Implementación de la interfaz de usuario",
+        projectName: "Nuevo_Proyecto_2",
+        organizationName: "OrganizationExample_2"
+      });
+    expect(response.status).to.equal(401);
+  });
+});
+
+describe('GET /task', () => {
+  it('should not get the task because the organization does not exists', async () => {
+    const response = await request(app)
+      .get('/task')
+      .set('Authorization', `${token}`)
+      .query({
+        name: "Implementación de la interfaz de usuario",
+        projectName: "Nuevo_Proyecto_2",
+        organizationName: "OrganizationExample_9"
+      });
+    expect(response.status).to.equal(404);
+  });
 });
 
 describe('PUT /task', () => {
@@ -141,6 +192,33 @@ describe('PUT /task', () => {
   });
 });
 
+describe('PUT /task', () => {
+  it('should not update the task because the user is not authenticated', async () => {
+    const taskName = "Implementación de la interfaz de usuario";
+    const updatedDescription = "Tarea actualizada para desarrollar la interfaz de usuario en el proyecto";
+    const updatedEndDate = "2024-12-16T00:00:00Z";
+    const updatedPriority = "low";
+    const updatedState = "done";
+    const projectName = "Nuevo_Proyecto_2";
+    const organizationName = "OrganizationExample_2";
+    const assignedTo = "test_user2"; 
+
+    const response = await request(app)
+      .put('/task') 
+      .send({
+        name: taskName, 
+        description: updatedDescription,
+        endDate: updatedEndDate, 
+        priority: updatedPriority, 
+        status: updatedState, 
+        projectName, 
+        organizationName,
+        assignedTo: assignedTo 
+      });
+    expect(response.status).to.equal(401);
+  });
+});
+
 describe('DELETE /task', () => {
 	it('should delete a task successfully', async () => {
 		const response = await request(app)
@@ -155,4 +233,46 @@ describe('DELETE /task', () => {
 		expect(response.status).to.equal(200);
 	});
 });
+
+describe('DELETE /task', () => {
+  it('should not delete the task because the user is not authenticated', async () => {
+    const response = await request(app)
+      .delete('/task')
+      .send({
+        name: "Implementación de la interfaz de usuario",
+        projectName: "Nuevo_Proyecto_2",
+        organizationName: "OrganizationExample_2"
+      });
+    expect(response.status).to.equal(401);
+  });
+});
+
+describe('DELETE /task', () => {
+  it('should not delete the task because the organization does not exists', async () => {
+    const response = await request(app)
+      .delete('/task')
+      .set('Authorization', `${token}`)
+      .send({
+        name: "Implementación de la interfaz de usuario",
+        projectName: "Nuevo_Proyecto_2",
+        organizationName: "OrganizationExample_9"
+      });
+    expect(response.status).to.equal(404);
+  });
+});
+
+describe('DELETE /task', () => {
+  it('should not delete because the prohect does not exists', async () => {
+    const response = await request(app)
+      .delete('/task')
+      .set('Authorization', `${token}`)
+      .send({
+        name: "Implementación de la interfaz de usuario",
+        projectName: "Nuevo_Proyecto_7",
+        organizationName: "OrganizationExample_2"
+      });
+    expect(response.status).to.equal(404);
+  });
+});
+
 
