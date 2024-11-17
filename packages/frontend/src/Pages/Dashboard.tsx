@@ -1,18 +1,4 @@
-/**
- * Proyecto Final: Aplicación gestora de proyectos
- * Asignatura: Sistemas y Tecnologías Web
- * Grado en Ingeniería Informática
- * Universidad de La Laguna
- *
- * @author Pablo Rodríguez de la Rosa
- * @author Javier Almenara Herrera
- * @author Omar Suárez Doro
- * @version 1.0
- * @date 28/10/2024
- * @brief Página de dashboard
- */
-
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
 import KanbanBoard from '../Components/Graphs/KanbanBoard';
@@ -56,21 +42,43 @@ const initialData = {
   columnOrder: ["column-1", "column-2"],
 };
 
-const DashboardPage : React.FC = () => {
+const DashboardPage: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <>
-    {localStorage.getItem('token') === null && window.location.replace('/login')}
-    <Navbar />
-    <div className="flex h-screen">
-      <div className="flex flex-col bg-gray-200">
-        <Sidebar />
+      {localStorage.getItem('token') === null && window.location.replace('/login')}
+      <Navbar onToggleSidebar={toggleSidebar} />
+      <div className="relative h-screen flex">
+        {/* Sidebar */}
+        <div
+          className={`fixed top-0 left-0 h-full bg-gray-200 shadow-lg z-40 transform transition-transform duration-300
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-[110%]'} 
+            md:relative md:translate-x-0`}
+          style={{ width: '250px' }}
+        >
+          <Sidebar />
+        </div>
+
+        {/* Overlay para dispositivos móviles */}
+        {isSidebarOpen && (
+          <div
+            onClick={toggleSidebar}
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          />
+        )}
+
+        {/* Contenido principal */}
+        <div className="flex-1 bg-gray-50 z-10">
+          <KanbanBoard initialData={initialData} />
+        </div>
       </div>
-      <div className="flex-1 bg-gray-50">
-        <KanbanBoard initialData={initialData} />
-      </div>
-  </div>
     </>
   );
-}
+};
 
 export default DashboardPage;

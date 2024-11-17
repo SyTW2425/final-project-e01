@@ -57,7 +57,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData }) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="grid grid-cols-2 gap-4 p-6 bg-gray-50 min-h-screen">
+      <div className="grid grid-cols-2 p-6 bg-gray-50 min-h-screen">
         {data.columnOrder.map((columnId) => {
           const column = data.columns[columnId];
           const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);

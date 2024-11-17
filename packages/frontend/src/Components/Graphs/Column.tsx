@@ -15,14 +15,14 @@ interface ColumnProps {
 
 const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
   return (
-    <div className="bg-white rounded-md shadow-md p-4">
-      <h3 className="text-lg font-bold mb-4">{column.title}</h3>
+    <div className="bg-white rounded-md shadow-md p-4 flex flex-col w-full md:w-80 lg:w-96">
+      <h3 className="text-lg font-bold mb-4 text-center md:text-left">{column.title}</h3>
       <Droppable droppableId={column.id}>
         {(provided) => (
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="space-y-4"
+            className="space-y-4 min-h-[100px]"
           >
             {tasks.map((task, index) => (
               <Task key={task.id} taskData={task} index={index} />
@@ -36,3 +36,4 @@ const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 };
 
 export default Column;
+  
