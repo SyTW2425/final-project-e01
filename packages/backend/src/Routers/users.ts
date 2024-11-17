@@ -122,7 +122,6 @@ usersRouter.post('/register', upload.single('profilePic'), async (req, res) => {
     res.status(201).send(response);
   } catch (error) {
     const errorParsed = error as Error;
-    console.log(errorParsed);
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
