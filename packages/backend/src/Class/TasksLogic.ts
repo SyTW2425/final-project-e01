@@ -16,8 +16,9 @@ import 'dotenv/config';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, TasksAPI, databaseAdapter } from '../types/APITypes.js';
 import Task from '../Models/Task.js';
-import Organization from '../Models/Organization.js';
 import { LIMIT } from './DBAdapter.js';
+import Organization from '../Models/Organization.js';
+import Project from '../Models/Project.js';
 
 /**
  * Class that contains the logic of the tasks
@@ -66,16 +67,18 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, task_saved); 
   }
 
-  async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, state: string | null, project: string, assignedTo: string | null): Promise<APIResponseFormat> {
-    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project, Organization }, {});
+  async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {
+    const org_id = await this.dbAdapter.findOne(Organization, { name: organization }, {});
+    const project_id = await this.dbAdapter.findOne(Project, { name: project, organization: org_id }, {});
+    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project: project_id, organization: org_id }, {});
     if (!taskToUpdate) {
       throw new Error('Task not found');
     }
     let obj: any = {};
     if (description) obj['description'] = description;
-    if (endDate) obj['endDate'] = endDate;
+    if (endDate) obj['endDate'] = new Date(endDate);
     if (priority) obj['priority'] = priority ;
-    if (state) obj['state'] = state;
+    if (status) obj['status'] = status;
     if (assignedTo) obj['assignedTo'] = assignedTo;
     const task = await this.dbAdapter.updateOne(Task, { name }, obj);
     return createResponseFormat(false, task);

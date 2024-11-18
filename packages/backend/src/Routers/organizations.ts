@@ -87,7 +87,8 @@ organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
  */
 organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
   try {
-    const { name, newName, members } = req.body;
+    const { newName, members } = req.body;
+    const { name } = req.query;
     const user = await getAuthenticatedUser(req, res);
     if (!user) return;
 

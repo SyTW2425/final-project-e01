@@ -119,14 +119,14 @@ tasksRouter.delete('/', jwtMiddleware, async (req, res) => {
  */
 tasksRouter.put('/', jwtMiddleware, async (req, res) => {
   try { 
-    const { name, description, deadline, priority, state, project, assignedTo, projectName, organizationName } = req.body;
+    const { name, description, endDate, priority, status, projectName, organizationName, assignedTo } = req.body;
     if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
     const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
     if (authResult.status !== 200) {
       res.status(authResult.status).send(createResponseFormat(true, authResult.message));
       return;
     }
-    const response = await taskLogic.updateTask(name, description, deadline, priority, state, project, assignedTo);
+    const response = await taskLogic.updateTask(name, description, endDate, priority, status, projectName, organizationName, assignedTo);
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
