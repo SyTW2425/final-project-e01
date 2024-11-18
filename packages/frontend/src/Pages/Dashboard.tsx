@@ -3,6 +3,7 @@ import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
 import { Routes, Route } from 'react-router-dom';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
+import GanttDiagramPage from './Subpages/GanttDiagramPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,9 +36,10 @@ const DashboardPage: React.FC = () => {
         )}
 
         {/* Contenido principal */}
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto overflow-x-scroll">
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
+            <Route path="gantt" Component={GanttDiagramPage}/>
             <Route path="*" Component={() => <h1 className='text-white'>Putada pibe</h1>}/>
           </Routes>
         </div>

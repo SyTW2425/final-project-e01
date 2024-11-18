@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 18/11/2024
+ * @brief Componente de columna para el tablero Kanban
+ */
+
 import React from "react";
 import { Droppable } from "@hello-pangea/dnd";
 import Task, { taskInfo } from "../Information/TaskCard";

@@ -42,6 +42,10 @@ const Sidebar: React.FC = () => {
           <SVGComponent className="w-6 h-6 align-middle inline-block ml-2 mr-2 mt-0 min-w-4" d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zm6 0H4v14h4V5zm2 0v14h4V5h-4zm6 0v14h4V5h-4z" fill="#000000" />
           Kanban Board
         </Link>
+        <Link to="/dashboard/gantt" className="block transition-all bg-blue-200 min-h-9  hover:text-white m-2 hover:translate-x-1 rounded hover:bg-blue-600">
+          <SVGComponent className="w-6 h-6 align-middle inline-block ml-2 mr-2 mt-0 min-w-4" d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zm6 0H4v14h4V5zm2 0v14h4V5h-4zm6 0v14h4V5h-4z" fill="#000000" />
+          GanttDiagram
+        </Link>
       </div>
       <nav className="space-y-4">
 
