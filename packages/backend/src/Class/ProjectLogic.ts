@@ -15,6 +15,7 @@
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, ProjectsAPI, databaseAdapter } from '../types/APITypes.js';
 import Project from '../Models/Project.js';
+import { LIMIT } from './DBAdapter.js';
 
 /**
  * Class that contains the logic of the projects
@@ -28,10 +29,21 @@ export default class ProjectLogic implements ProjectsAPI {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchProjects(orgID: string, projectName: string): Promise<APIResponseFormat> {
-    const query = this.buildSearchQuery(orgID, projectName);
-    let projects = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0});
-    return createResponseFormat(false, projects);
+  async searchProjects(orgID: string, projectName: string, page: number = 1): Promise<APIResponseFormat> {
+    try { 
+      const query = this.buildSearchQuery(orgID, projectName);
+      const limit = LIMIT;
+      const skip = (page - 1) * limit;
+      const projects = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0}, skip, limit);
+      const total = await this.dbAdapter.countDocuments(Project, query);
+      const totalPages = Math.ceil(total / limit);
+      if (page > totalPages) {
+        return createResponseFormat(true, 'Page out of range');
+      }
+      return createResponseFormat(false, { projects, totalPages });
+    } catch (error) {
+      return createResponseFormat(true, error);
+    }
   }
 
   async createProject(organization: string, nameProject: string, description: string, stardDate: string, endDate: string, users: any) : Promise<APIResponseFormat> {
@@ -87,7 +99,7 @@ export default class ProjectLogic implements ProjectsAPI {
       query.organization = orgID;
     }
     if (projectName) {
-      query.name = projectName;
+      query.name =  { $regex: projectName, $options: 'i' };
     }
     return query;
   }

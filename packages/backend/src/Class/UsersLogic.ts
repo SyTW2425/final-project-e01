@@ -18,9 +18,9 @@ import jwt from 'jsonwebtoken';
 import User, { Role } from "../Models/User.js";
 import { createResponseFormat } from "../Utils/CRUD-util-functions.js";
 import { APIResponseFormat, UsersAPI, databaseAdapter } from "../types/APITypes.js";
+import { LIMIT } from './DBAdapter.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
-const LIMIT = 10;
 
 /** 
  * Class that contains the logic of the users
@@ -51,12 +51,13 @@ export default class UserLogic implements UsersAPI {
     }
   }
 
-  async registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat> {
+  async registerUser(username : string, email : string, password : string, profilePicPath?: string) : Promise<APIResponseFormat> {
     let user_saved = await this.dbAdapter.create(User, {
       username,
       email,
       role: Role.User,
-      password: await bcrypt.hash(password, 10)
+      password: await bcrypt.hash(password, 10),
+      ...(profilePicPath && { img_path: profilePicPath })
     });
     return createResponseFormat(false, user_saved);    
   }
@@ -74,6 +75,7 @@ export default class UserLogic implements UsersAPI {
     delete userObject.__v;
     return createResponseFormat(false, { token, userObject });
   }
+
 
   async deleteUser(userToDelete : string, userID : any) : Promise<APIResponseFormat> {
     const isAdminUser = await this.isAdmin(userID);
