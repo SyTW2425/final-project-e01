@@ -12,6 +12,9 @@
  * @brief Componente principal de la aplicación.
  */
 
+import './App.css';
+
+
 // Setting up Redux
 import store from './store/store.tsx';
 import { Provider } from 'react-redux';
