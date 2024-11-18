@@ -171,6 +171,9 @@ projectsRouter.put('/', jwtMiddleware, async (req, res) => {
     }));
     // Update the project
     const projectUpdate = await projectLogic.updateProject(name, description, startDate, endDate, usersWithRoles, sprints);
+    if (!projectUpdate.result) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+    }
     res.status(200).send(projectUpdate);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
@@ -206,6 +209,10 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
     }
     // Delete the project
     const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
+    if (!projectDelete.result) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
     res.status(200).send(projectDelete);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));

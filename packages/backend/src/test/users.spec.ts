@@ -1,152 +1,142 @@
-// import { expect } from 'chai';
-// import request from 'supertest';
-// import sinon from 'sinon';
-// import { app } from '../index.js'; // Adjust path as needed
-// import bcrypt from 'bcrypt';
-// import { User, Role } from '../Models/User.js'; // Adjust path as needed
+import * as chai from 'chai';
+import chaiHttp from 'chai-http';
+import { app } from '../index.js'; // Importa tu aplicación Express principal
+import { describe, before, after } from 'mocha';
+import supertest from 'supertest';
 
-// // Initialize the Express app and apply middleware
+const { expect } = chai;
+chai.use(chaiHttp);
+const request = supertest(app);
 
-// describe('POST /user/register', () => {
-//   let saveStub: sinon.SinonStub;
+describe('Users API Endpoints', () => {
+  let token: string;
 
-//   beforeEach(() => {
-//     // Stub the `save` method for User model
-//     saveStub = sinon.stub(User.prototype, 'save');
-//   });
+  before(async () => {
+    const registerResponse = await request.post('/user/register')
+      .send({ username: 'testUser', email: 'test@example.com', password: 'Password123' });
+    expect(registerResponse.status).to.equal(201);
+    
+    const loginResponse = await request.post('/user/login')
+      .send({ email: 'test@example.com', password: 'Password123' });
+    expect(loginResponse.status).to.equal(200);
+    token = loginResponse.body.result.token;
+  });
 
-//   afterEach(() => {
-//     // Restore the original `save` method
-//     saveStub.restore();
-//   });
+  after(async () => {
+    // Limpia el usuario creado
+    await request.delete('/user/delete')
+      .set('Authorization', `${token}`)
+      .send({ email: 'test@example.com' });
+  });
 
-//   it('should register a new user and return a success message', async () => {
-//     const newUser = {
-//       username: 'testUser',
-//       email: 'test@example.com',
-//       password: 'password123',
-//     };
-//     saveStub.resolves(newUser); // Mock successful save operation
+  describe('GET /user', () => {
+    it('should return user details if username or email is provided', async () => {
+      const response = await request.get('/user')
+        .set('Authorization', `${token}`)
+        .query({ username: 'testUser', email: 'test@example.com' });
+      expect(response.status).to.equal(200);
+      expect(response.body.result).to.be.an('array');
+    });
 
-//     const res = await request(app).post('/user/register').send(newUser);
+    it('should return 400 if no username or email is provided', async () => {
+      const response = await request.get('/user')
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(400);
+      expect(response.body.result).to.equal('You must provide a username or email to search for users');
+    });
 
-//     expect(res.status).to.equal(201);
-//     expect(res.body.result).to.equal('User registered');
-//     expect(res.body.userInfo).to.include({
-//       username: newUser.username,
-//       email: newUser.email,
-//       role: Role.User, // Make sure this matches your enum or role definition
-//     });
-//   });
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request.get('/user')
+        .query({ username: 'testUser', email: 'test@example.com' });
+      expect(response.status).to.equal(401);
+    });
+  });
 
-//   it('should return a 500 error if a problem occurs', async () => {
-//     saveStub.rejects(new Error('Error saving user')); // Mock a failed save operation
+  describe('POST /user/register', () => {
+    it('should return 400 if required fields are missing', async () => {
+      const response = await request.post('/user/register')
+        .send({ username: 'testUser' });
 
-//     const res = await request(app).post('/user/register').send({
-//       username: 'testUser',
-//       email: 'test@example.com',
-//       password: 'password123',
-//     });
+      expect(response.status).to.equal(400);
+      expect(response.body.result).to.equal('You must provide a username, email, and password to register a user');
+    });
 
-//     expect(res.status).to.equal(500);
-//     expect(res.text).to.contain('Error:');
-//   });
-// });
+    it('should return 500 if email is invalid', async () => {
+      const response = await request.post('/user/register')
+        .send({ username: 'testUser', email: 'test@example', password: 'Password123' });
 
-// describe('POST /user/login', () => {
-//   let findOneStub: sinon.SinonStub;
-//   let compareSyncStub: sinon.SinonStub;
+      expect(response.status).to.equal(500);
+    });
 
-//   beforeEach(() => {
-//     // Stub para el método `findOne` de User (simulando búsqueda en base de datos)
-//     findOneStub = sinon.stub(User, 'findOne');
-//     // Stub para la comparación de contraseñas (simulando bcrypt.compareSync)
-//     compareSyncStub = sinon.stub(bcrypt, 'compareSync');
-//   });
+    it('should return 500 if password is invalid', async () => {
+      const response = await request.post('/user/register')
+        .send({ username: 'testUser', email: 'test@example.com', password: 'a' });
+      
+      expect(response.status).to.equal(500);
+    });
+  });
 
-//   afterEach(() => {
-//     // Restauramos los métodos originales después de cada prueba
-//     findOneStub.restore();
-//     compareSyncStub.restore();
-//   });
+  describe('POST /user/login', () => {
+    it('should login a user with correct credentials', async () => {
+      const response = await request.post('/user/login')
+        .send({ email: 'test@example.com', password: 'Password123' });
 
-//   it('should login a user and return a success message with a token', async () => {
-//     const user = {
-//       _id: '12345',
-//       username: 'testUser',
-//       email: 'test@example.com',
-//       password: bcrypt.hashSync('password123', 10),
-//     };
+      expect(response.status).to.equal(200);
+      expect(response.body.result).to.have.property('token');
+    });
 
-//     // Stub of `findOne` to simulate that the user exists in the database
-//     findOneStub.resolves(user);
-//     // stub for `compareSync` to simulate a successful password comparison
-//     compareSyncStub.returns(true);
+    it('should return 400 if required fields are missing', async () => {
+      const response = await request.post('/user/login')
+        .send({ email: 'test@example.com' });
 
-//     const loginData = {
-//       username: 'testUser',
-//       password: 'password123',
-//     };
+      expect(response.status).to.equal(400);
+      expect(response.body.result).to.equal('You must provide an email and password to login');
+    });
 
-//     const res = await request(app).post('/user/login').send(loginData);
+    it('should return 500 if password is incorrect', async () => {
+      const response = await request.post('/user/login')
+        .send({ email: 'test@example.com', password: 'Password' });
+      
+      expect(response.status).to.equal(500);
+    });
+  });
 
-//     expect(res.status).to.equal(201);
-//     expect(res.body.result).to.equal('Authentication successful');
-//     expect(res.body).to.have.property('token');
-//     expect(res.body.token).to.be.a('string');
-//   });
+  describe('DELETE /user/delete', () => {
+    it('should delete a user with valid token and email', async () => {
+      const response = await request.delete('/user/delete')
+        .set('Authorization', `${token}`)
+        .send({ email: 'test@example.com' });
 
-//   it('should return a 404 error if user is not found', async () => {
-//     // Stub for `findOne` to simulate that the user does not exist in the database
-//     findOneStub.resolves(null);
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+    });
+  });
 
-//     const loginData = {
-//       username: 'nonExistentUser',
-//       password: 'password123',
-//     };
+  describe('PATCH /user/update', () => {
+    it('should not update a user beacaue the user is not admin', async () => {
+      const response = await request.patch('/user/update')
+        .set('Authorization', `${token}`)
+        .send({ email: 'testUser2@example.com', username: 'updatedUser' });
+        
+      expect(response.status).to.equal(500);
+      expect(response.body.error).to.equal(true);
+    });
 
-//     const res = await request(app).post('/user/login').send(loginData);
+    it('should return 400 if email is missing', async () => {
+      const response = await request.patch('/user/update')
+        .set('Authorization', `${token}`)
+        .send({ username: 'updatedUser' });
 
-//     expect(res.status).to.equal(404);
-//     expect(res.body.result).to.equal('Authentication failed by user');
-//   });
+      expect(response.status).to.equal(400);
+      expect(response.body.result).to.equal('You must provide an email to update a user');
+    });
 
-//   it('should return a 404 error if password does not match', async () => {
-//     const user = {
-//       _id: '12345',
-//       username: 'testUser',
-//       email: 'test@example.com',
-//       password: bcrypt.hashSync('password123', 10),
-//     };
+    it('should return 500 if email is invalid', async () => {
+      const response = await request.patch('/user/update')
+        .set('Authorization', `${token}`)
+        .send({ email: 'test@example', username: 'updatedUser' });
 
-//     // Stub for `findOne` to simulate that the user exists in the database
-//     findOneStub.resolves(user);
-//     // Stub for `compareSync` to simulate a failed password comparison
-//     compareSyncStub.returns(false);
-
-//     const loginData = {
-//       username: 'testUser',
-//       password: 'wrongPassword',
-//     };
-
-//     const res = await request(app).post('/user/login').send(loginData);
-
-//     expect(res.status).to.equal(404);
-//     expect(res.body.result).to.equal('Authentication failed by user');
-//   });
-
-//   it('should return a 505 error if there is a server error', async () => {
-//     // Simulates a server error when searching for the user
-//     findOneStub.rejects(new Error('Server error'));
-
-//     const loginData = {
-//       username: 'testUser',
-//       password: 'password123',
-//     };
-
-//     const res = await request(app).post('/user/login').send(loginData);
-
-//     expect(res.status).to.equal(505);
-//     expect(res.body.result).to.equal('Authentication failed by server');
-//   });
-// });
+      expect(response.status).to.equal(500);
+    });
+  });
+});
