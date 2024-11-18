@@ -34,8 +34,7 @@ before(async () => {
 			password: password
 		});
 	expect(loginResponse.status).to.equal(200);
-  const data = loginResponse.body;
-	token = data.result.result.token;
+	token = loginResponse.body.result.token;
   const orgResponse = await request(app)
     .post('/organization/')
 		.set('Authorization', `${token}`)

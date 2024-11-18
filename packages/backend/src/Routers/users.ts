@@ -119,7 +119,7 @@ usersRouter.post('/register', upload.single('profilePic'), async (req, res) => {
     // Image path if the user uploaded a profile picture
     const profilePicPath = req.file ? req.file.filename : undefined;
     const response = await userLogic.registerUser(username, email, password, profilePicPath);
-    res.status(201).send(createResponseFormat(false, response));
+    res.status(201).send(response);
   } catch (error) {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));
@@ -140,7 +140,7 @@ usersRouter.post('/login', async (req, res) => {
       return;
     }
     const response = await userLogic.loginUser(email, password);
-    res.status(200).send(createResponseFormat(false, response));
+    res.status(200).send(response);
   } catch (error) {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));

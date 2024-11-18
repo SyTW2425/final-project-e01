@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import chaiHttp from 'chai-http';
 import { app } from '../index.js'; // Importa tu aplicación Express principal
-import { describe, before, after } from 'mocha';
+import { it, describe, before, after } from 'mocha';
 import supertest from 'supertest';
 
 const { expect } = chai;
