@@ -70,6 +70,17 @@ const upload = multer({
   }
 });
 
+const deleteImage = (imgPath: string) => {
+  if (imgPath !== "default.png") {
+    const imgPathToDelete = path.join(uploadDir, imgPath);
+    fs.unlink(imgPathToDelete, (err) => {
+      if (err) {
+        console.error(`Error deleting image: ${err}`);
+      }
+    });
+  }
+}
+
 
 /**
  * @brief This endpoint is used to search for users
@@ -155,6 +166,8 @@ usersRouter.post('/login', async (req, res) => {
  */
 usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
   try {
+    const user = await userLogic.searchUsers(null, req.body.email);
+    deleteImage(user.result.users[0].img_path);
     const response = await userLogic.deleteUser(req.body.email, req.userId);
     res.status(200).send(createResponseFormat(false, response));
   } catch (error) {
