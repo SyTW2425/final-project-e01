@@ -39,7 +39,7 @@ function App() {
           <Route path="/" Component={HomePage} />
           <Route path="/login" Component={LoginPage} />
           <Route path="/register" Component={RegisterPage} />
-          <Route path="/dashboard" Component={DashboardPage} />
+          <Route path="/dashboard/*" Component={DashboardPage} />
           <Route path="*" Component={HomePage} />
         </Routes>
       </Router>

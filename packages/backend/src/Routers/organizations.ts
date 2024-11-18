@@ -90,9 +90,12 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
     const { newName, members } = req.body;
     const { name } = req.query;
     const user = await getAuthenticatedUser(req, res);
-    if (!user) return;
+    if (!name || !user) {
+      res.status(403).json(createResponseFormat(true, 'Forbidden'));
+      return;
+    }
 
-    const organization = await organizationLogic.searchOrganizationByName(name) as any;
+    const organization = await organizationLogic.searchOrganizationByName(name as string) as any;
     if (!organization) {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
       return;
@@ -117,7 +120,7 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
       membersWithObjectIds.push({ user: user._id, role: 'admin' });
     }
 
-    const response = await organizationLogic.updateOrganization(name, membersWithObjectIds, newName);
+    const response = await organizationLogic.updateOrganization(name as string, membersWithObjectIds, newName);
     res.status(200).send(response);
   } catch (error) {
     res.status(500).send(createResponseFormat(true, 'Cannot update organization'));
