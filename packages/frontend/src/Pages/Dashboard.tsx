@@ -40,7 +40,8 @@ const DashboardPage: React.FC = () => {
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
-            <Route path="*" Component={() => <h1 className='text-white'>Putada pibe</h1>}/>
+            <Route path="*" Component={() => <div className="p-4 text-center text-gray-200 text-xl text-bold
+            ">🛠️ PAGE UNDER DEVELOPMENT 🛠️</div>} />
           </Routes>
         </div>
     
