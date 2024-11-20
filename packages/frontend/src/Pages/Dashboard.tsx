@@ -36,6 +36,7 @@ const DashboardPage: React.FC = () => {
         )}
 
         {/* Contenido principal */}
+
         <div className="flex-1 overflow-y-auto overflow-x-scroll">
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
