@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 18/11/2024
+ * @brief Componente de tarjeta de tarea para tablero kanban
+ */
+
 import React from "react";
 import { Draggable } from "@hello-pangea/dnd";
 
