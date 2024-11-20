@@ -3,7 +3,6 @@ import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
 import { Routes, Route } from 'react-router-dom';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
-import UserCard from '../Components/Information/UserCard';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,21 +10,6 @@ const DashboardPage: React.FC = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  const users = [
-    {
-      name: 'lamine',
-      email: 'lamine@gmail.com',
-      image: '$2b$10$6r0AN0TL4N2mclHvQrSTA.aFggpLlAucTwOVt9dibqcIigoluucwS.jpg',
-    },
-    {
-      name: 'pablo',
-      email: 'pablo@gmail.com',
-      image: '$2b$10$suR6yC6g7H9lUAUI0Ln9rufR.HKvhoFLBzVt3YdCUlidN7.ZuHwI..png',
-    },
-    // Puedes agregar más usuarios si lo deseas
-  ];
-
 
   return (
     <>
@@ -51,13 +35,6 @@ const DashboardPage: React.FC = () => {
         )}
 
         {/* Contenido principal */}
-        <div className="flex-1 p-10">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {users.map((user) => (
-              <UserCard key={user.name} userData={user} />
-            ))}
-          </div>
-        </div>
 
         <div className="flex-1">
           <Routes>
