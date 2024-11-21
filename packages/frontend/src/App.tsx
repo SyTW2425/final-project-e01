@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSession } from './slices/sessionSlice';
 
 // Routing
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 
 // Import Pages
 import HomePage from './Pages/Home';
