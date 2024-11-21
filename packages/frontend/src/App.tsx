@@ -13,39 +13,60 @@
  */
 
 import './App.css';
-
+import { useEffect } from 'react';
 
 // Setting up Redux
-import store from './store/store.tsx';
-import { Provider } from 'react-redux';
+import { RootState } from './store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSession } from './slices/sessionSlice';
 
 // Routing
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
-//  Import Pages
+// Import Pages
 import HomePage from './Pages/Home';
 import LoginPage from './Pages/Login';
 import RegisterPage from './Pages/Register';
 import DashboardPage from './Pages/Dashboard';
 
 
+// We need a custom hook in order to validate the session
+// in the case that user refreshes the page
+const useSessionValidation = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const userObject = useSelector((state: RootState) => state.session.userObject);
 
-function App() {
+  useEffect(() => {
+    if (localStorage.getItem('token') && !userObject) {
+      fetch(import.meta.env.VITE_BACKEND_URL + '/user/validate', {
+        method: 'GET',
+        headers: {
+          authorization: localStorage.getItem('token') || '',
+        },
+      })
+        .then((res) => res.json()).then((data) => {
+          if (data.result) dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result}));
+        })
+        .catch((_) => {
+          console.log('Error validating session');
+          navigate('/login', { replace: true })
+        });
+    }
+  }, [dispatch, userObject]);
+};
+
+const App: React.FC = () => {
+  useSessionValidation();
   return (
-    <>
-    <Provider store={store}>
-      <Router>
-        <Routes>
-          <Route path="/" Component={HomePage} />
-          <Route path="/login" Component={LoginPage} />
-          <Route path="/register" Component={RegisterPage} />
-          <Route path="/dashboard/*" Component={DashboardPage} />
-          <Route path="*" Component={HomePage} />
-        </Routes>
-      </Router>
-    </Provider>
-    </>
-  )
-}
+    <Routes>
+      <Route path="/" Component={HomePage} />
+      <Route path="/login" Component={LoginPage} />
+      <Route path="/register" Component={RegisterPage} />
+      <Route path="/dashboard/*" Component={DashboardPage} />
+      <Route path="*" Component={HomePage} />
+    </Routes>
+  );
+};
 
-export default App
+export default App;

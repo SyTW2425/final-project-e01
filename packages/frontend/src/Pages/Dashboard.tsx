@@ -7,14 +7,9 @@ import GanttDiagramPage from './Subpages/GanttDiagramPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   return (
     <>
-      {localStorage.getItem('token') === null && window.location.replace('/login')}
       <Navbar onToggleSidebar={toggleSidebar} />
       <div className="relative h-screen flex">
         {/* Sidebar */}
@@ -41,8 +36,7 @@ const DashboardPage: React.FC = () => {
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
-            <Route path="*" Component={() => <div className="p-4 text-center text-gray-200 text-xl text-bold
-            ">🛠️ PAGE UNDER DEVELOPMENT 🛠️</div>} />
+            <Route path="*" Component={() => <div className="p-4 text-center text-gray-200 text-xl text-bold">🛠️ PAGE UNDER DEVELOPMENT 🛠️</div>} />
           </Routes>
         </div>
     

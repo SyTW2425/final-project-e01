@@ -16,12 +16,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface SessionState {
   token: string;
-  userInfo: object | null;
+  userObject: object | null;
 }
 
 const initialState: SessionState = {
   token: '',
-  userInfo: null,
+  userObject: null,
 };
 
 const sessionSlice = createSlice({
@@ -30,7 +30,7 @@ const sessionSlice = createSlice({
   reducers: {
     setSession: (state, action: PayloadAction<SessionState>) => {
       state.token = action.payload.token;
-      state.userInfo = action.payload.userInfo;
+      state.userObject = action.payload.userObject;
     },
   },
 });

@@ -46,7 +46,7 @@ const storage = multer.diskStorage({
       }
       
       const filename = `${hash}${path.extname(file.originalname)}`;
-      cb(null, filename);  // Llama al callback con el nombre del archivo
+      cb(null, filename);
     });
   }
 });
@@ -56,7 +56,7 @@ const storage = multer.diskStorage({
  */
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB)
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
     // @ts-ignore: 'file' is declared but its value is never read
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png/;
@@ -113,6 +113,15 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 }); 
 
+usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
+  try {
+    const userObject = await userLogic.searchUserById(req.userId);
+    res.status(200).send(createResponseFormat(false, userObject)); 
+  } catch (error) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
 
 /**
  * @brief This endpoint is used to register a new user
@@ -157,6 +166,7 @@ usersRouter.post('/login', async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
+
 
 /**
  * @brief This endpoint is used to delete a user

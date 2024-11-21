@@ -28,9 +28,9 @@ export default class MongoDB implements databaseAdapter {
   
   async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0) : Promise<any> {
     if (skip === 0 && limit === 0) {
-      return await model.find(query, filter);
+      return await model.find(query, filter, { password: 0, __v: 0, _id: 0 });
     } else {
-      return await model.find(query, filter).skip(skip).limit(limit);
+      return await model.find(query, filter, { password: 0, __v: 0, _id: 0 }).skip(skip).limit(limit);
     }
   }
 

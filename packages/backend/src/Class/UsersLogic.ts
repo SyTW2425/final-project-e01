@@ -115,7 +115,7 @@ export default class UserLogic implements UsersAPI {
   }
 
   public async searchUserById(userId : any) : Promise<APIResponseFormat> {
-    const user = await this.dbAdapter.findOne(User, { _id: userId }, {});
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, {})
     return user;
   }
 

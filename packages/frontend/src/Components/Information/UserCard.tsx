@@ -12,7 +12,7 @@ interface UserCardProps {
 
 const UserCard: React.FC<UserCardProps> = ({ userData }) => {
     const { name, email, image } = userData;
-    const imageURL = image ? `http://localhost:3000/userImg/${image}` : 'http://localhost:3000/userImg/default.png';
+    const imageURL = import.meta.env.VITE_BACKEND_URL + '/userImg/' + (image ?? 'default.png');
     return (
       <div className="max-w-xs w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
         {/* Imagen */}
