@@ -36,7 +36,6 @@ const useSessionValidation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userObject = useSelector((state: RootState) => state.session.userObject);
-
   useEffect(() => {
     if (localStorage.getItem('token') && !userObject) {
       fetch(import.meta.env.VITE_BACKEND_URL + '/user/validate', {
@@ -49,7 +48,6 @@ const useSessionValidation = () => {
           if (data.result) dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result}));
         })
         .catch((_) => {
-          console.log('Error validating session');
           navigate('/login', { replace: true })
         });
     }
