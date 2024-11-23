@@ -68,13 +68,13 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
         }
       );
       const data: SearchResult[] = await response.json();
-      setResults(data);
+      console.log(data.length);
+      console.log(results[0]);
     } catch (error) {
       console.error("Error fetching search results:", error);
       setResults([]); // Limpiar resultados en caso de error
     }
   };
-
   // Función de búsqueda con debounce
   const debouncedFetchResults = useCallback(debounce((value: string) => fetchResults(value), 1000), []);
 
@@ -84,7 +84,6 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
     setSearch(value);
     debouncedFetchResults(value);
   };
-
   return (
     <div className="hidden md:flex flex-1 justify-center items-center">
       {SVGComponent({ className: 'w-6 h-6 mr-3', d: searchIcon })}
@@ -106,10 +105,10 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
           ))}
         </div>
       )}
-
+      
       {/* Mensaje si no hay resultados */}
       {results.length === 0 && search && (
-        <div className="mt-2 text-gray-500">No se encontraron resultados.</div>
+        <div className="mt-2 text-red-500">No se encontraron resultados.</div>
       )}
     </div>
   );
