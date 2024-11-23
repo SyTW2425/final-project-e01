@@ -16,7 +16,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import InfoSection from '../Components/Information/InfoSection';
 import NavbarHome from '../Components/NavBars/NavBarHome';
-
+import FooterHome from '../Components/Footer/FooterHome';
 
 const HomePage: React.FC = () => {
   return (
@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
         image="project-manager.png"
         position="right"
       />
-
+      <FooterHome />
   </>
   );
 }
