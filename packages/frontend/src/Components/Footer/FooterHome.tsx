@@ -15,32 +15,69 @@
 import React from 'react';
 
 /**
- * Footer component
+ * Component that renders the footer of the home page.
  */
 const FooterHome: React.FC = () => {
   return (
-    <footer className="bg-gray-800 text-white text-center py-6">
-      {/* Información de contacto */}
-      <div>
-        <p>Contacto: <a href="mailto:contacto@velia.com" className="text-blue-400 hover:underline">contacto@velia.com</a></p>
-        <p>Teléfono: <a href="tel:+1234567890" className="text-blue-400 hover:underline">+34 922 000 000</a></p>
+    <footer className="bg-gray-900 text-gray-300 py-16">
+      <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      {/* About Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">About Velia</h3>
+          <p className="text-base">
+            Velia is a project management platform that helps you organize, collaborate, and achieve your goals.
+          </p>
+        </div>
+        {/* Quick Links */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Quick Links</h3>
+          <ul className="space-y-2">
+            <li><a href="/" className="hover:underline">About Us</a></li>
+            <li><a href="/" className="hover:underline">FAQ</a></li>
+            <li><a href="/" className="hover:underline">Terms of Service</a></li>
+            <li><a href="/" className="hover:underline">Privacy Policy</a></li>
+          </ul>
+        </div>
+        {/* Contact Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Contact</h3>
+          <ul className="space-y-2">
+            <li>
+              <a href="mailto:contacto@velia.com" className="hover:underline">
+                contacto@velia.com
+              </a>
+            </li>
+            <li>
+              <a href="tel:+1234567890" className="hover:underline">
+                +34 922 10 10 10
+              </a>
+            </li>
+          </ul>
+        </div>
+        {/* Follow Us */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Follow Us</h3>
+          <ul className="space-y-2">
+            <li>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                Twitter
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                GitHub
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
-      {/* Navegación adicional */}
-      <div className="mt-4">
-        {/* Añadir espacios */}
-        <a href="/" className="text-blue-400 hover:underline">About Us </a> |
-        <a href="/" className="text-blue-400 hover:underline"> FAQ</a> | 
-        <a href="/" className="text-blue-400 hover:underline"> Terms of Service </a> | 
-        <a href="/" className="text-blue-400 hover:underline"> Privacy Policy </a>
-      </div>
-      {/* Redes sociales */}
-      <div className="mt-4">
-        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="mx-2 text-blue-400 hover:underline">LinkedIn</a>
-        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="mx-2 text-blue-400 hover:underline">Twitter</a>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="mx-2 text-blue-400 hover:underline">GitHub</a>
-      </div>
-      {/* Derechos reservados */}
-      <div className="mt-4">
+      {/* Copyright */}
+      <div className="text-center mt-8 pt-4">
         <p>&copy; {new Date().getFullYear()} Velia. All Rights Reserved.</p>
       </div>
     </footer>

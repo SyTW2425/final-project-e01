@@ -72,6 +72,7 @@ const HomePage: React.FC = () => {
         }
         image="project-manager.png"
         position="right"
+        className="pb-16"
       />
       <FooterHome />
   </>

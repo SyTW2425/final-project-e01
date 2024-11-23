@@ -6,6 +6,7 @@ import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+import FooterDashboard from '../Components/Footer/FooterDashboard';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +53,7 @@ const DashboardPage: React.FC = () => {
         </div>
     
       </div>
+      <FooterDashboard currentUser={currentUser} />
     </>
   );
 };
