@@ -36,10 +36,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         .catch((err) => console.error(err));
     } 
   }, [currentUser, imageSRC]);
-  
-
-  console.log(currentUser.organizations);
-  
+    
   return (
     <nav className="bg-blue-600 p-4">
       <div className="container mx-auto flex items-center justify-between">
