@@ -36,7 +36,6 @@ const useSessionValidation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userObject = useSelector((state: RootState) => state.session.userObject);
-
   useEffect(() => {
     if (localStorage.getItem('token') && !userObject) {
       fetch(import.meta.env.VITE_BACKEND_URL + '/user/validate', {

@@ -4,10 +4,13 @@ import Navbar from '../Components/NavBars/NavBarGeneral';
 import { Routes, Route } from 'react-router-dom';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const currentUser : any = useSelector((state: RootState) => state.session.userObject);
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
@@ -29,11 +32,21 @@ const DashboardPage: React.FC = () => {
           />
         )}
 
+        {/* Principal content */}
+
         <div className="flex-1 overflow-y-auto overflow-x-scroll">
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
-            <Route path="*" Component={() => <div className="p-4 text-center text-gray-200 text-xl text-bold">🛠️ PAGE UNDER DEVELOPMENT 🛠️</div>} />
+            <Route path="*" Component={() => {
+              return (
+              <>
+              <div className="p-4 text-center text-gray-200 text-5xl text-bold">
+                🛠️ PAGE UNDER DEVELOPMENT 🛠️
+              </div>
+              </>
+              );
+            }} />
           </Routes>
         </div>
     

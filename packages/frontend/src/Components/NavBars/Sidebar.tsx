@@ -22,7 +22,7 @@ const Sidebar: React.FC = () => {
   return (
     <div className="w-64 h-full min-h-full bg-gray-100 p-0 pt-2">
       <div className="flex items-center justify-center">
-        <h2 className="text-xl font-bold mt-5">Workspace</h2>
+        <h2 className="text-xl font-bold mt-5">My Workspace</h2>
       </div>
       <hr className='m-4'/>
       <div className=''>

@@ -32,22 +32,22 @@ export const userLogic = new UserLogic(dbAdapter);
 const uploadDir = path.join(process.cwd(), 'public/userImages');
 
 // Create the directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+(async () => {
+  try {
+    await fs.promises.mkdir(uploadDir, { recursive: true });
+  } catch (err) {
+    console.error("Error creating directory:", err);
+  }
+})();
 
 const storage = multer.diskStorage({
   // @ts-ignore: 'file' is declared but its value is never read
-  destination: (_, file, cb) => cb(null, uploadDir),
+  destination: uploadDir,
   filename: (_, file, cb) => {
-    bcrypt.hash(Date.now().toString(), 10, (err, hash) => {
-      if (err) {
-        return cb(new Error('Error generating image filename'), '');
-      }
-      
-      const filename = `${hash}${path.extname(file.originalname)}`;
-      cb(null, filename);
-    });
+    // Utilizando bcrypt.hashSync para obtener el hash de manera síncrona
+    const hash = bcrypt.hash(Date.now().toString(), 10);
+    const filename = `${hash}${path.extname(file.originalname)}`;
+    cb(null, filename);  // El callback se llama con el nombre del archivo
   }
 });
 
