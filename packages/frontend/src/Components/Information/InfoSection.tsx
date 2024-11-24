@@ -15,18 +15,22 @@
 import React from 'react';
 
 interface InfoSectionProps {
-  id: string
+  id: string;
   title: string;
   paragraphs: string[];
   image: string;
   position: 'left' | 'right';
+  className?: string; // Hacer className opcional
 }
 
-const InfoSection: React.FC<InfoSectionProps> = ({ id, title, paragraphs, image, position }) => {
+const InfoSection: React.FC<InfoSectionProps> = ({ id, title, paragraphs, image, position, className }) => {
   const isLeft = position === 'left';
   
   return (
-    <div id={id} className="pt-4 flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-700 to-blue-500 text-white px-6">
+    <div
+      id={id}
+      className={`pt-4 flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-700 to-blue-500 text-white px-6 ${className || ''}`}
+    >
       <div className="flex flex-col md:flex-row justify-between items-center max-w-6xl bg-white text-black rounded-lg shadow-xl overflow-hidden p-8">
         {isLeft && (
           <div className="md:w-1/2 p-6 flex justify-center">
