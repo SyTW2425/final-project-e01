@@ -32,28 +32,24 @@ export const organizationLogic = new OrganizationLogic(dbAdapter);
 organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, members } = req.body;
-
     // Check if organization already exists
     const organization = await organizationLogic.searchOrganizations(name) as any;
     if (organization.result.length !== 0) {
       res.status(409).json(createResponseFormat(true, 'Organization already exists'));
       return;
     }
-
     // Map members to ObjectIds and add the creator as an admin
     let membersWithObjectIds: any[] = [];
     if (members && members.length !== 0) {
       try {
         membersWithObjectIds = await mapMembersToObjectIds(members);
       } catch (error: any) {
-        res.status(404).json(createResponseFormat(true, error.message));
+        res.status(404).send(createResponseFormat(true, error.message));
         return;
       }
     }
-
     const user = await getAuthenticatedUser(req, res);
     if (!user) return;
-
     membersWithObjectIds.push({ user: user._id, role: 'admin' });
     const organization_saved = await organizationLogic.createOrganization(name, membersWithObjectIds);
     res.status(201).send(organization_saved);

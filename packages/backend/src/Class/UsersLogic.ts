@@ -76,7 +76,6 @@ export default class UserLogic implements UsersAPI {
     return createResponseFormat(false, { token, userObject });
   }
 
-
   async deleteUser(userToDelete : string, userID : any) : Promise<APIResponseFormat> {
     const isAdminUser = await this.isAdmin(userID);
     userToDelete = !isAdminUser ? userToDelete : userToDelete;
@@ -122,6 +121,24 @@ export default class UserLogic implements UsersAPI {
   public async searchUser(name : string) : Promise<APIResponseFormat> {
     const user = await this.dbAdapter.findOne(User, { username: name }, {});
     return user;
+  }
+
+  public async addOrganizationToUser(userId : any, organizationId : any) : Promise<boolean> {
+    const user = await this.dbAdapter.findOne(User, { _id : userId.toString() }, {});
+    if (!user) throw new Error('User not found');
+    user.organizations.push(organizationId);
+    const userUpdated = await this.dbAdapter.updateOne(User, { _id: userId }, { organizations: user.organizations });
+    if (!userUpdated) throw new Error('User not updated');
+    return true;
+  }
+
+  public async removeOrganizationFromUser(userId : any, organizationId : any) : Promise<boolean> {
+    const user = await this.dbAdapter.findOne(User, { _id : userId.toString() }, {});
+    if (!user) throw new Error('User not found');
+    user.organizations = user.organizations.filter((org : any) => org.toString() !== organizationId.toString());
+    const userUpdated = await this.dbAdapter.updateOne(User, { _id: userId }, { organizations: user.organizations });
+    if (!userUpdated) throw new Error('User not updated');
+    return true;
   }
 
   private buildSearchQuery(username : string | null, email : string | null) : any {
