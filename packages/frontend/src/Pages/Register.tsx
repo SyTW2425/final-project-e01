@@ -90,6 +90,7 @@ const RegisterForm: React.FC = () => {
     if (!password.trim()) return 'Password is required.';
     if (password.length < 8) return 'Password must be at least 8 characters long.';
     if (!passwordConfirmation.trim()) return 'Password confirmation is required.';
+    if (password !== passwordConfirmation) return 'Passwords do not match.';
     return null;
   }
 
@@ -112,7 +113,7 @@ const RegisterForm: React.FC = () => {
           <img src="blank_logo.png" 
           className="inline-block size-20 mr-2 cursor-pointer hover:-translate-y-0.5 transition duration-200 hover:box-shadow hover:rounded-full hover:bg-gray-500"
           alt="go-home" 
-          onClick={() => {window.location.href = '/'} }/>
+          onClick={() => navigate('/')}/>
         </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Register</h2>
 

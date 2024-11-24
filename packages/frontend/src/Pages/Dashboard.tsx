@@ -22,15 +22,12 @@ const DashboardPage: React.FC = () => {
           <Sidebar />
         </div>
 
-        {/* Overlay para dispositivos móviles */}
         {isSidebarOpen && (
           <div
             onClick={toggleSidebar}
             className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
           />
         )}
-
-        {/* Contenido principal */}
 
         <div className="flex-1 overflow-y-auto overflow-x-scroll">
           <Routes>

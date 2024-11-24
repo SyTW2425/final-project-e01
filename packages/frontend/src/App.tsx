@@ -49,8 +49,8 @@ const useSessionValidation = () => {
           if (data.result) dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result}));
         })
         .catch((_) => {
-          console.log('Error validating session');
-          navigate('/login', { replace: true })
+          const page = window.location.href.split('/').pop();
+          if (page?.length !== 0 && page !== 'register') navigate('/login', { replace: true });
         });
     }
   }, [dispatch, userObject]);
