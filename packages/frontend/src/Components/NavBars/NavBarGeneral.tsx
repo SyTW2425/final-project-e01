@@ -40,54 +40,77 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   return (
     <nav className="bg-blue-600 p-4">
       <div className="container mx-auto flex items-center justify-between">
-        {/* Button to toggle sidebar */}
-        <div className="flex items-center">
-        <button
-          className="text-white mr-4 md:hidden"
-          onClick={onToggleSidebar}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-
-        {/* Logo */}
-        <Link to="/dashboard" className="text-white text-xl font-bold">
-          <img src="/blank_logo.png" alt="Logo" className="w-10 h-10 mr-2" />Velia
-        </Link>
-        </div>
-        {/* Search Input */}
-        <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
-
-
-        {/* Notification and Profile */}
+        {/* Logo y Botón para el Sidebar */}
         <div className="flex items-center space-x-4">
-          {/* Search Icon (Mobile) */}
-          <button className="text-white md:hidden" onClick={toggleSearch}>
-          {SVGComponent({ className: 'w-6 h-6', d: searchIcon })}
+          <button
+            className="text-white md:hidden"
+            onClick={onToggleSidebar}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
           </button>
-          {/* New Buttons */}
-          <div className="p-4 space-y-4">
+  
+          {/* Logo */}
+          <Link to="/dashboard" className="flex items-center space-x-2 text-white">
+            <img
+              src="/blank_logo.png"
+              alt="Logo"
+              className="w-8 h-8"
+            />
+            <span className="text-xl font-bold">Velia</span>
+          </Link>
+        </div>
+  
+        {/* Componente de búsqueda */}
+        <div className="hidden md:block flex-1 mx-4">
+          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
+        </div>
+  
+        {/* Notificaciones, Perfil y Botones */}
+        <div className="flex items-center space-x-4">
+          {/* Botón de búsqueda (Mobile) */}
+          <button
+            className="text-white md:hidden"
+            onClick={toggleSearch}
+          >
+            {SVGComponent({ className: "w-6 h-6", d: searchIcon })}
+          </button>
+  
+          {/* Botones de crear */}
+          <div className="hidden md:flex space-x-2">
             <button
               onClick={() => setShowCreateOrgPopup(true)}
-              className="ml-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
+              className="bg-green-500 text-white py-1 px-4 rounded hover:bg-green-600 transition"
             >
               Create Organization
             </button>
             <button
               onClick={() => setShowCreateProjectPopup(true)}
-              className="m-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+              className="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600 transition"
             >
               Create Project
             </button>
           </div>
-          {/* Notification Icon */}
-          <button className="text-white relative">
-          {SVGComponent({ className: 'w-6 h-6', d: bellIcon })}
+  
+          {/* Notificación */}
+          <button className="relative text-white">
+            {SVGComponent({ className: "w-6 h-6", d: bellIcon })}
             <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
           </button>
-
-          {/* Profile Picture */}
+  
+          {/* Imagen de perfil */}
           <div className="relative">
             <img
               src={imageSRC}
@@ -98,38 +121,92 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             {showMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-4 z-10">
                 <ul>
-                  <li><a href="#" className="text-gray-700 block">Perfil</a></li>
-                  <li><a href="#" className="text-gray-700 block">Cerrar sesión</a></li>
+                  <li>
+                    <a href="#" className="text-gray-700 block">
+                      Perfil
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-gray-700 block">
+                      Cerrar sesión
+                    </a>
+                  </li>
                 </ul>
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Mobile Search Bar */}
+  
+      {/* Barra de búsqueda (Mobile) */}
       {showSearch && (
         <div className="mt-2 md:hidden">
           <input
             type="text"
             placeholder="Buscar"
-            className="w-full px-4 py-2 rounded-md transition-all text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-black-500 focus:ring-opacity-50"
+            className="w-full px-4 py-2 rounded-md text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       )}
+  
+      {/* Botón flotante con menú desplegable */}
+      <div className="fixed bottom-4 right-4 md:hidden z-40">
+        <button
+          onClick={toggleMenu}
+          className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
+        >
+          +
+        </button>
+        {showMenu && (
+          <>
+            {/* Fondo semi-transparente para evitar clics en el fondo */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-25 z-40"
+              onClick={() => setShowMenu(false)} // Cerrar menú si se hace clic fuera del menú
+            ></div>
 
-      {/* Organization Modal */}
+            {/* Menú desplegable */}
+            <div
+              className="absolute bottom-16 right-4 bg-white rounded-lg shadow-lg py-2 z-50"
+              style={{ minWidth: "12rem" }} // Ancho mínimo para evitar colapsos
+            >
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowCreateOrgPopup(true);
+                }}
+                className="block w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+              >
+                Crear Organización
+              </button>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowCreateProjectPopup(true);
+                }}
+                className="block w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+              >
+                Crear Proyecto
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+  
+      {/* Modal de Crear Organización */}
       {showCreateOrgPopup && (
         <Modal
           title="Crear Organización"
           onClose={() => setShowCreateOrgPopup(false)}
           onSubmit={() => {
-            const name = (document.querySelector('#organization-name') as HTMLInputElement).value;
-            fetch(BACKEND_URL + '/organization', {
-              method: 'POST',
+            const name = (document.querySelector(
+              "#organization-name"
+            ) as HTMLInputElement).value;
+            fetch(BACKEND_URL + "/organization", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
-                authorization: localStorage.getItem('token') || '',
+                "Content-Type": "application/json",
+                authorization: localStorage.getItem("token") || "",
               },
               body: JSON.stringify({ name, members: [] }),
             })
@@ -149,20 +226,24 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           />
         </Modal>
       )}
-
-      {/* Project Modal */}
+  
+      {/* Modal de Crear Proyecto */}
       {showCreateProjectPopup && (
         <Modal
           title="Crear Proyecto"
           onClose={() => setShowCreateProjectPopup(false)}
           onSubmit={() => {
-            const name = (document.querySelector('#project-name') as HTMLInputElement).value;
-            const description = (document.querySelector('#project-description') as HTMLTextAreaElement).value;
-            fetch(BACKEND_URL + '/project', {
-              method: 'POST',
+            const name = (document.querySelector(
+              "#project-name"
+            ) as HTMLInputElement).value;
+            const description = (document.querySelector(
+              "#project-description"
+            ) as HTMLTextAreaElement).value;
+            fetch(BACKEND_URL + "/project", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
-                authorization: localStorage.getItem('token') || '',
+                "Content-Type": "application/json",
+                authorization: localStorage.getItem("token") || "",
               },
               body: JSON.stringify({ name, description }),
             })
@@ -187,20 +268,16 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             type="date"
             className="w-full border rounded px-3 py-2 mb-4"
           />
-          <select
-            className="w-full border rounded px-3 py-2 mb-4"
-          >
+          <select className="w-full border rounded px-3 py-2 mb-4">
             <option value="">Seleccionar organización</option>
-            {/* Select from redux the organizations of the users */}
-            { currentUser.organizations.map((org: any) => (
-              <option key={org._id} value={org._id}>{org.name}</option>
+            {currentUser.organizations.map((org: any) => (
+              <option key={org._id} value={org._id}>
+                {org.name}
+              </option>
             ))}
           </select>
         </Modal>
       )}
-
-
-
     </nav>
   )};
 
