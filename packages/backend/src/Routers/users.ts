@@ -41,14 +41,17 @@ const uploadDir = path.join(process.cwd(), 'public/userImages');
 })();
 
 const storage = multer.diskStorage({
-  // @ts-ignore: 'file' is declared but its value is never read
   destination: uploadDir,
   filename: (_, file, cb) => {
-    // Utilizando bcrypt.hashSync para obtener el hash de manera síncrona
-    const hash = bcrypt.hash(Date.now().toString(), 10);
-    const filename = `${hash}${path.extname(file.originalname)}`;
-    cb(null, filename);  // El callback se llama con el nombre del archivo
-  }
+    try {
+      const hash = bcrypt.hashSync(file.originalname, 10);
+      const filename = `${hash}${path.extname(file.originalname)}`;
+      cb(null, filename);
+    } catch (err) {
+      console.error(`Error al generar hash: ${err}`);
+      cb(err as Error, ''); // Pasar el error al callback de Multer
+    }
+  },
 });
 
 /**

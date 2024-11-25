@@ -35,7 +35,7 @@ interface SearchResult {
 // Componente para representar cada resultado
 const SearchResultItem: React.FC<{ result: SearchResult }> = ({ result }) => {
   return (
-    <div className="p-2 border-b border-gray-200">
+    <div className="p-2 border-b border-gray-200 ">
       <div className="flex items-center">
         <img src={import.meta.env.VITE_BACKEND_URL + '/userImg/' + result.img_path} alt={result.username} className="w-8 h-8 rounded-full mr-2" />
         <div>
@@ -86,7 +86,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
     debouncedFetchResults(value);
   };
   return (
-    <div className="hidden md:flex flex-1 justify-center items-center relative">
+    <div className="flex flex-1 justify-center items-center relative">
       {/* Buscador con referencia para el tamaño */}
       <div
         ref={searchBoxRef}
@@ -107,7 +107,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
       {/* Contenedor de resultados adaptado dinámicamente */}
       {results.length > 0 && (
         <div
-          className="absolute top-full  bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto transition-all"
+          className="absolute top-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto transition-all w-full sm:w-auto sm:max-w-xs"
           style={{
             width: searchBoxRef.current?.offsetWidth || 'auto', // Ancho dinámico basado en el buscador
           }}
