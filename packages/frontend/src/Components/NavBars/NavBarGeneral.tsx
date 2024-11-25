@@ -12,10 +12,12 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [imageSRC, setImageSRC] = useState<string>('');
 
   const toggleMenu = () => setShowMenu(!showMenu);
+  const toggleCreate = () => setShowCreate(!showCreate);
   const toggleSearch = () => setShowSearch(!showSearch);
   const currentUser : any = useSelector((state: RootState) => state.session.userObject);
   
@@ -152,17 +154,17 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
       {/* Botón flotante con menú desplegable */}
       <div className="fixed bottom-4 right-4 md:hidden z-40">
         <button
-          onClick={toggleMenu}
+          onClick={toggleCreate}
           className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
         >
           +
         </button>
-        {showMenu && (
+        {showCreate && (
           <>
             {/* Fondo semi-transparente para evitar clics en el fondo */}
             <div
               className="fixed inset-0 bg-black bg-opacity-25 z-40"
-              onClick={() => setShowMenu(false)} // Cerrar menú si se hace clic fuera del menú
+              onClick={() => setShowCreate(false)} // Cerrar menú si se hace clic fuera del menú
             ></div>
 
             {/* Menú desplegable */}
@@ -172,7 +174,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             >
               <button
                 onClick={() => {
-                  setShowMenu(false);
+                  setShowCreate(false);
                   setShowCreateOrgPopup(true);
                 }}
                 className="block w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
