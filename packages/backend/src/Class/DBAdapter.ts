@@ -13,6 +13,7 @@
  */
 import { Model } from 'mongoose';
 import { databaseAdapter } from '../types/APITypes';
+import { PopulateOptions } from 'mongoose';
 
 export const LIMIT: number = 10;
 
@@ -22,8 +23,12 @@ export const LIMIT: number = 10;
  * @implements databaseAdapter
  */
 export default class MongoDB implements databaseAdapter {
-  async findOne(model : Model<any>, query : any, filter : object = {}) : Promise<any> {
-    return await model.findOne(query, filter);
+  async findOne(model : Model<any>, query : any, filter : object = {}, populateFields?: PopulateOptions | (string | PopulateOptions)[]) : Promise<any> {
+    if (populateFields) {
+      return await model.findOne(query, filter).populate(populateFields);
+    } else {
+      return await model.findOne(query, filter)
+    }
   }
   
   async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0) : Promise<any> {

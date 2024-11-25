@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Routes, Route } from 'react-router-dom';
+
+import { RootState } from '../store/store';
 import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
-import { Routes, Route } from 'react-router-dom';
+import FooterDashboard from '../Components/Footer/FooterDashboard';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
-import FooterDashboard from '../Components/Footer/FooterDashboard';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const currentUser : any = useSelector((state: RootState) => state.session.userObject);
+  console.log(currentUser);
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />

@@ -75,6 +75,23 @@ organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @brief This endpoint is used to get an organization by its id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await organizationLogic.searchOrganizationsById(id);
+    res.status(200).send(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organization'));
+  }
+});
+
 /** 
  * @brief This endpoint is used to update an organization
  * @param req The request object

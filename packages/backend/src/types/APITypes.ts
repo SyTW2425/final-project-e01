@@ -12,7 +12,7 @@
  * @brief API Types file, contains the interfaces of the API
  */
 
-import { Model } from "mongoose";
+import { Model, PopulateOptions } from "mongoose";
 
 /**
  * APIResponseFormat
@@ -67,6 +67,7 @@ export interface TasksAPI {
  */
 export interface ProjectsAPI {
   searchProjects(nameOrg : string, nameProject : string, page?: number) : Promise<APIResponseFormat>;
+  searchPorjectsFromUser(userId : any) : Promise<APIResponseFormat>;
   createProject(organization : string, name : string, description : string, startDate : string, endDate : string, users : any) : Promise<APIResponseFormat>;
   deleteProject(nameOrg: string, projectToDelete : string) : Promise<APIResponseFormat>;
   updateProject(nameProject : string, description : string, startDate : string, endDate : string, users : string[], sprints : any) : Promise<APIResponseFormat>;
@@ -78,6 +79,7 @@ export interface ProjectsAPI {
  * @description Organizations API
  */
 export interface OrganizationsAPI {
+  searchOrganizationsById(organizationId : any) : Promise<APIResponseFormat>;
   searchOrganizations(name : string) : Promise<APIResponseFormat>;
   createOrganization(name : string, members : any) : Promise<APIResponseFormat>;
   deleteOrganization(organizationToDelete : string) : Promise<APIResponseFormat>;
@@ -86,8 +88,8 @@ export interface OrganizationsAPI {
 
 
 export interface databaseAdapter {
-  findOne(model : Model<any>, query : any, filter : object) : Promise<any>;
-  find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number) : Promise<any>;
+  findOne(model : Model<any>, query : any, filter? : object, populateFields?: null | PopulateOptions | (string | PopulateOptions)[]) : Promise<any>;
+  find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number) : Promise<any>;  // TODO: Add populateFields
   create : (model : Model<any>, data : any) => Promise<any>;
   updateOne : (model : Model<any>, query : any, data : any) => Promise<any>;
   updateMany: (model: Model<any>, query: any, data: any) => Promise<any>;

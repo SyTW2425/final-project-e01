@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SVGComponent from '../Icons/SVGComponent';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -24,6 +24,12 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const [showCreateOrgPopup, setShowCreateOrgPopup] = useState(false); 
   const [showCreateProjectPopup, setShowCreateProjectPopup] = useState(false);
   
+  // References for the project form
+  const projectNameRef = useRef<HTMLInputElement>(null);
+  const projectDescriptionRef = useRef<HTMLTextAreaElement>(null);
+  const projectEndDateRef = useRef<HTMLInputElement>(null);
+  const projectOrganizationRef = useRef<HTMLSelectElement>(null);
+
   // We need to send the backend form info to create a new organization
 
 
@@ -228,26 +234,39 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           />
         </Modal>
       )}
-  
       {/* Modal de Crear Proyecto */}
       {showCreateProjectPopup && (
         <Modal
           title="Crear Proyecto"
           onClose={() => setShowCreateProjectPopup(false)}
           onSubmit={() => {
-            const name = (document.querySelector(
-              "#project-name"
-            ) as HTMLInputElement).value;
-            const description = (document.querySelector(
-              "#project-description"
-            ) as HTMLTextAreaElement).value;
-            fetch(BACKEND_URL + "/project", {
+            // Uso de refs en lugar de document.querySelector para evitar errores
+            const name = projectNameRef.current?.value || "";
+            const description = projectDescriptionRef.current?.value || "";
+            const endDate = projectEndDateRef.current?.value || "";
+            const organization = projectOrganizationRef.current?.value || "";
+
+            // Validación básica
+            if (!name || !organization) {
+              alert("Por favor, complete todos los campos obligatorios.");
+              return;
+            }
+
+            fetch(`${BACKEND_URL}/project`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 authorization: localStorage.getItem("token") || "",
               },
-              body: JSON.stringify({ name, description }),
+              body: JSON.stringify({
+                name,
+                description,
+                startDate: Date.now(),
+                endDate,
+                organization,
+                users: [],
+                sprints: [],
+              }),
             })
               .then((res) => res.json())
               .then((data) => {
@@ -257,23 +276,34 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               .catch((err) => console.error(err));
           }}
         >
+          {/* Uso de refs para capturar los valores */}
           <input
+            id="project-name"
+            ref={projectNameRef}
             type="text"
             placeholder="Nombre del proyecto"
             className="w-full border rounded px-3 py-2 mb-4"
           />
           <textarea
+            id="project-description"
+            ref={projectDescriptionRef}
             placeholder="Descripción"
             className="w-full border rounded px-3 py-2 mb-4"
           ></textarea>
           <input
+            id="project-end-date"
+            ref={projectEndDateRef}
             type="date"
             className="w-full border rounded px-3 py-2 mb-4"
           />
-          <select className="w-full border rounded px-3 py-2 mb-4">
+          <select
+            id="project-organization"
+            ref={projectOrganizationRef}
+            className="w-full border rounded px-3 py-2 mb-4"
+          >
             <option value="">Seleccionar organización</option>
             {currentUser.organizations.map((org: any) => (
-              <option key={org._id} value={org._id}>
+              <option key={org._id} value={org.name}>
                 {org.name}
               </option>
             ))}

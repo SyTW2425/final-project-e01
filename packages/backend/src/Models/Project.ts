@@ -82,16 +82,10 @@ const ProjectSchema = new Schema<ProjectInterface>({
   startDate: {
     type: Date,
     required: true,
-    validate: {
-      validator: (v: Date) => v.getTime() > Date.now(),
-      message: (props) => {
-        return `${props.value} is not a valid date. The start date must be greater than the current date.`;
-      },
-    },
   },
   endDate: {
     type: Date,
-    required: true,
+    required: false,
     validate: {
       validator: (v: Date) => v.getTime() > Date.now(),
       message: (props) => {
