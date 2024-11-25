@@ -76,7 +76,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         </div>
   
         {/* Componente de búsqueda */}
-        <div className="hidden md:block flex-1 mx-4">
+        <div className="hidden md:block flex-1 mx-4 relative z-20">
           <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
         </div>
   
@@ -142,12 +142,8 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   
       {/* Barra de búsqueda (Mobile) */}
       {showSearch && (
-        <div className="mt-2 md:hidden">
-          <input
-            type="text"
-            placeholder="Buscar"
-            className="w-full px-4 py-2 rounded-md text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <div className="mt-2 md:hidden relative z-30">
+          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
         </div>
       )}
   
