@@ -28,6 +28,7 @@ import HomePage from './Pages/Home';
 import LoginPage from './Pages/Login';
 import RegisterPage from './Pages/Register';
 import DashboardPage from './Pages/Dashboard';
+import ProfileUserPage from './Pages/Subpages/ProfileUserPage';
 
 
 // We need a custom hook in order to validate the session
@@ -63,6 +64,7 @@ const App: React.FC = () => {
       <Route path="/login" Component={LoginPage} />
       <Route path="/register" Component={RegisterPage} />
       <Route path="/dashboard/*" Component={DashboardPage} />
+      <Route path="/dashboard/profile" Component={ProfileUserPage} />
       <Route path="*" Component={HomePage} />
     </Routes>
   );

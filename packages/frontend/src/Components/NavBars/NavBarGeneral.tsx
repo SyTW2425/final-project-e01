@@ -124,8 +124,10 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-4 z-10">
                 <ul>
                   <li>
-                    <a href="#" className="text-gray-700 block">
+                    <a>
+                    <Link to="/dashboard/profile" className="text-gray-700 block hover:text-blue-500">
                       Perfil
+                    </Link>
                     </a>
                   </li>
                   <li>
