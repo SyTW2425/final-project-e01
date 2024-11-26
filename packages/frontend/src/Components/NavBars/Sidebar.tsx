@@ -18,6 +18,7 @@ import SVGComponent from '../Icons/SVGComponent';
 
 
 
+
 const Sidebar: React.FC = () => {
   return (
     <div className="w-64 h-full min-h-full bg-gray-100 p-0 pt-2">

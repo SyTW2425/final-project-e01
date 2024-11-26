@@ -68,8 +68,11 @@ const useSessionValidation = () => {
         })
         .catch((_) => {
           const page = window.location.href.split('/').pop();
-          if (page?.length !== 0 && page !== 'register') navigate('/login', { replace: true });
+          if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
         });
+    } else if (!localStorage.getItem('token') && !userObject) {
+      const page = window.location.href.split('/').pop();
+      if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
     }
   }, [dispatch, userObject]);
 };

@@ -81,14 +81,14 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           </Link>
         </div>
   
-        {/* Componente de búsqueda */}
+        {/* Search bar */}
         <div className="hidden md:block flex-1 mx-4 relative z-20">
           <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
         </div>
   
-        {/* Notificaciones, Perfil y Botones */}
+        {/* Notifications, Notificaciones, Perfil y Botones */}
         <div className="flex items-center space-x-4">
-          {/* Botón de búsqueda (Mobile) */}
+          {/* Search bar (Mobile) */}
           <button
             className="text-white md:hidden"
             onClick={toggleSearch}
@@ -96,7 +96,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             {SVGComponent({ className: "w-6 h-6", d: searchIcon })}
           </button>
   
-          {/* Botones de crear */}
+          {/* Create buttons */}
           <div className="hidden md:flex space-x-2">
             <button
               onClick={() => setShowCreateOrgPopup(true)}
@@ -126,30 +126,39 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               className="w-10 h-10 rounded-full cursor-pointer"
               onClick={toggleMenu}
             />
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-4 z-10">
-                <ul>
-                  <li>
-                    <a href="#" className="text-gray-700 block">
-                      Perfil
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-700 block">
-                      Cerrar sesión
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            )}
+            
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl p-4 z-10">
+              <ul className="space-y-2">
+                <li>
+                  <Link 
+                    to="/perfil" 
+                    className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-blue-600"
+                  >
+                    Perfil
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/login" 
+                    className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-red-600"
+                    onClick={() => localStorage.removeItem("token")}
+                  >
+                    Cerrar sesión
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
+
           </div>
         </div>
       </div>
   
-      {/* Barra de búsqueda (Mobile) */}
+      {/* Search bar (Mobile) */}
       {showSearch && (
         <div className="mt-2 md:hidden relative z-30">
-          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
+          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} mobile={true} />
         </div>
       )}
   
@@ -163,16 +172,14 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         </button>
         {showCreate && (
           <>
-            {/* Fondo semi-transparente para evitar clics en el fondo */}
             <div
               className="fixed inset-0 bg-black bg-opacity-25 z-40"
-              onClick={() => setShowCreate(false)} // Cerrar menú si se hace clic fuera del menú
+              onClick={() => setShowCreate(false)}
             ></div>
 
-            {/* Menú desplegable */}
             <div
               className="absolute bottom-16 right-4 bg-white rounded-lg shadow-lg py-2 z-50"
-              style={{ minWidth: "12rem" }} // Ancho mínimo para evitar colapsos
+              style={{ minWidth: "12rem" }}
             >
               <button
                 onClick={() => {
@@ -197,7 +204,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         )}
       </div>
   
-      {/* Modal de Crear Organización */}
+      {/* Modal for Organization Creation */}
       {showCreateOrgPopup && (
         <Modal
           title="Crear Organización"
@@ -230,21 +237,20 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           />
         </Modal>
       )}
-      {/* Modal de Crear Proyecto */}
+      {/* Modal for Project Creation*/}
       {showCreateProjectPopup && (
         <Modal
           title="Crear Proyecto"
           onClose={() => setShowCreateProjectPopup(false)}
           onSubmit={() => {
-            // Uso de refs en lugar de document.querySelector para evitar errores
+
             const name = projectNameRef.current?.value || "";
             const description = projectDescriptionRef.current?.value || "";
             const endDate = projectEndDateRef.current?.value || "";
             const organization = projectOrganizationRef.current?.value || "";
 
-            // Validación básica
             if (!name || !organization) {
-              alert("Por favor, complete todos los campos obligatorios.");
+              alert("Please, fill the mandatory fields.");
               return;
             }
 
@@ -272,20 +278,20 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               .catch((err) => console.error(err));
           }}
         >
-          {/* Uso de refs para capturar los valores */}
           <input
             id="project-name"
             ref={projectNameRef}
             type="text"
-            placeholder="Nombre del proyecto"
+            placeholder="Name of the project"
             className="w-full border rounded px-3 py-2 mb-4"
           />
           <textarea
             id="project-description"
             ref={projectDescriptionRef}
-            placeholder="Descripción"
+            placeholder="Description of the project"
             className="w-full border rounded px-3 py-2 mb-4"
           ></textarea>
+          <label htmlFor="project-end-date" className="block text-sm font-medium text-gray-700" />
           <input
             id="project-end-date"
             ref={projectEndDateRef}
@@ -297,7 +303,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             ref={projectOrganizationRef}
             className="w-full border rounded px-3 py-2 mb-4"
           >
-            <option value="">Seleccionar organización</option>
+            <option value="">Select organizations</option>
             {currentUser.organizations.map((org: any) => (
               <option key={org._id} value={org.name}>
                 {org.name}
