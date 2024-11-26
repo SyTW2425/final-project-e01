@@ -60,7 +60,7 @@ const handleRegister = async (
     if (response_login.ok) {
       const data = await response_login.json();
       localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
-      dispatch(setSession({ token: data.token, userObject: data.userObject }));
+      dispatch(setSession({ token: data.token, userObject: data.userObject, projects: null, organizations: null, currentProject: null }));
       navigate('/dashboard', { replace: true });
     } else {
       console.error('Failed to login');

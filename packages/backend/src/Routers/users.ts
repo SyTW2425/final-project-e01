@@ -73,7 +73,7 @@ const upload = multer({
   }
 });
 
-const deleteImage = (imgPath: string) => {
+const deleteImage = async (imgPath: string) => {
   if (imgPath !== "default.png") {
     const imgPathToDelete = path.join(uploadDir, imgPath);
     fs.unlink(imgPathToDelete, (err) => {
@@ -195,14 +195,20 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-usersRouter.patch('/update', jwtMiddleware, async (req, res) => {
+usersRouter.patch('/update', upload.single('profilePicUpdate'), jwtMiddleware, async (req, res) => {
   try {
     const { username, email,  password, role } = req.body;
     if (!email) {
       res.status(400).send(createResponseFormat(true, 'You must provide an email to update a user'));
       return;
     }
-    const response = await userLogic.updateUser(email, username ?? null, password ?? null, role ?? null, req.userId);
+    if (req.file) {
+      const user = await userLogic.searchUsers(null, email);
+      deleteImage(user.result.users[0].img_path);
+    }
+    console.log(username)
+    const profilePicPath = req.file ? req.file.filename : undefined;
+    const response = await userLogic.updateUser(email, username ?? null, password ?? null, role ?? null, req.userId, profilePicPath);
     res.status(200).send(createResponseFormat(false, response));
   } catch (error) {
     const errorParsed = error as Error;
