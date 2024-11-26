@@ -8,15 +8,17 @@ import Navbar from '../Components/NavBars/NavBarGeneral';
 import FooterDashboard from '../Components/Footer/FooterDashboard';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
+import MyProjectsPage from './Subpages/MyProjectsPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const currentUser : any = useSelector((state: RootState) => state.session.userObject);
+  const sessionState = useSelector((state: RootState) => state.session);
+  const currentUser : any = sessionState.userObject;
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
-      <div className="relative h-screen flex">
+      <div className="relative h-screen flex bg-gray-50">
         {/* Sidebar */}
         <div
           className={`fixed top-0 left-0 h-full bg-gray-200 shadow-lg z-40 transform transition-transform duration-300
@@ -30,7 +32,7 @@ const DashboardPage: React.FC = () => {
         {isSidebarOpen && (
           <div
             onClick={toggleSidebar}
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 bg-gray-50 bg-opacity-50 z-30 md:hidden"
           />
         )}
 
@@ -40,6 +42,7 @@ const DashboardPage: React.FC = () => {
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
+            <Route path="/" Component={MyProjectsPage} />
             <Route path="*" Component={() => {
               return (
               <>

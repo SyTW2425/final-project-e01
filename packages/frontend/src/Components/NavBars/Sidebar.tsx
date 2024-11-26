@@ -15,19 +15,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SVGComponent from '../Icons/SVGComponent';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
 
 
 
 const Sidebar: React.FC = () => {
+  const currentProject : any = useSelector((state: RootState) => state.session.currentProject);
+
   return (
     <div className="w-64 h-full min-h-full bg-gray-100 p-0 pt-2">
       <div className="flex items-center justify-center">
         <h2 className="text-xl font-bold mt-5">My Workspace</h2>
       </div>
       <hr className='m-4'/>
+      <div className="items-center justify-center bg-gray-300">
+        <h2 className="text-xl font-bold mt-1">Working on</h2>
+        <h2 className="text-xl mt-1">{currentProject ? currentProject.name : "No projects available" }</h2>
+      </div>
+      
       <div className=''>
-        <Link to="/dashboard/projects" className="block align-middle transition-all bg-blue-200 min-h-9  hover:text-white m-2 hover:translate-x-1 rounded hover:bg-blue-600">
+        <Link to="/dashboard/" className="block align-middle transition-all bg-blue-200 min-h-9  hover:text-white m-2 hover:translate-x-1 rounded hover:bg-blue-600">
           <SVGComponent className="w-8 h-8 align-middle inline-block ml-2 mr-2 mt-2 min-w-4" d="M4,4 L9,4 C9.55228,4 10,3.55228 10,3 C10,2.44772 9.55228,2 9,2 L4,2 C2.89543,2 2,2.89543 2,4 L2,12 C2,13.1046 2.89543,14 4,14 L12,14 C13.1046,14 14,13.1046 14,12 L14,10 C14,9.44771 13.5523,9 13,9 C12.4477,9 12,9.44771 12,10 L12,12 L4,12 L4,4 Z M15.2071,2.29289 C14.8166,1.90237 14.1834,1.90237 13.7929,2.29289 L8.5,7.58579 L7.70711,6.79289 C7.31658,6.40237 6.68342,6.40237 6.29289,6.79289 C5.90237,7.18342 5.90237,7.81658 6.29289,8.20711 L7.79289,9.70711 C7.98043,9.89464 8.23478,10 8.5,10 C8.76522,10 9.01957,9.89464 9.20711,9.70711 L15.2071,3.70711 C15.5976,3.31658 15.5976,2.68342 15.2071,2.29289 Z" fill="#000000" />
           My Projects
         </Link>

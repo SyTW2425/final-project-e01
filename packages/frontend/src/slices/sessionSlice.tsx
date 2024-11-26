@@ -16,10 +16,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface SessionState {
   token: string;
-  userObject: object | null;
-  projects: object[] | null;
-  organizations : object | null;
-  currentProject: object | null;
+  userObject: any | null;
+  projects: any[] | null;
+  currentProject: any | null;
 }
 
 const initialState: SessionState = {
@@ -27,7 +26,6 @@ const initialState: SessionState = {
   userObject: null,
   projects: null,
   currentProject: null,
-  organizations: null
 };
 
 const sessionSlice = createSlice({
@@ -38,11 +36,28 @@ const sessionSlice = createSlice({
       state.token = action.payload.token;
       state.projects = action.payload.projects;
       state.userObject = action.payload.userObject;
-      state.organizations = action.payload.organizations;
       state.currentProject = action.payload.currentProject;
     },
+    setToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+    },
+    setUserObject: (state, action: PayloadAction<object>) => {
+      state.userObject = action.payload;
+    },
+    setProjects: (state, action: PayloadAction<object[]>) => {
+      state.projects = action.payload;
+    },
+    setCurrentProject: (state, action: PayloadAction<object>) => {
+      state.currentProject = action.payload;
+    }
   },
 });
 
-export const { setSession } = sessionSlice.actions;
+export const { 
+  setSession,
+  setToken,
+  setUserObject,
+  setProjects,
+  setCurrentProject
+ } = sessionSlice.actions;
 export default sessionSlice.reducer;

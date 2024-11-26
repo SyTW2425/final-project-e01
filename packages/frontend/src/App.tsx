@@ -47,7 +47,7 @@ const useSessionValidation = () => {
       })
         .then((res) => res.json()).then((data) => {
           if (!data.error) {
-            dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result, projects: null, organizations: null, currentProject: null }));
+            dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result, projects: null, currentProject: null }));
             userObject = data.result;
             fetch(import.meta.env.VITE_BACKEND_URL + '/project/user', {
               method: 'GET',
@@ -57,7 +57,7 @@ const useSessionValidation = () => {
             })
               .then((res) => res.json()).then((data) => {
                 if (!data.error) {
-                  dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: userObject, projects: data.result, organizations:null, currentProject: data.result[0] }));
+                  dispatch(setSession({ token: localStorage.getItem('token') || '', userObject, projects: data.result, currentProject: data.result[0] }));
                 }
               })
               .catch((_) => {
