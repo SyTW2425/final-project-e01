@@ -83,7 +83,7 @@ export default class UserLogic implements UsersAPI {
     return createResponseFormat(false, userDelete);
   }
 
-  async updateUser(email : string, username : string | null, password : string | null, role : string | null, userID : any) : Promise<APIResponseFormat>{
+  async updateUser(email : string, username : string | null, password : string | null,  role : string | null, userID : any, profilePicPath?: string) : Promise<APIResponseFormat>{
     const isAdminUser = await this.isAdmin(userID);
     const modifierUser = await this.dbAdapter.find(User, { _id: userID }, {});
     if (!modifierUser || (modifierUser.length === 0)) throw new Error('User not found');
@@ -99,8 +99,9 @@ export default class UserLogic implements UsersAPI {
     if (email) obj['email'] = email;
     if (password) obj['password'] = await bcrypt.hash(password, 10);
     if (isAdminUser && role) obj['role'] = role; 
-
-    const user = await this.dbAdapter.updateOne(User, { email }, { username, email, password, role });
+    if (profilePicPath) obj['img_path'] = profilePicPath;
+    console.log(obj);
+    const user = await this.dbAdapter.updateOne(User, { email }, { username, email, password, role, img_path: profilePicPath });
     if (!user) {
       throw new Error('User not found');
     }

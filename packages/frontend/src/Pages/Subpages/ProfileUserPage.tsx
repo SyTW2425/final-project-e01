@@ -12,10 +12,9 @@
  * @brief Página de información del perfil de usuario con layout lateral.
  */
 
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
 
@@ -34,8 +33,13 @@ const UserProfile: React.FC = () => {
 
   const user = useSelector((state: RootState) => state.session.userObject) as User;
   const [imageSRC, setImageSRC] = useState<string>('');
-  const [showModal, setShowModal] = useState<boolean>(false); // Estado para controlar el modal
-  const [updatedUser, setUpdatedUser] = useState<User>(user); // Estado para almacenar datos actualizados
+  const [showModal, setShowModal] = useState<boolean>(false); 
+  const [updatedUser, setUpdatedUser] = useState<User>({
+    email: user.email,
+    username: user.username,
+    img_path: user.img_path,
+  });
+  const [profilePicUpdate, setProfilePicUpdate] = useState<File | null>(null);
   const navigate = useNavigate();
 
   const handleDelete = () => {
@@ -71,30 +75,45 @@ const UserProfile: React.FC = () => {
     setShowModal(false); // Ocultar modal
   };
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    // Realizar petición al backend
-    fetch(BACKEND_UPDATE_USER_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('token') || '',
-      },
-      body: JSON.stringify(updatedUser),
-    })
-      .then((res) => {
-        if (res.ok) {
-          setShowModal(false); 
-        } else {
-          console.error('Failed to update user');
-        }
-      })
-      .catch((err) => console.error(err));
-  };
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setUpdatedUser({ ...updatedUser, [name]: value }); 
+    setUpdatedUser((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+  
+
+  const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData();
+    formData.append('username', updatedUser.username);
+    if (profilePicUpdate) formData.append('profilePicUpdate', profilePicUpdate);
+
+    try {
+      const response = await fetch(BACKEND_UPDATE_USER_URL, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: formData, // Usar FormData aquí para enviar la imagen
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setUpdatedUser({
+          ...updatedUser,
+          img_path: data.img_path || updatedUser.img_path, // Actualiza la imagen si se cambió
+        });
+        setImageSRC(data.img_path); // Actualizar la imagen visualmente
+        setShowModal(false); // Cerrar el modal
+      } else {
+        console.error('Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user', error);
+    }
   };
 
   useEffect(() => {
@@ -108,12 +127,11 @@ const UserProfile: React.FC = () => {
         .catch((err) => console.error(err));
     }
   }, [user, imageSRC]);
-
+  
   return (
     <>
       <Navbar onToggleSidebar={() => {}} />
       <div className="flex min-h-screen bg-gray-100">
-        {/*  */}
         <div className="w-1/3 bg-white p-8 shadow-lg">
           <div className="text-center mb-8">
             <img
@@ -121,8 +139,8 @@ const UserProfile: React.FC = () => {
               alt="Profile"
               className="w-48 h-48 rounded-full mx-auto border-8 border-blue-600 shadow-lg"
             />
-            <h2 className="text-2xl font-bold text-gray-700">{user.username}</h2>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <h2 className="text-2xl font-bold text-gray-700">{updatedUser.username}</h2>
+            <p className="text-sm text-gray-500">{updatedUser.email}</p>
           </div>
           <div className="mt-8 space-y-4">
             <button
@@ -140,9 +158,7 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
 
-        {/* Lado derecho: Organizaciones y proyectos */}
         <div className="w-2/3 flex flex-col space-y-8 p-8">
-          {/* Organizaciones */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
             <ul className="space-y-3">
@@ -160,7 +176,6 @@ const UserProfile: React.FC = () => {
             </ul>
           </div>
 
-          {/* Proyectos */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
             <ul className="space-y-3">
@@ -180,12 +195,11 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal para actualizar perfil */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
             <h2 className="text-2xl font-bold mb-4 text-gray-700">Actualizar Perfil</h2>
-            <form onSubmit={handleFormSubmit}>
+            <form onSubmit={handleUpdateUser}>
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">Nombre de Usuario</label>
                 <input
@@ -194,29 +208,17 @@ const UserProfile: React.FC = () => {
                   value={updatedUser.username}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Correo Electrónico</label>
+                <label htmlFor="profilePicUpdate" className="block text-gray-700 text-sm font-bold mb-2">Imagen de Perfil</label>
                 <input
-                  type="email"
-                  name="email"
-                  value={updatedUser.email}
-                  onChange={handleInputChange}
+                  type="file"
+                  id="profilePicUpdate"
+                  name="profilePicUpdate"
+                  accept='image/*'
+                  onChange={e => setProfilePicUpdate(e.target.files ? e.target.files[0] : null)}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Imagen de Perfil</label>
-                <input
-                  type="text"
-                  name="img_path"
-                  value={updatedUser.img_path}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
                 />
               </div>
               <div className="flex justify-end space-x-4">
