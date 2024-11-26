@@ -126,13 +126,13 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               className="w-10 h-10 rounded-full cursor-pointer"
               onClick={toggleMenu}
             />
-            
-          {showMenu && (
+
+            {showMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl p-4 z-10">
               <ul className="space-y-2">
                 <li>
                   <Link 
-                    to="/perfil" 
+                    to="/dashboard/profile" 
                     className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-blue-600"
                   >
                     Perfil
@@ -149,8 +149,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
                 </li>
               </ul>
             </div>
-          )}
-
+            )}
           </div>
         </div>
       </div>
