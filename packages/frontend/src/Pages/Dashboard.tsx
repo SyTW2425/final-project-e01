@@ -13,7 +13,6 @@ const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const currentUser : any = useSelector((state: RootState) => state.session.userObject);
-  console.log(currentUser);
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
