@@ -77,7 +77,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
     }
   };
   // Función de búsqueda con debounce
-  const debouncedFetchResults = useCallback(debounce((value: string) => fetchResults(value), 1000), []);
+  const debouncedFetchResults = useCallback(debounce((value: string) => fetchResults(value), 500), []);
 
   // Maneja los cambios en el campo de búsqueda
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {

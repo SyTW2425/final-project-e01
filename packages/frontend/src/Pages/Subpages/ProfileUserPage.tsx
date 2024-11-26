@@ -15,12 +15,16 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import {useNavigate } from 'react-router-dom';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
+
+const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
 
 const UserProfile: React.FC = () => {
   // Obtener información del usuario desde el estado global
   const user = useSelector((state: any) => state.session.userObject);
   const [imageSRC, setImageSRC] = useState<string>('');
+  const navigate = useNavigate();
 
   const handleDelete = () => {
     const confirmDelete = window.confirm(
@@ -28,12 +32,27 @@ const UserProfile: React.FC = () => {
     );
     if (confirmDelete) {
       console.log('Usuario eliminado');
-      //navigate('/');
+      fetch(BACKEND_DELETE_USER_URL, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') || '',
+        },
+        body: JSON.stringify({ email: user.email }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            localStorage.removeItem('token');
+            navigate('/login');
+          } else {
+            console.error('Failed to delete user');
+          }
+        })
     }
   };
 
   const handleUpdate = () => {
-    //navigate('/profile/update');
+    //navigate('/update-profile');
   };
 
   useEffect(() => {
