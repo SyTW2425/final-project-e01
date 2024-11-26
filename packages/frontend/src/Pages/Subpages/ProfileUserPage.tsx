@@ -7,16 +7,15 @@
  * @author Pablo Rodríguez de la Rosa
  * @author Javier Almenara Herrera
  * @author Omar Suárez Doro
- * @version 1.0
+ * @version 1.1
  * @date 28/10/2024
- * @brief Página de información del perfil de usuario.
+ * @brief Página de información del perfil de usuario con layout lateral.
  */
 
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { navigate } from 'react-router-dom';
-
+import Navbar from '../../Components/NavBars/NavBarGeneral';
 
 const UserProfile: React.FC = () => {
   // Obtener información del usuario desde el estado global
@@ -28,15 +27,12 @@ const UserProfile: React.FC = () => {
       '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'
     );
     if (confirmDelete) {
-      // Aquí llamas a tu lógica de eliminación
       console.log('Usuario eliminado');
-      // Redirigir después de eliminar
       //navigate('/');
     }
   };
 
   const handleUpdate = () => {
-    // Redirigir a la página de actualización de perfil
     //navigate('/profile/update');
   };
 
@@ -49,15 +45,18 @@ const UserProfile: React.FC = () => {
           setImageSRC(url);
         })
         .catch((err) => console.error(err));
-    } 
+    }
   }, [user, imageSRC]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+    <>
+    <Navbar onToggleSidebar={() => {}} />
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Lado izquierdo: Información del perfil */}
+      <div className="w-1/3 bg-white p-8 shadow-lg">
         <div className="text-center mb-8">
           <img
-            src={imageSRC} // Imagen del usuario o predeterminada
+            src={imageSRC}
             alt="Profile"
             className="w-48 h-48 rounded-full mx-auto border-8 border-gray-500 shadow-lg"
           />
@@ -79,7 +78,43 @@ const UserProfile: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Lado derecho: Organizaciones y proyectos */}
+      <div className="w-2/3 flex flex-col space-y-8 p-8">
+        {/* Organizaciones */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
+          <ul className="space-y-3">
+            {/* Renderiza las organizaciones dinámicamente */}
+            {user.organizations?.map((org: string, index: number) => (
+              <li
+                key={index}
+                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
+              >
+                {org}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Proyectos */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
+          <ul className="space-y-3">
+            {/* Renderiza los proyectos dinámicamente */}
+            {user.projects?.map((project: string, index: number) => (
+              <li
+                key={index}
+                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
+              >
+                {project}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
+    </>
   );
 };
 
