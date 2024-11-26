@@ -36,7 +36,7 @@ import ProfileUserPage from './Pages/Subpages/ProfileUserPage';
 const useSessionValidation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userObject = useSelector((state: RootState) => state.session.userObject);
+  let userObject : any = useSelector((state: RootState) => state.session.userObject);
   useEffect(() => {
     if (localStorage.getItem('token') && !userObject) {
       fetch(import.meta.env.VITE_BACKEND_URL + '/user/validate', {
@@ -46,12 +46,34 @@ const useSessionValidation = () => {
         },
       })
         .then((res) => res.json()).then((data) => {
-          if (data.result) dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result}));
+          if (!data.error) {
+            dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result, projects: null, organizations: null, currentProject: null }));
+            userObject = data.result;
+            fetch(import.meta.env.VITE_BACKEND_URL + '/project/user', {
+              method: 'GET',
+              headers: {
+                authorization: localStorage.getItem('token') || '',
+              },
+            })
+              .then((res) => res.json()).then((data) => {
+                if (!data.error) {
+                  dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: userObject, projects: data.result, organizations:null, currentProject: data.result[0] }));
+                }
+              })
+              .catch((_) => {
+                const page = window.location.href.split('/').pop();
+                if (page?.length !== 0 && page !== 'register') navigate('/login', { replace: true });
+              });
+          } 
+
         })
         .catch((_) => {
           const page = window.location.href.split('/').pop();
-          if (page?.length !== 0 && page !== 'register') navigate('/login', { replace: true });
+          if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
         });
+    } else if (!localStorage.getItem('token') && !userObject) {
+      const page = window.location.href.split('/').pop();
+      if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
     }
   }, [dispatch, userObject]);
 };

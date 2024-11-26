@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SVGComponent from '../Icons/SVGComponent';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -24,6 +24,12 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const [showCreateOrgPopup, setShowCreateOrgPopup] = useState(false); 
   const [showCreateProjectPopup, setShowCreateProjectPopup] = useState(false);
   
+  // References for the project form
+  const projectNameRef = useRef<HTMLInputElement>(null);
+  const projectDescriptionRef = useRef<HTMLTextAreaElement>(null);
+  const projectEndDateRef = useRef<HTMLInputElement>(null);
+  const projectOrganizationRef = useRef<HTMLSelectElement>(null);
+
   // We need to send the backend form info to create a new organization
 
 
@@ -75,14 +81,14 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           </Link>
         </div>
   
-        {/* Componente de búsqueda */}
+        {/* Search bar */}
         <div className="hidden md:block flex-1 mx-4 relative z-20">
           <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
         </div>
   
-        {/* Notificaciones, Perfil y Botones */}
+        {/* Notifications, Notificaciones, Perfil y Botones */}
         <div className="flex items-center space-x-4">
-          {/* Botón de búsqueda (Mobile) */}
+          {/* Search bar (Mobile) */}
           <button
             className="text-white md:hidden"
             onClick={toggleSearch}
@@ -90,7 +96,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             {SVGComponent({ className: "w-6 h-6", d: searchIcon })}
           </button>
   
-          {/* Botones de crear */}
+          {/* Create buttons */}
           <div className="hidden md:flex space-x-2">
             <button
               onClick={() => setShowCreateOrgPopup(true)}
@@ -120,32 +126,38 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               className="w-10 h-10 rounded-full cursor-pointer"
               onClick={toggleMenu}
             />
+
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-4 z-10">
-                <ul>
-                  <li>
-                    <a>
-                    <Link to="/dashboard/profile" className="text-gray-700 block hover:text-blue-500">
-                      Perfil
-                    </Link>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-700 block">
-                      Cerrar sesión
-                    </a>
-                  </li>
-                </ul>
-              </div>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl p-4 z-10">
+              <ul className="space-y-2">
+                <li>
+                  <Link 
+                    to="/dashboard/profile" 
+                    className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-blue-600"
+                  >
+                    Perfil
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/login" 
+                    className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-red-600"
+                    onClick={() => localStorage.removeItem("token")}
+                  >
+                    Cerrar sesión
+                  </Link>
+                </li>
+              </ul>
+            </div>
             )}
           </div>
         </div>
       </div>
   
-      {/* Barra de búsqueda (Mobile) */}
+      {/* Search bar (Mobile) */}
       {showSearch && (
         <div className="mt-2 md:hidden relative z-30">
-          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
+          <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} mobile={true} />
         </div>
       )}
   
@@ -159,16 +171,14 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         </button>
         {showCreate && (
           <>
-            {/* Fondo semi-transparente para evitar clics en el fondo */}
             <div
               className="fixed inset-0 bg-black bg-opacity-25 z-40"
-              onClick={() => setShowCreate(false)} // Cerrar menú si se hace clic fuera del menú
+              onClick={() => setShowCreate(false)}
             ></div>
 
-            {/* Menú desplegable */}
             <div
               className="absolute bottom-16 right-4 bg-white rounded-lg shadow-lg py-2 z-50"
-              style={{ minWidth: "12rem" }} // Ancho mínimo para evitar colapsos
+              style={{ minWidth: "12rem" }}
             >
               <button
                 onClick={() => {
@@ -193,7 +203,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         )}
       </div>
   
-      {/* Modal de Crear Organización */}
+      {/* Modal for Organization Creation */}
       {showCreateOrgPopup && (
         <Modal
           title="Crear Organización"
@@ -226,26 +236,38 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           />
         </Modal>
       )}
-  
-      {/* Modal de Crear Proyecto */}
+      {/* Modal for Project Creation*/}
       {showCreateProjectPopup && (
         <Modal
           title="Crear Proyecto"
           onClose={() => setShowCreateProjectPopup(false)}
           onSubmit={() => {
-            const name = (document.querySelector(
-              "#project-name"
-            ) as HTMLInputElement).value;
-            const description = (document.querySelector(
-              "#project-description"
-            ) as HTMLTextAreaElement).value;
-            fetch(BACKEND_URL + "/project", {
+
+            const name = projectNameRef.current?.value || "";
+            const description = projectDescriptionRef.current?.value || "";
+            const endDate = projectEndDateRef.current?.value || "";
+            const organization = projectOrganizationRef.current?.value || "";
+
+            if (!name || !organization) {
+              alert("Please, fill the mandatory fields.");
+              return;
+            }
+
+            fetch(`${BACKEND_URL}/project`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 authorization: localStorage.getItem("token") || "",
               },
-              body: JSON.stringify({ name, description }),
+              body: JSON.stringify({
+                name,
+                description,
+                startDate: Date.now(),
+                endDate,
+                organization,
+                users: [],
+                sprints: [],
+              }),
             })
               .then((res) => res.json())
               .then((data) => {
@@ -256,22 +278,33 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           }}
         >
           <input
+            id="project-name"
+            ref={projectNameRef}
             type="text"
-            placeholder="Nombre del proyecto"
+            placeholder="Name of the project"
             className="w-full border rounded px-3 py-2 mb-4"
           />
           <textarea
-            placeholder="Descripción"
+            id="project-description"
+            ref={projectDescriptionRef}
+            placeholder="Description of the project"
             className="w-full border rounded px-3 py-2 mb-4"
           ></textarea>
+          <label htmlFor="project-end-date" className="block text-sm font-medium text-gray-700" />
           <input
+            id="project-end-date"
+            ref={projectEndDateRef}
             type="date"
             className="w-full border rounded px-3 py-2 mb-4"
           />
-          <select className="w-full border rounded px-3 py-2 mb-4">
-            <option value="">Seleccionar organización</option>
+          <select
+            id="project-organization"
+            ref={projectOrganizationRef}
+            className="w-full border rounded px-3 py-2 mb-4"
+          >
+            <option value="">Select organizations</option>
             {currentUser.organizations.map((org: any) => (
-              <option key={org._id} value={org._id}>
+              <option key={org._id} value={org.name}>
                 {org.name}
               </option>
             ))}

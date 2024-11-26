@@ -23,6 +23,7 @@ const searchIcon = "M21.71,20.29,18,16.61A9,9,0,1,0,16.61,18l3.68,3.68a1,1,0,0,0
  */
 interface SearchComponentProps {
   url: string;
+  mobile?: boolean;
 }
 
 interface SearchResult {
@@ -47,14 +48,14 @@ const SearchResultItem: React.FC<{ result: SearchResult }> = ({ result }) => {
   );
 };
 
-const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}) => {
+const SearchComponent : React.FC<SearchComponentProps> = ({url, mobile} : SearchComponentProps) => {
   const [search, setSearch] = useState<string>('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   
   const fetchResults = async (searchQuery: string) => {
     if (!searchQuery) {
-      setResults([]); // Limpiar resultados si la búsqueda está vacía
+      setResults([]);
       return;
     }
 
@@ -90,26 +91,28 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
       {/* Buscador con referencia para el tamaño */}
       <div
         ref={searchBoxRef}
-        className="flex items-center w-1/5 focus-within:w-1/3 transition-all"
+        className={"flex items-center transition-all" + (mobile ? "w-full" : "w-1/3 focus-within:w-1/2")}
       >
-        {SVGComponent({ className: 'w-6 h-6 mr-3', d: searchIcon })}
+        {!mobile && SVGComponent({ className: 'w-6 h-6 mr-3', d: searchIcon })}
         <input
           type="text"
           id="search"
           name="search"
           placeholder="Buscar"
           value={search}
+          onFocus={() => searchBoxRef.current?.focus()}
+          onBlur={() => searchBoxRef.current?.blur()}
           onChange={handleInputChange}
           className="w-full px-4 py-2 rounded-md text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-black-500 focus:ring-opacity-50 transition-all"
         />
       </div>
 
       {/* Contenedor de resultados adaptado dinámicamente */}
-      {results.length > 0 && (
+      {searchBoxRef.current !== document.activeElement && results.length > 0 && (
         <div
           className="absolute top-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-y-auto transition-all w-full sm:w-auto sm:max-w-xs"
           style={{
-            width: searchBoxRef.current?.offsetWidth || 'auto', // Ancho dinámico basado en el buscador
+            width: 'auto'
           }}
         >
           {results.map((result) => (
@@ -123,7 +126,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url} : {url : string}
         <div
           className="absolute top-full  text-red-500 bg-white border border-gray-300 text-center py-2 rounded-md transition-all"
           style={{
-            width: searchBoxRef.current?.offsetWidth || 'auto', // Ancho dinámico basado en el buscador
+            width: 'auto',
           }}
         >
           No se encontraron resultados.

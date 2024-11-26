@@ -17,11 +17,17 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface SessionState {
   token: string;
   userObject: object | null;
+  projects: object[] | null;
+  organizations : object | null;
+  currentProject: object | null;
 }
 
 const initialState: SessionState = {
   token: '',
   userObject: null,
+  projects: null,
+  currentProject: null,
+  organizations: null
 };
 
 const sessionSlice = createSlice({
@@ -30,7 +36,10 @@ const sessionSlice = createSlice({
   reducers: {
     setSession: (state, action: PayloadAction<SessionState>) => {
       state.token = action.payload.token;
+      state.projects = action.payload.projects;
       state.userObject = action.payload.userObject;
+      state.organizations = action.payload.organizations;
+      state.currentProject = action.payload.currentProject;
     },
   },
 });

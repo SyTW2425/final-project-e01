@@ -64,7 +64,7 @@ export default class UserLogic implements UsersAPI {
   
   async loginUser(email : string, password : string) : Promise<APIResponseFormat> {
     const query = { email };
-    const user = await this.dbAdapter.findOne(User, query, {});
+    const user = await this.dbAdapter.findOne(User, query, {}, ['organizations']);
     if (!user) throw new Error('User not found');
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new Error('Authentication failed by password');
@@ -114,7 +114,7 @@ export default class UserLogic implements UsersAPI {
   }
 
   public async searchUserById(userId : any) : Promise<APIResponseFormat> {
-    const user = await this.dbAdapter.findOne(User, { _id: userId }, {})
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, {}, ['organizations']);
     return user;
   }
 
