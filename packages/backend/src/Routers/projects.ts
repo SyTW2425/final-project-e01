@@ -27,7 +27,6 @@ export const projectsRouter = Express.Router();
 const dbAdapter = new MongoDB();
 export const projectLogic = new ProjectLogic(dbAdapter);
 
-
 /**
  * @brief This endpoint is used to create a new project
  * @param req The request object
@@ -132,6 +131,26 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @brief This endpoint is used to search projects from the id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.get('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+    const response = await projectLogic.searchProjectById(id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
 
 /**
  * @brief This endpoint is used to search projects from a user
@@ -153,7 +172,6 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, error.message));
   }
 });
-
 
 /**
  * @brief This endpoint is used to update a project
