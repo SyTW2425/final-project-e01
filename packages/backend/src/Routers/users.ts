@@ -17,8 +17,8 @@ import UserLogic from '../Class/UsersLogic.js';
 import MongoDB from '../Class/DBAdapter.js';
 import multer from 'multer';
 import path from 'path';
-import bcrypt from 'bcrypt';
 import fs from 'fs';
+import crypto from 'crypto';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 
@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
   destination: uploadDir,
   filename: (_, file, cb) => {
     try {
-      const hash = bcrypt.hashSync(file.originalname, 10);
+      const hash = crypto.createHash('md5').update(Date.now() + file.originalname).digest('hex');
       const filename = `${hash}${path.extname(file.originalname)}`;
       cb(null, filename);
     } catch (err) {
@@ -72,6 +72,8 @@ const upload = multer({
     cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
   }
 });
+
+
 
 const deleteImage = async (imgPath: string) => {
   if (imgPath !== "default.png") {
@@ -195,7 +197,7 @@ usersRouter.delete('/delete', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-usersRouter.patch('/update', upload.single('profilePicUpdate'), jwtMiddleware, async (req, res) => {
+usersRouter.patch('/update', upload.single('profilePic'), jwtMiddleware, async (req, res) => {
   try {
     const { username, email,  password, role } = req.body;
     if (!email) {
@@ -206,7 +208,6 @@ usersRouter.patch('/update', upload.single('profilePicUpdate'), jwtMiddleware, a
       const user = await userLogic.searchUsers(null, email);
       deleteImage(user.result.users[0].img_path);
     }
-    console.log(username)
     const profilePicPath = req.file ? req.file.filename : undefined;
     const response = await userLogic.updateUser(email, username ?? null, password ?? null, role ?? null, req.userId, profilePicPath);
     res.status(200).send(createResponseFormat(false, response));
