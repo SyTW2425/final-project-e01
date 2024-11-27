@@ -137,7 +137,7 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-projectsRouter.get('/:id', jwtMiddleware, async (req, res) => {
+projectsRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(id);

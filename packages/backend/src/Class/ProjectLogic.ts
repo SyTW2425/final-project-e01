@@ -58,7 +58,6 @@ export default class ProjectLogic implements ProjectsAPI {
   async searchProjectById(id: string): Promise<APIResponseFormat> {
     try {
       const project = await this.dbAdapter.findOne(Project, { _id: id }, {_id: 0, __v: 0}, ['organization', 'users.user']);
-      console.log(project);
       if (!project) {
         return createResponseFormat(true, 'Project not found!');
       }
@@ -77,7 +76,6 @@ export default class ProjectLogic implements ProjectsAPI {
       }
       return createResponseFormat(false, project);
     } catch (error) {
-      console.log(error);
       return createResponseFormat(true, error);
     }
   }
