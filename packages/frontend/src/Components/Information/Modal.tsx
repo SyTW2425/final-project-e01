@@ -14,7 +14,7 @@ const Modal: React.FC<ModalProps> = ({ title, children, onClose, onSubmit }) => 
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-md p-6 w-1/3"
+        className="bg-white rounded-md p-6 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4 md:mx-auto max-h-screen overflow-y-auto"
         onClick={(e) => e.stopPropagation()} // Previene cerrar al hacer clic dentro del modal
       >
         <h2 className="text-xl font-bold mb-4">{title}</h2>
