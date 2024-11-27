@@ -44,12 +44,13 @@ const sessionSlice = createSlice({
     setUserObject: (state, action: PayloadAction<object>) => {
       state.userObject = action.payload;
     },
-    setProjects: (state, action: PayloadAction<object[]>) => {
+    setProjects: (state, action: PayloadAction<any>) => {
       state.projects = action.payload;
     },
-    setCurrentProject: (state, action: PayloadAction<object>) => {
+    setCurrentProject: (state, action: PayloadAction<any>) => {
       state.currentProject = action.payload;
-    }
+    },
+
   },
 });
 
@@ -57,7 +58,7 @@ export const {
   setSession,
   setToken,
   setUserObject,
+  setCurrentProject,
   setProjects,
-  setCurrentProject
  } = sessionSlice.actions;
 export default sessionSlice.reducer;

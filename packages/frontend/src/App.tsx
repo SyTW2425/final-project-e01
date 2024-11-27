@@ -49,21 +49,6 @@ const useSessionValidation = () => {
           if (!data.error) {
             dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result, projects: null, currentProject: null }));
             userObject = data.result;
-            fetch(import.meta.env.VITE_BACKEND_URL + '/project/user', {
-              method: 'GET',
-              headers: {
-                authorization: localStorage.getItem('token') || '',
-              },
-            })
-              .then((res) => res.json()).then((data) => {
-                if (!data.error) {
-                  dispatch(setSession({ token: localStorage.getItem('token') || '', userObject, projects: data.result, currentProject: data.result[0] }));
-                }
-              })
-              .catch((_) => {
-                const page = window.location.href.split('/').pop();
-                if (page?.length !== 0 && page !== 'register') navigate('/login', { replace: true });
-              });
           } 
 
         })
