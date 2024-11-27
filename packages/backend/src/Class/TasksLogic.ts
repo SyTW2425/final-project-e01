@@ -66,6 +66,15 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, task);
   }
 
+  async getTasksProjectFromUser(id: string, userId: string): Promise<APIResponseFormat> {
+    const query = { users: userId, project: id };
+    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project', 'organization']);
+    if (!tasks) {
+      return createResponseFormat(true, 'Tasks not found');
+    }
+    return createResponseFormat(false, tasks);
+  }
+
   async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string, organization: string) : Promise<APIResponseFormat> {
     const actualDate = new Date();
     const progress : number = 0.0;

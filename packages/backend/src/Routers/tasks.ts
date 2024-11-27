@@ -16,7 +16,7 @@ import Express from 'express';
 import MongoDB from '../Class/DBAdapter.js';
 import TasksLogic from '../Class/TasksLogic.js';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
-import { createResponseFormat, mapUsersToObjectIds, validateRequiredFields, authenticateAndAuthorizeUser } from '../Utils/CRUD-util-functions.js';
+import { createResponseFormat, mapUsersToObjectIds, validateRequiredFields, authenticateAndAuthorizeUser, getUserFromHeader } from '../Utils/CRUD-util-functions.js';
 
 export const tasksRouter = Express.Router();
 
@@ -70,6 +70,32 @@ tasksRouter.get('/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.getTaskById(id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to get the tasks from a user of a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.get('/user/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const response = await taskLogic.getTasksProjectFromUser(id, user._id);
     if (response.error) {
       res.status(404).send(response);
       return;
