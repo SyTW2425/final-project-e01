@@ -18,7 +18,8 @@ import { useEffect } from 'react';
 // Setting up Redux
 import { RootState } from './store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSession } from './slices/sessionSlice';
+import { setSession, setCurrentProject, setProjects } from './slices/sessionSlice';
+
 
 // Routing
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -51,6 +52,20 @@ const useSessionValidation = () => {
             userObject = data.result;
           } 
 
+          fetch(import.meta.env.VITE_BACKEND_URL + '/project/user', {
+            method: 'GET',
+            headers: { authorization: localStorage.getItem('token') || '' },
+          })
+          .then((res) => res.json())
+          .then((data) => {
+            if (!data.error) {
+              dispatch(setProjects(data.result));
+              dispatch(setCurrentProject(data.result[0]));
+            } 
+          })
+          .catch((error) => {
+            console.error('Error fetching projects:', error);
+          })
         })
         .catch((_) => {
           const page = window.location.href.split('/').pop();

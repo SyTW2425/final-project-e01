@@ -87,7 +87,7 @@ tasksRouter.get('/:id', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-tasksRouter.get('/user/:id', jwtMiddleware, async (req, res) => {
+tasksRouter.get('/project/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const user: any = await getUserFromHeader(req);

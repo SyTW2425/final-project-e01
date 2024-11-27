@@ -6,9 +6,10 @@ import { RootState } from '../store/store';
 import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
 import FooterDashboard from '../Components/Footer/FooterDashboard';
+import MyTasksPage from './Subpages/MyTasksPage';
+import MyProjectsPage from './Subpages/MyProjectsPage';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
-import MyProjectsPage from './Subpages/MyProjectsPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -38,10 +39,11 @@ const DashboardPage: React.FC = () => {
 
         {/* Principal content */}
 
-        <div className="flex-1 overflow-y-auto overflow-x-scroll">
+        <div className="flex-1 max-w-full">
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
+            <Route path="tasks" Component={MyTasksPage} />
             <Route path="/" Component={MyProjectsPage} />
             <Route path="*" Component={() => {
               return (
