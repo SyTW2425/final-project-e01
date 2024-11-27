@@ -95,7 +95,7 @@ const UserProfile: React.FC = () => {
       const response = await fetch(BACKEND_UPDATE_USER_URL, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+          authorization: `${localStorage.getItem('token') || ''}`,
         },
         body: formData, // Usar FormData aquí para enviar la imagen
       });

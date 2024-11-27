@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import Modal from '../Information/Modal';
 import SearchComponent from '../Search/SearchInput';
-import { useDispatch } from 'react-redux';
 
 
 
@@ -19,7 +18,6 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const [showSearch, setShowSearch] = useState(false);
   const [imageSRC, setImageSRC] = useState<string>('');
 
-  const dispatch = useDispatch();
   const toggleMenu = () => setShowMenu(!showMenu);
   const toggleCreate = () => setShowCreate(!showCreate);
   const toggleSearch = () => setShowSearch(!showSearch);
