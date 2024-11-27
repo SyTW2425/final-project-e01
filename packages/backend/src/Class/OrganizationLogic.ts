@@ -30,8 +30,29 @@ export default class OrganizationLogic implements OrganizationsAPI {
   }
 
   async searchOrganizationsById(id: string) : Promise<APIResponseFormat>  {
-    let organizations = await this.dbAdapter.find(Organization, {_id: id }, {_id: 0, __v: 0, members: 0, projects: 0});
+    let organizations = await this.dbAdapter.find(Organization, {_id: id }, {_id: 0, __v: 0, members: 0, projects: 0})
     return createResponseFormat(false, organizations);
+  }
+
+  async searchOrganizationById(id: string) : Promise<APIResponseFormat> { // Realizar cambio de los usuarios de la organización por sus usuarios de forma completa
+    let organization = await this.dbAdapter.findOne(Organization, { _id: id }, {_id: 0, __v: 0}, ['members.user', 'projects']);
+    if (!organization) {
+      return createResponseFormat(true, "Organization not found");
+    }
+    if (organization.members && Array.isArray(organization.members)) {
+      organization.members = organization.members.map((member: any) => {
+        if (member.user && typeof member.user === "object") {
+          const userObj = member.user.toObject ? member.user.toObject() : member.user;
+          const { password, ...restOfUser } = userObj;
+          return {
+            ...member,
+            user: restOfUser, 
+          };
+        }
+      return member;
+    });
+  }
+    return createResponseFormat(false, organization);
   }
 
   async searchOrganizations(name: string | null) : Promise<APIResponseFormat> {

@@ -31,7 +31,7 @@ export default class ProjectLogic implements ProjectsAPI {
   
   async searchPorjectsFromUser(userId : any) : Promise<APIResponseFormat> {
     try {
-      const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {_id: 0, __v: 0});
+      const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {__v: 0});
       return createResponseFormat(false, projects);
     } catch (error) {
       return createResponseFormat(true, error);
@@ -50,6 +50,31 @@ export default class ProjectLogic implements ProjectsAPI {
         return createResponseFormat(true, 'Page out of range');
       }
       return createResponseFormat(false, { projects, totalPages });
+    } catch (error) {
+      return createResponseFormat(true, error);
+    }
+  }
+
+  async searchProjectById(id: string): Promise<APIResponseFormat> {
+    try {
+      const project = await this.dbAdapter.findOne(Project, { _id: id }, {_id: 0, __v: 0}, ['organization', 'users.user']);
+      if (!project) {
+        return createResponseFormat(true, 'Project not found!');
+      }
+      if (project.users && Array.isArray(project.users)) {
+        project.users = project.users.map((user: any) => {
+          if (user.user && typeof user.user === 'object') {
+            const userObj = user.user.toObject ? user.user.toObject() : user.user;
+            const { password, ...restOfUser } = userObj;
+            return {
+              ...user,
+              user: restOfUser,
+            };
+          }
+          return user;
+        });
+      }
+      return createResponseFormat(false, project);
     } catch (error) {
       return createResponseFormat(true, error);
     }

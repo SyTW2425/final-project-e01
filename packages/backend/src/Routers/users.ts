@@ -46,10 +46,11 @@ const storage = multer.diskStorage({
     try {
       const hash = crypto.createHash('md5').update(Date.now() + file.originalname).digest('hex');
       const filename = `${hash}${path.extname(file.originalname)}`;
+      console.log(`Generated filename: ${filename}`);
       cb(null, filename);
     } catch (err) {
       console.error(`Error al generar hash: ${err}`);
-      cb(err as Error, ''); // Pasar el error al callback de Multer
+      cb(err as Error, '');
     }
   },
 });
@@ -59,18 +60,18 @@ const storage = multer.diskStorage({
  */
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
+  // limits: { fileSize: 5 * 1024 * 1024 }, // limit to 5MB
     // @ts-ignore: 'file' is declared but its value is never read
-  fileFilter: (req, file, cb) => {
-    const fileTypes = /jpeg|jpg|png/;
-    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = fileTypes.test(file.mimetype);
+  // fileFilter: (req, file, cb) => {
+  //   const fileTypes = /jpeg|jpg|png/;
+  //   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+  //   const mimetype = fileTypes.test(file.mimetype);
     
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
-  }
+  //   if (mimetype && extname) {
+  //     return cb(null, true);
+  //   }
+  //   cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png)'));
+  // }
 });
 
 

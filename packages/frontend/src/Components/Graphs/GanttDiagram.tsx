@@ -233,7 +233,7 @@ const GanttDiagram: React.FC = () => {
   
 
   return (
-    <div className="h-screen overflow-scroll">
+    <div className="h-screen">
       <Gantt tasks={tasks} />
     </div>
 

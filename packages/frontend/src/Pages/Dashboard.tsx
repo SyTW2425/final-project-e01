@@ -6,17 +6,20 @@ import { RootState } from '../store/store';
 import Sidebar from '../Components/NavBars/Sidebar';
 import Navbar from '../Components/NavBars/NavBarGeneral';
 import FooterDashboard from '../Components/Footer/FooterDashboard';
+import MyTasksPage from './Subpages/MyTasksPage';
+import MyProjectsPage from './Subpages/MyProjectsPage';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const currentUser : any = useSelector((state: RootState) => state.session.userObject);
+  const sessionState = useSelector((state: RootState) => state.session);
+  const currentUser : any = sessionState.userObject;
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
-      <div className="relative h-screen flex">
+      <div className="relative h-screen flex bg-gray-50">
         {/* Sidebar */}
         <div
           className={`fixed top-0 left-0 h-full bg-gray-200 shadow-lg z-40 transform transition-transform duration-300
@@ -30,16 +33,18 @@ const DashboardPage: React.FC = () => {
         {isSidebarOpen && (
           <div
             onClick={toggleSidebar}
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 bg-gray-50 bg-opacity-50 z-30 md:hidden"
           />
         )}
 
         {/* Principal content */}
 
-        <div className="flex-1 overflow-y-auto overflow-x-scroll">
+        <div className="flex-1 max-w-full">
           <Routes>
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
+            <Route path="tasks" Component={MyTasksPage} />
+            <Route path="/" Component={MyProjectsPage} />
             <Route path="*" Component={() => {
               return (
               <>

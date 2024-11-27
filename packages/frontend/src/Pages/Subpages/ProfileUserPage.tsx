@@ -93,11 +93,13 @@ const UserProfile: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
+
       const updatedUser = await handleUpdateUser(username, user.email, profilePic);
       setImageSRC(`${import.meta.env.VITE_BACKEND_URL}/userImg/${updatedUser.img_path}`);
       setUsername(updatedUser.username);
 
       setShowModal(false);
+
     } catch (error) {
       console.error('Error al actualizar el perfil:', error);
     }

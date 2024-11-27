@@ -64,7 +64,7 @@ export interface ProjectInterface extends Document {
 const ProjectSchema = new Schema<ProjectInterface>({
   organization: {
     type: Schema.Types.ObjectId,
-    ref: 'Organizations',
+    ref: 'Organization',
     required: true,
   },
   name: {
@@ -93,7 +93,6 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     },
   },
-
   users: {
     type: [
       {

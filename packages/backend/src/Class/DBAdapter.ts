@@ -31,11 +31,17 @@ export default class MongoDB implements databaseAdapter {
     }
   }
   
-  async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0) : Promise<any> {
+  async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0, populateFields?: PopulateOptions | (string | PopulateOptions)[]) : Promise<any> {
     if (skip === 0 && limit === 0) {
-      return await model.find(query, filter, { password: 0, __v: 0, _id: 0 });
+      if (populateFields) {
+        return await model.find(query, filter, { password: 0, __v: 0}).populate(populateFields);
+      }
+      return await model.find(query, filter, { password: 0, __v: 0});
     } else {
-      return await model.find(query, filter, { password: 0, __v: 0, _id: 0 }).skip(skip).limit(limit);
+      if (populateFields) {
+        return await model.find(query, filter, { password: 0, __v: 0}).skip(skip).limit(limit).populate(populateFields);
+      }
+      return await model.find(query, filter, { password: 0, __v: 0}).skip(skip).limit(limit);
     }
   }
 
