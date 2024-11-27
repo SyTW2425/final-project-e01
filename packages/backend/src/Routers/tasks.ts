@@ -57,6 +57,31 @@ tasksRouter.get('/', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to get a task by its id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.get('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      return;
+    }
+    const response = await taskLogic.getTaskById(id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to create a task
  * @param req The request object
  * @param res The response object

@@ -84,7 +84,11 @@ organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
 organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const response = await organizationLogic.searchOrganizationsById(id);
+    const response = await organizationLogic.searchOrganizationById(id);
+    if (response.error) {
+      res.status(404).json(response);
+      return;
+    }
     res.status(200).send(response);
   } catch (error) {
     console.error(error);

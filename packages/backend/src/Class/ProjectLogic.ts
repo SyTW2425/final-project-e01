@@ -55,6 +55,33 @@ export default class ProjectLogic implements ProjectsAPI {
     }
   }
 
+  async searchProjectById(id: string): Promise<APIResponseFormat> {
+    try {
+      const project = await this.dbAdapter.findOne(Project, { _id: id }, {_id: 0, __v: 0}, ['organization', 'users.user']);
+      console.log(project);
+      if (!project) {
+        return createResponseFormat(true, 'Project not found!');
+      }
+      if (project.users && Array.isArray(project.users)) {
+        project.users = project.users.map((user: any) => {
+          if (user.user && typeof user.user === 'object') {
+            const userObj = user.user.toObject ? user.user.toObject() : user.user;
+            const { password, ...restOfUser } = userObj;
+            return {
+              ...user,
+              user: restOfUser,
+            };
+          }
+          return user;
+        });
+      }
+      return createResponseFormat(false, project);
+    } catch (error) {
+      console.log(error);
+      return createResponseFormat(true, error);
+    }
+  }
+
   async createProject(organization: string, nameProject: string, description: string, stardDate: string, endDate: string, users: any) : Promise<APIResponseFormat> {
     const project_saved = await this.dbAdapter.create(Project, {
       organization,

@@ -138,7 +138,7 @@ export const TaskSchema = new Schema<TaskInterface>({
   },
   organization: {
     type: Schema.Types.ObjectId,
-    ref: 'Organizations',
+    ref: 'Organization',
     required: true,
     _id: false,
   },
