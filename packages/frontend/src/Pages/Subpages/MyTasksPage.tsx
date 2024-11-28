@@ -19,7 +19,7 @@ const MyTasksPage: React.FC = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!currentProject?._id) return; // Evita hacer la petición si currentProject es null o no tiene _id
+      if (!currentProject?._id) return;
 
       try {
         const response = await fetch(
@@ -54,7 +54,7 @@ const MyTasksPage: React.FC = () => {
           {Array.isArray(tasks) && tasks.length > 0 ? (
             tasks.map((task) => (
               <div
-                key={task._id}
+                key={Date.now() + Math.random()}
                 className="bg-white shadow-md p-4 rounded-lg border border-gray-200"
               >
                 <h2 className="text-xl font-semibold">{task.name}</h2>

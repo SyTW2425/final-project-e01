@@ -6,7 +6,7 @@ import { RootState } from '../../store/store';
 const MyProjectsPage: React.FC = () => {
   const dispatch = useDispatch();
   const sessionState = useSelector((state: RootState) => state.session);
-
+  console.log(sessionState.currentProject);
 
   return (
     <div className="flex-1 bg-gray-50 w-full h-auto">
@@ -14,7 +14,7 @@ const MyProjectsPage: React.FC = () => {
       (sessionState.projects && sessionState.projects.length > 0 ? 
         (sessionState.projects.map((project: any) => (
           <div 
-            key={project.organization} 
+            key={Date.now() + Math.random()} 
             className="bg-white rounded-lg shadow-md p-4 m-4 cursor-pointer"
             onClick={() => dispatch(setCurrentProject(project))}
           >

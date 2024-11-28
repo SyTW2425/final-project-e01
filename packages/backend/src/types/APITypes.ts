@@ -88,7 +88,7 @@ export interface OrganizationsAPI {
 
 
 export interface databaseAdapter {
-  findOne(model : Model<any>, query : any, filter? : object, populateFields?: null | PopulateOptions | (string | PopulateOptions)[]) : Promise<any>;
+  findOne(model : Model<any>, query : any, filter? : object, populateFields?: null | PopulateOptions | (string | PopulateOptions | object)[]) : Promise<any>;
   find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number, populateFields?: null | PopulateOptions | (string | PopulateOptions)[]) : Promise<any>;
   create : (model : Model<any>, data : any) => Promise<any>;
   updateOne : (model : Model<any>, query : any, data : any) => Promise<any>;

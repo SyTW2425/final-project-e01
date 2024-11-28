@@ -57,7 +57,11 @@ export default class ProjectLogic implements ProjectsAPI {
 
   async searchProjectById(id: string): Promise<APIResponseFormat> {
     try {
-      const project = await this.dbAdapter.findOne(Project, { _id: id }, {_id: 0, __v: 0}, ['organization', 'users.user']);
+      const project = await this.dbAdapter.findOne(Project, { _id: id }, {_id: 0, __v: 0}, {
+        path: 'users.user',
+        model: 'Users',
+        select: 'username email img_path '
+      });
       if (!project) {
         return createResponseFormat(true, 'Project not found!');
       }
