@@ -46,7 +46,6 @@ const storage = multer.diskStorage({
     try {
       const hash = crypto.createHash('md5').update(Date.now() + file.originalname).digest('hex');
       const filename = `${hash}${path.extname(file.originalname)}`;
-      console.log(`Generated filename: ${filename}`);
       cb(null, filename);
     } catch (err) {
       console.error(`Error al generar hash: ${err}`);
@@ -118,6 +117,17 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 }); 
+
+usersRouter.get('/:username', jwtMiddleware, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const response = await userLogic.searchUsers(username, null);
+    res.status(200).send(response);
+  } catch (error : unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+})
 
 usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
   try {
