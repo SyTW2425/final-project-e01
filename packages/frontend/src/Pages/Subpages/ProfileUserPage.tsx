@@ -20,6 +20,7 @@ import Navbar from '../../Components/NavBars/NavBarGeneral';
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
 const BACKEND_UPDATE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/update';
+const BACKEND_PROJECTS_USER_URL = import.meta.env.VITE_BACKEND_URL + '/project/user';
 
 
 
@@ -52,8 +53,31 @@ const UserProfile: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [imageSRC, setImageSRC] = useState<string>('');
   const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
 
   const navigate = useNavigate();
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(BACKEND_PROJECTS_USER_URL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') || '',
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setProjects(data.result);
+      } 
+    } catch (error) {
+      console.error('Error al obtener los proyectos del usuario:', error);
+    }
+  };
+  
+
+
 
   const handleDelete = () => {
     const confirmDelete = window.confirm(
@@ -81,11 +105,11 @@ const UserProfile: React.FC = () => {
   };
 
   const handleUpdate = () => {
-    setShowModal(true); // Mostrar modal
+    setShowModal(true);
   };
 
   const handleModalClose = () => {
-    setShowModal(false); // Ocultar modal
+    setShowModal(false);
   };
 
   
@@ -116,6 +140,7 @@ const UserProfile: React.FC = () => {
         })
         .catch((err) => console.error(err));
     }
+    fetchProjects();
   }, [user, imageSRC]);
   
   return (
@@ -169,15 +194,15 @@ const UserProfile: React.FC = () => {
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
             <ul className="space-y-3">
-              {user && user.projects?.map((project: any, index: number) => (
+              {user && projects.map((project: any, index: number) => (
                 <li
-                  key={index}
+                  key={project._id || index}
                   className="bg-gray-100 p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
                 >
-                  {typeof project === 'string' ? project : project.name}
+                  {project.name || "Proyecto sin nombre"} 
                 </li>
               ))}
-              {user && user.projects?.length === 0 && (
+              {user && projects.length === 0 && (
                 <p className="text-gray-500">No tienes proyectos asignados.</p>
               )}
             </ul>
