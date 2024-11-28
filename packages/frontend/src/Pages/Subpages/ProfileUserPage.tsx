@@ -20,6 +20,7 @@ import Navbar from '../../Components/NavBars/NavBarGeneral';
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
 const BACKEND_UPDATE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/update';
+const BACKEND_PROJECTS_USER_URL = import.meta.env.VITE_BACKEND_URL + '/project/user';
 
 
 
@@ -52,8 +53,31 @@ const UserProfile: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [imageSRC, setImageSRC] = useState<string>('');
   const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
 
   const navigate = useNavigate();
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(BACKEND_PROJECTS_USER_URL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') || '',
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setProjects(data.result);
+      } 
+    } catch (error) {
+      console.error('Error al obtener los proyectos del usuario:', error);
+    }
+  };
+  
+
+
 
   const handleDelete = () => {
     const confirmDelete = window.confirm(
@@ -81,11 +105,11 @@ const UserProfile: React.FC = () => {
   };
 
   const handleUpdate = () => {
-    setShowModal(true); // Mostrar modal
+    setShowModal(true);
   };
 
   const handleModalClose = () => {
-    setShowModal(false); // Ocultar modal
+    setShowModal(false);
   };
 
   
@@ -116,46 +140,50 @@ const UserProfile: React.FC = () => {
         })
         .catch((err) => console.error(err));
     }
+    fetchProjects();
   }, [user, imageSRC]);
   
   return (
     <>
       <Navbar onToggleSidebar={() => {}} />
-      <div className="flex min-h-screen bg-gray-100">
-        <div className="w-1/3 bg-white p-8 shadow-lg">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+        {/* Sección del perfil del usuario */}
+        <div className="w-full md:w-1/3 bg-white p-6 md:p-8 shadow-lg">
           <div className="text-center mb-8">
             <img
               src={imageSRC}
               alt="Profile"
-              className="w-48 h-48 rounded-full mx-auto border-8 border-blue-600 shadow-lg"
+              className="w-32 h-32 md:w-48 md:h-48 rounded-full mx-auto border-4 md:border-8 border-blue-600 shadow-lg"
             />
-            <h2 className="text-2xl font-bold text-gray-700">{user && user.username}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-700">{user && user.username}</h2>
             <p className="text-sm text-gray-500">{user && user.email}</p>
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleUpdate}
-              className="w-full bg-blue-500 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition duration-200"
+              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-600 transition duration-200"
             >
               Actualizar Perfil
             </button>
             <button
               onClick={handleDelete}
-              className="w-full bg-red-500 text-white font-bold py-3 rounded-lg hover:bg-red-600 transition duration-200"
+              className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-600 transition duration-200"
             >
               Eliminar Cuenta
             </button>
           </div>
         </div>
-
-        <div className="w-2/3 flex flex-col space-y-8 p-8">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
+  
+        {/* Sección de organizaciones y proyectos */}
+        <div className="w-full md:w-2/3 flex flex-col space-y-6 p-4 md:p-8">
+          {/* Organizaciones */}
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+            <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
             <ul className="space-y-3">
               {user && user.organizations?.map((organization: any, index: number) => (
                 <li
                   key={index}
-                  className="bg-gray-100 p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
+                  className="bg-gray-100 p-3 md:p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
                 >
                   {typeof organization === 'string' ? organization : organization.name}
                 </li>
@@ -165,30 +193,32 @@ const UserProfile: React.FC = () => {
               )}
             </ul>
           </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
+  
+          {/* Proyectos */}
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+            <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
             <ul className="space-y-3">
-              {user && user.projects?.map((project: any, index: number) => (
+              {projects.map((project: any, index: number) => (
                 <li
-                  key={index}
-                  className="bg-gray-100 p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
+                  key={project._id || index}
+                  className="bg-gray-100 p-3 md:p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
                 >
-                  {typeof project === 'string' ? project : project.name}
+                  {project.name || "Proyecto sin nombre"}
                 </li>
               ))}
-              {user && user.projects?.length === 0 && (
+              {projects.length === 0 && (
                 <p className="text-gray-500">No tienes proyectos asignados.</p>
               )}
             </ul>
           </div>
         </div>
       </div>
-
+  
+      {/* Modal para actualizar perfil */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-2xl font-bold mb-4 text-gray-700">Actualizar Perfil</h2>
+          <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Actualizar Perfil</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="username" className="block text-gray-700 font-bold mb-2">Nombre de Usuario</label>
@@ -202,12 +232,12 @@ const UserProfile: React.FC = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="profilePic" className="block text-gray-700 text-sm font-bold mb-2">Imagen de Perfil</label>
+                <label htmlFor="profilePic" className="block text-gray-700 font-bold mb-2">Imagen de Perfil</label>
                 <input
                   type="file"
                   id="profilePic"
                   name="profilePic"
-                  accept='image/*'
+                  accept="image/*"
                   onChange={e => setProfilePic(e.target.files ? e.target.files[0] : null)}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -233,7 +263,7 @@ const UserProfile: React.FC = () => {
       )}
     </>
   );
-};
+};  
 
 export default UserProfile;
 
