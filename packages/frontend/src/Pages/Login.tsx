@@ -13,7 +13,7 @@
  */
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { setSession } from '../slices/sessionSlice';
+import { setUserObject, setToken } from '../slices/sessionSlice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../store/store';
 
@@ -51,8 +51,10 @@ const LoginForm: React.FC = () => {
 
       const data = await response.json();
       localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
-      dispatch(setSession({ token: data.result.token, userObject: data.result.userObject }));
+      dispatch(setToken(data.result.token));
+      dispatch(setUserObject(data.result.userObject));
       navigate('/dashboard', { replace: true });
+      window.location.reload();
     } catch (error: any) {
       setErrorMessage(error.message);
       throw error;

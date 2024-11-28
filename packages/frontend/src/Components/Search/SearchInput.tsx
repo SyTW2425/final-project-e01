@@ -91,7 +91,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url, mobile} : Search
       {/* Buscador con referencia para el tamaño */}
       <div
         ref={searchBoxRef}
-        className={"flex items-center transition-all" + (mobile ? "w-full" : "w-1/3 focus-within:w-1/2")}
+        className={"flex items-center " + (mobile ? "w-full" : "w-1/3 focus-within:w-1/2 transition-all")}
       >
         {!mobile && SVGComponent({ className: 'w-6 h-6 mr-3', d: searchIcon })}
         <input

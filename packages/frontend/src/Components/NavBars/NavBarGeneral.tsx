@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
-import SVGComponent from '../Icons/SVGComponent';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import React, { useEffect, useState, useRef } from 'react';
+
 import Modal from '../Information/Modal';
+import { RootState } from '../../store/store';
+import SVGComponent from '../Icons/SVGComponent';
 import SearchComponent from '../Search/SearchInput';
 
 
