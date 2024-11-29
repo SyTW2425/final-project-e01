@@ -16,6 +16,7 @@ import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, OrganizationsAPI, databaseAdapter } from '../types/APITypes.js';
 import Organization from '../Models/Organization.js';
 import { userLogic } from '../Routers/users.js';
+import { projectLogic } from '../Routers/projects.js';
 
 /**
  * Class that contains the logic of the organizations
@@ -49,9 +50,9 @@ export default class OrganizationLogic implements OrganizationsAPI {
             user: restOfUser, 
           };
         }
-      return member;
-    });
-  }
+        return member;
+      });
+    }
     return createResponseFormat(false, organization);
   }
 
@@ -59,6 +60,14 @@ export default class OrganizationLogic implements OrganizationsAPI {
     const query = this.buildSearchQuery(name);
     let organizations = await this.dbAdapter.find(Organization, query, {_id: 0, __v: 0, members: 0, projects: 0});
     return createResponseFormat(false, organizations);
+  }
+
+  async searchOrganizationByProject(projectID: string) : Promise<any> {
+    return this.dbAdapter.findOne(Organization, { projects: projectID }, {});
+  }
+
+  async searchUsersFromOrganization(organizationID: string) : Promise<any> {
+    return this.dbAdapter.find(Organization, { _id: organizationID }, { members: 1 });
   }
 
   async createOrganization(name: string, members: any): Promise<APIResponseFormat> {
@@ -78,7 +87,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
           if (member.user) {
             await userLogic.addOrganizationToUser(member.user, organization._id);
           } else {
-            console.warn(`Member ${JSON.stringify(member)} has no user field`);
+            // console.warn(`Member ${JSON.stringify(member)} has no user field`);
           }
         })
       );
@@ -86,6 +95,29 @@ export default class OrganizationLogic implements OrganizationsAPI {
       return createResponseFormat(false, organization_saved);
     } catch (error) {
       return createResponseFormat(true, "Cannot create organization");
+    }
+  }
+
+  async addMemberToOrganization(idOrg: string, member: any): Promise<APIResponseFormat> {
+    try {
+      const query = { _id: idOrg };
+      const organization = await this.dbAdapter.findOne(Organization, query, {});
+      if (!organization) {
+        throw new Error(`Organization with ID "${idOrg}" not found.`);
+      }
+      const members = organization.members || [];
+      members.push(member);
+      const data = {
+        members
+      };
+      const organization_updated = await this.dbAdapter.updateOne(Organization, query, data);
+      if (!organization_updated) {
+        throw new Error(`Failed to update organization with ID "${idOrg}".`);
+      }
+      await userLogic.addOrganizationToUser(member.user, organization._id);
+      return createResponseFormat(false, organization_updated);
+    } catch (error) {
+      return createResponseFormat(true, "Cannot add member to organization");
     }
   }
 
@@ -128,7 +160,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
             if (member.user) {
               await userLogic.addOrganizationToUser(member.user, organizationToUpdate._id);
             } else {
-              console.warn(`Member ${JSON.stringify(member)} has no user field`);
+              // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
           })
         );
@@ -137,7 +169,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
             if (member.user) {
               await userLogic.removeOrganizationFromUser(member.user, organizationToUpdate._id);
             } else {
-              console.warn(`Member ${JSON.stringify(member)} has no user field`);
+              // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
           })
         );
@@ -146,6 +178,24 @@ export default class OrganizationLogic implements OrganizationsAPI {
     } catch (error) {
       return createResponseFormat(true, "Unknown error occurred");
     }
+  }
+
+  public async addProjectToOrganization(idOrg: string, projectID: string): Promise<any> {
+    const query = { _id: idOrg };
+    const organization = await this.dbAdapter.findOne(Organization, query, {});
+    if (!organization) {
+      return createResponseFormat(true, "Organization not found");
+    }
+    const projects = organization.projects || [];
+    projects.push(projectID);
+    const data = {
+      projects
+    };
+    const organizationUpdated = await this.dbAdapter.updateOne(Organization, query, data);
+    if (!organizationUpdated) {
+      return createResponseFormat(true, "Cannot update organization");
+    }
+    return createResponseFormat(false, organizationUpdated);
   }
   
   async deleteOrganization(nameOrg: string): Promise<APIResponseFormat> {
@@ -167,19 +217,62 @@ export default class OrganizationLogic implements OrganizationsAPI {
             if (member.user) {
               await userLogic.removeOrganizationFromUser(member.user, organization._id);
             } else {
-              console.warn(`Member ${JSON.stringify(member)} has no user field`);
+              // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
           })
         );
       } else {
-        console.warn(`Organization "${nameOrg}" has no members or members is not an array.`);
+        // console.warn(`Organization "${nameOrg}" has no members or members is not an array.`);
       }
       return createResponseFormat(false, organization_deleted);
     } catch (error) {
       return createResponseFormat(true, "Unknown error occurred");
     }
   }
-  
+
+  async deleteMember(orgId: string, memberId: string): Promise<APIResponseFormat> {
+    try {
+      const query = { _id: orgId };
+      const organization = await this.dbAdapter.findOne(Organization, query, {});
+      if (!organization) {
+        throw new Error(`Organization with ID "${orgId}" not found.`);
+      }
+      const members = organization.members || [];
+      const memberIndex = members.findIndex((member: any) => member.user === memberId);
+      if (memberIndex === -1) {
+        throw new Error(`Member with ID "${memberId}" not found in organization with ID "${orgId}".`);
+      }
+      const member = members[memberIndex];
+      members.splice(memberIndex, 1);
+      const data = {
+        members
+      };
+      const organization_updated = await this.dbAdapter.updateOne(Organization, query, data);
+      if (!organization_updated) {
+        throw new Error(`Failed to update organization with ID "${orgId}".`);
+      }
+      await userLogic.removeOrganizationFromUser(member.user, organization._id);
+      /// Delete user from each project of the organization
+      if (organization.projects && Array.isArray(organization.projects)) {
+        await Promise.all(
+          organization.projects.map(async (projectID: string) => {
+            const project = await projectLogic.searchProjectById(projectID);
+            if (project.error) {
+              // console.warn(`Project with ID "${projectID}" not found.`);
+              return;
+            }
+            const project_updated = await projectLogic.deleteUserFromProject(projectID, memberId);
+            if (project_updated.error) {
+              // console.warn(`Failed to update project with ID "${projectID}".`);
+            }            
+          })
+        );
+      }
+      return createResponseFormat(false, organization_updated);
+    } catch (error) {
+      return createResponseFormat(true, "Unknown error occurred");
+    }
+  }
   
   public searchOrganizationByName(nameOrg: string) : Promise<any> {
     return this.dbAdapter.findOne(Organization, { name: nameOrg }, {} );

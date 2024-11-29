@@ -15,11 +15,15 @@ interface Task {
 
 const MyTasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true); // Nuevo estado de carga
   const currentProject: any = useSelector((state: RootState) => state.session.currentProject);
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!currentProject?._id) return;
+      if (!currentProject?._id) {
+        setLoading(false); // Si no hay proyecto, dejamos de cargar
+        return;
+      }
 
       try {
         const response = await fetch(
@@ -35,16 +39,23 @@ const MyTasksPage: React.FC = () => {
         if (!response.ok) {
           throw new Error("Error fetching tasks");
         }
-        
+
         const data = await response.json();
         setTasks(data.result);
       } catch (error) {
         console.error("Error fetching tasks:", error);
+      } finally {
+        setLoading(false); // La carga ha terminado
       }
     };
 
+    setLoading(true); // Iniciar carga al cambiar el proyecto
     fetchTasks();
   }, [currentProject]);
+
+  if (loading) {
+    return <p>Loading tasks...</p>; // Mensaje de carga mientras esperamos
+  }
 
   return (
     <div className="flex-1 bg-gray-50 w-full h-auto">
@@ -54,7 +65,7 @@ const MyTasksPage: React.FC = () => {
           {Array.isArray(tasks) && tasks.length > 0 ? (
             tasks.map((task) => (
               <div
-                key={Date.now() + Math.random()}
+                key={task._id} // Clave única
                 className="bg-white shadow-md p-4 rounded-lg border border-gray-200"
               >
                 <h2 className="text-xl font-semibold">{task.name}</h2>

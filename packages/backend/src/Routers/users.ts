@@ -36,7 +36,7 @@ const uploadDir = path.join(process.cwd(), 'public/userImages');
   try {
     await fs.promises.mkdir(uploadDir, { recursive: true });
   } catch (err) {
-    console.error("Error creating directory:", err);
+    // console.error("Error creating directory:", err);
   }
 })();
 
@@ -46,10 +46,10 @@ const storage = multer.diskStorage({
     try {
       const hash = crypto.createHash('md5').update(Date.now() + file.originalname).digest('hex');
       const filename = `${hash}${path.extname(file.originalname)}`;
-      console.log(`Generated filename: ${filename}`);
+      // console.log(`Generated filename: ${filename}`);
       cb(null, filename);
     } catch (err) {
-      console.error(`Error al generar hash: ${err}`);
+      // console.error(`Error al generar hash: ${err}`);
       cb(err as Error, '');
     }
   },
@@ -81,7 +81,7 @@ const deleteImage = async (imgPath: string) => {
     const imgPathToDelete = path.join(uploadDir, imgPath);
     fs.unlink(imgPathToDelete, (err) => {
       if (err) {
-        console.error(`Error deleting image: ${err}`);
+        // console.error(`Error deleting image: ${err}`);
       }
     });
   }
