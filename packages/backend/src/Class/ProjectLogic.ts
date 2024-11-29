@@ -14,6 +14,7 @@
 
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, ProjectsAPI, databaseAdapter } from '../types/APITypes.js';
+import { organizationLogic } from '../Routers/organizations.js';
 import Project from '../Models/Project.js';
 import { LIMIT } from './DBAdapter.js';
 
@@ -93,6 +94,16 @@ export default class ProjectLogic implements ProjectsAPI {
       endDate,
       users
     });
+    if (!project_saved) {
+      return createResponseFormat(true, 'Cannot save project');
+    }
+    // console.log('Project saved: ', project_saved);
+    /// Add the project to the organization
+    const organizationObj = await organizationLogic.addProjectToOrganization(organization, project_saved._id);
+    if (organizationObj.error) {
+      return createResponseFormat(true, 'Cannot save project');
+    }
+    // console.log('Organization updated: ', organizationObj);
     return createResponseFormat(false, project_saved);
   }
 
@@ -118,6 +129,43 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, project);
   }
 
+  public async addUserToProject(projectID: string, user: any): Promise<APIResponseFormat> {
+    const query = { _id: projectID };
+    const project = await this.dbAdapter.findOne(Project, query, {});
+    if (!project) {
+      return createResponseFormat(true, 'Project not found');
+    }
+    const usersProject = project.users;
+    usersProject.push(user);
+    const data = {
+      users: usersProject
+    };
+    const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
+    if (!projectUpdated) {
+      return createResponseFormat(true, 'Cannot update project');
+    }
+    return createResponseFormat(false, projectUpdated);
+  }
+
+  public async deleteUserFromProject(projectID: string, users: string): Promise<APIResponseFormat> {
+    const query = { _id: projectID };
+    /// Obtener el proyecto 
+    const project = await this.dbAdapter.findOne(Project, query, {});
+    if (!project) {
+      return createResponseFormat(true, 'Project not found');
+    }
+    const usersProject = project.users;
+    const newUsers = usersProject.filter((user: any) => user.user != users);
+    const data = {
+      users: newUsers
+    };
+    const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
+    if (!projectUpdated) {
+      return createResponseFormat(true, 'Cannot update project');
+    }
+    return createResponseFormat(false, projectUpdated);
+  }
+
   public async updateProject(nameProject: string, description: string, startDate: string, endDate: string, users: string[], sprints: any): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery('', nameProject);
     const data = {
@@ -129,6 +177,25 @@ export default class ProjectLogic implements ProjectsAPI {
     };
     const project = await this.dbAdapter.updateOne(Project, query, data);
     return createResponseFormat(false, project);
+  }
+
+  public async updateRoleOfUserInProject(projectID: string, userID: string, role: string): Promise<APIResponseFormat> {
+    const query = { _id: projectID, 'users.user': userID };
+    const project = await this.dbAdapter.findOne(Project, query, {});
+    if (!project) {
+      return createResponseFormat(true, 'Project not found');
+    }
+    const users = project.users;
+    const userIndex = users.findIndex((user: any) => user.user == userID);
+    users[userIndex].role = role;
+    const data = {
+      users
+    };
+    const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
+    if (!projectUpdated) {
+      return createResponseFormat(true, 'Cannot update project');
+    }
+    return createResponseFormat(false, projectUpdated);
   }
 
   private buildSearchQuery(orgID: string, projectName: string): any {
