@@ -86,7 +86,7 @@ const App: React.FC = () => {
       <Route path="/login" Component={LoginPage} />
       <Route path="/register" Component={RegisterPage} />
       <Route path="/dashboard/*" Component={DashboardPage} />
-      <Route path="/dashboard/profile" Component={ProfileUserPage} />
+      <Route path="/dashboard/profile/:username" element={<ProfileUserPage />} />
       <Route path="*" Component={HomePage} />
     </Routes>
   );

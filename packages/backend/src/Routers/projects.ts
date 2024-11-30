@@ -230,6 +230,20 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
   }
 });
 
+projectsRouter.get('/:username', jwtMiddleware, async (req, res) => {
+  try {
+    const user = await userLogic.searchUsersByUsername(req.params.username);
+    if (user.error) {
+      res.status(404).send(user);
+      return;
+    }
+    const response = await projectLogic.searchPorjectsFromUser(user.result._id);
+    res.status(200).send(response);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+})
+
 /**
  * @brief This endpoint is used to update a project
  * @param req The request object
