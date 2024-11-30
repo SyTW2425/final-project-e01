@@ -18,7 +18,7 @@ import MongoDB from '../Class/DBAdapter.js';
 import ProjectLogic from '../Class/ProjectLogic.js';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { Role } from '../Models/Project.js';
-import { getUserFromHeader, isAdminOfOrganization } from '../Utils/CRUD-util-functions.js';
+import { getUserFromHeader, isAdminOfOrganization, isAdminOrOwnerOfProject, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
 import { organizationLogic } from './organizations.js';
 import { userLogic } from './users.js';
 
@@ -89,6 +89,63 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to add a user to a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, user, role } = req.body;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project as string);
+    if (!projectResult) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    const userResult = await userLogic.searchUserById(user);
+    if (!userResult) {
+      res.status(404).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const userFromHeader = await getUserFromHeader(req) as any;
+    if (!userFromHeader) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
+    // Obtain the organization of the project 
+    const organizationResult = await organizationLogic.searchOrganizationByProject(project);
+    if (!organizationResult) {
+      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    // Check if the user is in the organization
+    const isUserInOrganization = await isMemberOfOrganization(organizationResult, user);
+    if (!isUserInOrganization) {
+      res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
+      return;
+    }
+    // Add the user to the project
+    const userToAdd = { user, role };
+    const userAdded = await projectLogic.addUserToProject(project, userToAdd);
+    if (!userAdded.result) {
+      res.status(404).send(createResponseFormat(true, 'User not added to the project'));
+      return;
+    }
+    res.status(201).send(userAdded);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to search projects
  * @param req The request object
  * @param res The response object
@@ -140,7 +197,7 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
 projectsRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
+    // console.log(id);
     const response = await projectLogic.searchProjectById(id);
     if (response.error) {
       res.status(404).send(response);
@@ -237,6 +294,45 @@ projectsRouter.put('/', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to update the role of a user in a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, user, role } = req.body;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (!projectResult) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const userFromHeader = await getUserFromHeader(req) as any;
+    if (!userFromHeader) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
+    // Update the role of the user in the project
+    const userUpdate = await projectLogic.updateRoleOfUserInProject(project, user, role);
+    if (!userUpdate.result) {
+      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
+      return;
+    }
+    res.status(200).send(userUpdate);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to delete a project
  * @param req The request object
  * @param res The response object
@@ -267,6 +363,45 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
     if (!projectDelete.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    res.status(200).send(projectDelete);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to delete a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, user } = req.body;
+    // We need search the project 
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (!projectResult) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const userResult = await userLogic.searchUserById(user);
+    if (!userResult) {
+      res.status(404).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const userFromHeader = await getUserFromHeader(req) as any;
+    if (!userFromHeader) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Delete the user from the project
+    const projectDelete = await projectLogic.deleteUserFromProject(project, user); 
+    if (!projectDelete.result) {
+      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
     res.status(200).send(projectDelete);

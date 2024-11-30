@@ -106,8 +106,34 @@ export async function getAuthenticatedUser(req: any, res: any) {
  * @returns Boolean indicating if the user is an admin
  */
 export function isAdminOfOrganization(organization: any, userId: string) {
-  const member = organization.members.find((m: any) => m.user.toString() === userId.toString());
+  let member = organization.members.find((m: any) => m.user.toString() === userId.toString());
+  if (!member) {
+    member = organization.members.find((m: any) => m.user._id.toString() === userId.toString()); 
+  }
   return member && member.role === 'admin';
+}
+
+/**
+ * Helper to check if a user is a member of an organization
+ * @param organization The organization object
+ * @param userId The user ID to check
+ * @returns Boolean indicating if the user is a member
+ */
+export function isMemberOfOrganization(organization: any, userId: string) {
+  return organization.members.some((member: any) => member.user.toString() === userId.toString());
+}
+
+/**
+ * Helper to check if a user is a admin or a owner of a project
+ * @param project The project object
+ * @param userId The user ID to check
+ * @returns Boolean indicating if the user is a member
+ */
+export function isAdminOrOwnerOfProject(project: any, userId: string): boolean {
+  return project.users.some((user: any) => 
+    user.user._id.toString() === userId.toString() && 
+    (user.role === 'admin' || user.role === 'owner')
+  );
 }
 
 /**
