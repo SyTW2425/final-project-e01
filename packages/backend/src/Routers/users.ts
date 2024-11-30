@@ -137,18 +137,6 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 }); 
 
-usersRouter.get('/:username', jwtMiddleware, async (req, res) => {
-  try {
-    const { username } = req.params;
-    const response = await userLogic.searchUsers(username, null);
-    res.status(200).send(response);
-  } catch (error : unknown) {
-    const errorParsed = error as Error;
-    res.status(500).send(createResponseFormat(true, errorParsed.message));
-  }
-})
-
-
 
 /**
  * @brief This endpoint is used to register a new user

@@ -230,7 +230,7 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
   }
 });
 
-projectsRouter.get('/:username', jwtMiddleware, async (req, res) => {
+projectsRouter.get('/searchprojects/:username', jwtMiddleware, async (req, res) => {
   try {
     const user = await userLogic.searchUsersByUsername(req.params.username);
     if (user.error) {

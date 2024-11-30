@@ -20,7 +20,9 @@ import Navbar from '../../Components/NavBars/NavBarGeneral';
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
 const BACKEND_UPDATE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/update';
-const BACKEND_PROJECTS_USER_URL = import.meta.env.VITE_BACKEND_URL + '/project/user';
+const BACKEND_PROJECTS_USER_URL = import.meta.env.VITE_BACKEND_URL + '/project/searchprojects';
+const BACKEND_ADD_MEMBER_URL = `${import.meta.env.VITE_BACKEND_URL}/organization/member`;
+
 
 
 
@@ -50,19 +52,21 @@ const UserProfile: React.FC = () => {
   const user_searched = useParams<{ username : string }>();
   const user : any = useSelector((state: RootState) => state.session.userObject);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalAddOrg, setShowModalAddOrg] = useState<boolean>(false);
   const [searchedUser, setSearchedUser] = useState<any>(null);
   const [username, setUsername] = useState<string>('');
   const [imageSRC, setImageSRC] = useState<string>('');
+  const [organizations, setOrganizations] = useState<any[]>([]);
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<string>('');
 
   const navigate = useNavigate();
   
   const isLoggedUser = user_searched.username === user?.username;
-
   const fetchUser = async () => {
     try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/user/' + user_searched.username, {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/user/search/' + user_searched.username, {
         method: 'GET',
         headers: {
           Authorization: `${localStorage.getItem('token') || ''}`,
@@ -79,9 +83,32 @@ const UserProfile: React.FC = () => {
     }
   }
 
+  const fetchOrganizations = async () => {
+    try {
+      const URL = import.meta.env.VITE_BACKEND_URL + '/organization/searchorganizations/user/' + `${user.username}`;
+      console.log(URL);
+      const response = await fetch(URL, {
+        method: 'GET',
+        headers: {
+          Authorization: `${localStorage.getItem('token') || ''}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setOrganizations(data.result);
+      } else {
+        console.error('Error al obtener organizaciones');
+      }
+    } catch (error) {
+      console.error('Error al obtener organizaciones:', error);
+    }
+  };
+  
   const fetchProjects = async () => {
     try {
-      const URL = isLoggedUser ? BACKEND_PROJECTS_USER_URL : BACKEND_PROJECTS_USER_URL + `/${user_searched.username}`;
+      const URL = isLoggedUser ? BACKEND_PROJECTS_USER_URL + `/${user?.username}` : BACKEND_PROJECTS_USER_URL + `/${user_searched.username}`;
+      console.log(URL);
       const response = await fetch(URL, {
         method: 'GET',
         headers: {
@@ -134,7 +161,7 @@ const UserProfile: React.FC = () => {
     setShowModal(false);
   };
 
-  
+    
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -152,6 +179,65 @@ const UserProfile: React.FC = () => {
     setShowModal(false);
   };
 
+  const handleAddToOrganization = async (organizationId: string, memberId:string) => {
+    try {
+      const response = await fetch(BACKEND_ADD_MEMBER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({
+          organization: organizationId,
+          member: memberId,
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al añadir miembro a la organización');
+      }
+  
+      const data = await response.json();
+      console.log('Usuario añadido con éxito:', data);
+      setShowModalAddOrg(false);
+      return data;
+    } catch (error) {
+      console.error('Error al añadir miembro a la organización:', error);
+      throw error;
+    }
+  };
+
+  const handleAddtoOrg = () => {
+    console.log('Añadir a organización');
+    setShowModalAddOrg(true);
+  }
+
+  const handleRemoveFromOrganization = () => {
+    console.log('Eliminar de organización');
+    // Implementar lógica para eliminar de organización
+  };
+
+  const handleAddToProject = () => {
+    console.log('Añadir a proyecto');
+    // Implementar lógica para añadir a proyecto
+  };
+
+  const handleRemoveFromProject = () => {
+    console.log('Eliminar de proyecto');
+    // Implementar lógica para eliminar de proyecto
+  };
+
+  const handleSubmitAddOrg = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (selectedOrg) {
+      handleAddToOrganization(selectedOrg, user?.id); // Asegúrate de que 'user.id' es el ID del usuario logueado
+    } else {
+      alert('Por favor, selecciona una organización');
+    }
+  };
+
+
   useEffect(() => {
     if (!imageSRC && user) {
       fetch(import.meta.env.VITE_BACKEND_URL + '/userImg/' + user.img_path)
@@ -164,8 +250,10 @@ const UserProfile: React.FC = () => {
     }
     fetchProjects();
     fetchUser();
-  }, [user, imageSRC]);
-  
+    fetchOrganizations();
+  }, [user, imageSRC, searchedUser, projects]);
+
+
   return (
     <>
       <Navbar onToggleSidebar={() => {}} />
@@ -181,6 +269,35 @@ const UserProfile: React.FC = () => {
             <h2 className="text-xl md:text-2xl font-bold text-gray-700">{isLoggedUser ? user.username : searchedUser?.username}</h2>
             <p className="text-sm text-gray-500">{isLoggedUser ? user.email : searchedUser?.email}</p>
           </div>
+          { !isLoggedUser && (
+          <div className="mt-6 md:mt-8 space-y-4">
+            <button
+              onClick={handleAddtoOrg}
+              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Añadir a Organización
+            </button>
+            <button
+              onClick={handleRemoveFromOrganization}
+              className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-700 transition duration-200"
+            >
+              Eliminar de Organización
+            </button>
+            <button
+              onClick={handleAddToProject}
+              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Añadir a Proyecto
+            </button>
+            <button
+              onClick={handleRemoveFromProject}
+              className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-700 transition duration-200"
+            >
+              Eliminar de Proyecto
+            </button>
+          </div>
+          )}
+          { isLoggedUser && (
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleUpdate}
@@ -195,6 +312,7 @@ const UserProfile: React.FC = () => {
               Eliminar Cuenta
             </button>
           </div>
+          )}
         </div>
   
         {/* Sección de organizaciones y proyectos */}
@@ -209,7 +327,9 @@ const UserProfile: React.FC = () => {
                   key={index}
                   className="bg-gray-100 p-3 md:p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
                 >
-                  {typeof organization === 'string' ? organization : organization.name}
+                  {typeof organization === 'string' 
+              ? organization  // Si es una cadena, mostrarla directamente
+              : organization?.name || "Nombre desconocido"}
                 </li>
               )
             )}
@@ -238,7 +358,53 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
       </div>
-  
+              
+      {/* Modal para añadir a organización */}
+      {showModalAddOrg && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Añadir a Organización</h2>
+            <form onSubmit={handleSubmitAddOrg}>
+              <div className="mb-4">
+                <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Selecciona una Organización</label>
+                <select
+                  name="organization"
+                  id="organization"
+                  value={selectedOrg}
+                  onChange={e => setSelectedOrg(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Selecciona una organización</option>
+                  {organizations && organizations.length > 0 ? (
+                    organizations.map((organization: any) => (
+                      <option key={organization._id} value={organization._id}>
+                        {organization.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No tienes organizaciones disponibles</option>
+                  )}
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModalAddOrg(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                >
+                  Añadir
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Modal para actualizar perfil */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
