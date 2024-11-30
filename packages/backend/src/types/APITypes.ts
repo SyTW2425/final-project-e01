@@ -40,6 +40,7 @@ export interface ApplicationAdapter {
  */
 export interface UsersAPI {
   searchUserById(userId : any) : Promise<APIResponseFormat>;
+  searchUsersByUsername(username : string) : Promise<APIResponseFormat>;
   searchUsers(username : string | null, email : string | null, page? : number) : Promise<APIResponseFormat>;
   registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat>;
   loginUser(email : string, password : string) : Promise<APIResponseFormat>;

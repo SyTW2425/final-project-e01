@@ -88,6 +88,16 @@ const deleteImage = async (imgPath: string) => {
 }
 
 
+usersRouter.get('/:username', jwtMiddleware, async (req, res) => {
+  try {
+    const response = await userLogic.searchUsersByUsername(req.params.username);
+    res.status(200).send(response);
+  } catch (error) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+})
+
 /**
  * @brief This endpoint is used to search for users
  * @param req The request object

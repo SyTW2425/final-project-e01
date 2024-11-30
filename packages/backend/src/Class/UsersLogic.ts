@@ -34,6 +34,11 @@ export default class UserLogic implements UsersAPI {
     this.dbAdapter = dbAdapter;
   }
 
+  async searchUsersByUsername(username : string) : Promise<APIResponseFormat> {
+    const user = await this.dbAdapter.findOne(User, { username }, {});
+    return createResponseFormat(false, user);
+  }
+
   async searchUsers(username : string | null, email : string | null, page : number = 1) : Promise<APIResponseFormat> {
     try {
       const limit = LIMIT;

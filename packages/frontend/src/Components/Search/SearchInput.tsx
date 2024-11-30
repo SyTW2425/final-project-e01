@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useCallback, ChangeEvent, useRef} from 'react';
+import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 import SVGComponent from '../Icons/SVGComponent';
 
@@ -34,11 +35,18 @@ interface SearchResult {
 
 
 // Componente para representar cada resultado
-const SearchResultItem: React.FC<{ result: SearchResult }> = ({ result }) => {
+const SearchResultItem: React.FC<{ result: SearchResult; onSelect: (user: SearchResult) => void }> = ({ result, onSelect }) => {
   return (
-    <div className="p-2 border-b border-gray-200 ">
+    <div
+      onClick={() => onSelect(result)}
+      className="p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+    >
       <div className="flex items-center">
-        <img src={import.meta.env.VITE_BACKEND_URL + '/userImg/' + result.img_path} alt={result.username} className="w-8 h-8 rounded-full mr-2" />
+        <img
+          src={import.meta.env.VITE_BACKEND_URL + '/userImg/' + result.img_path}
+          alt={result.username}
+          className="w-8 h-8 rounded-full mr-2"
+        />
         <div>
           <div>{result.username}</div>
           <div className="text-sm text-gray-500">{result.email}</div>
@@ -48,10 +56,21 @@ const SearchResultItem: React.FC<{ result: SearchResult }> = ({ result }) => {
   );
 };
 
+
 const SearchComponent : React.FC<SearchComponentProps> = ({url, mobile} : SearchComponentProps) => {
   const [search, setSearch] = useState<string>('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const [selectedUser, setSelectedUser] = useState<SearchResult | null>(null);
+  const navigate = useNavigate();
+
+  const handleSelectUser = (user: SearchResult) => {
+    setSelectedUser(user);
+    setSearch(user.username);
+    setResults([]);
+    navigate(`/dashboard/profile/${user.username}`);
+  };
+
   
   const fetchResults = async (searchQuery: string) => {
     if (!searchQuery) {
@@ -71,10 +90,9 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url, mobile} : Search
       );
       const data = await response.json();
       setResults(data.result);
-      console.log(results.length);
     } catch (error) {
       console.error("Error fetching search results:", error);
-      setResults([]); // Limpiar resultados en caso de error
+      setResults([]);
     }
   };
   // Función de búsqueda con debounce
@@ -116,7 +134,7 @@ const SearchComponent : React.FC<SearchComponentProps> = ({url, mobile} : Search
           }}
         >
           {results.map((result) => (
-            <SearchResultItem key={result.username} result={result} />
+            <SearchResultItem key={result.username} result={result} onSelect={handleSelectUser} />
           ))}
         </div>
       )}

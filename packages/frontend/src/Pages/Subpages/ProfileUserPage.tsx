@@ -14,7 +14,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
 
@@ -47,19 +47,42 @@ const handleUpdateUser = async (username: string, email: string, profilePic: Fil
 }
 
 const UserProfile: React.FC = () => {
-
+  const user_searched = useParams<{ username : string }>();
   const user : any = useSelector((state: RootState) => state.session.userObject);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [searchedUser, setSearchedUser] = useState<any>(null);
   const [username, setUsername] = useState<string>('');
   const [imageSRC, setImageSRC] = useState<string>('');
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
 
   const navigate = useNavigate();
+  
+  const isLoggedUser = user_searched.username === user?.username;
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/user/' + user_searched.username, {
+        method: 'GET',
+        headers: {
+          Authorization: `${localStorage.getItem('token') || ''}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSearchedUser(data.result);
+      } else {
+        console.error('Error al obtener el usuario:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+    }
+  }
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(BACKEND_PROJECTS_USER_URL, {
+      const URL = isLoggedUser ? BACKEND_PROJECTS_USER_URL : BACKEND_PROJECTS_USER_URL + `/${user_searched.username}`;
+      const response = await fetch(URL, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +91,6 @@ const UserProfile: React.FC = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setProjects(data.result);
       } 
     } catch (error) {
@@ -141,6 +163,7 @@ const UserProfile: React.FC = () => {
         .catch((err) => console.error(err));
     }
     fetchProjects();
+    fetchUser();
   }, [user, imageSRC]);
   
   return (
@@ -151,12 +174,12 @@ const UserProfile: React.FC = () => {
         <div className="w-full md:w-1/3 bg-white p-6 md:p-8 shadow-lg">
           <div className="text-center mb-8">
             <img
-              src={imageSRC}
+              src={isLoggedUser ? imageSRC : `${import.meta.env.VITE_BACKEND_URL}/userImg/${searchedUser?.img_path}`}
               alt="Profile"
               className="w-32 h-32 md:w-48 md:h-48 rounded-full mx-auto border-4 md:border-8 border-blue-600 shadow-lg"
             />
-            <h2 className="text-xl md:text-2xl font-bold text-gray-700">{user && user.username}</h2>
-            <p className="text-sm text-gray-500">{user && user.email}</p>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-700">{isLoggedUser ? user.username : searchedUser?.username}</h2>
+            <p className="text-sm text-gray-500">{isLoggedUser ? user.email : searchedUser?.email}</p>
           </div>
           <div className="mt-6 md:mt-8 space-y-4">
             <button
@@ -180,19 +203,21 @@ const UserProfile: React.FC = () => {
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
             <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
             <ul className="space-y-3">
-              {user && user.organizations?.map((organization: any, index: number) => (
+            {(isLoggedUser ? user.organizations : searchedUser?.organizations || []).map(
+              (organization: any, index: number) => (
                 <li
                   key={index}
                   className="bg-gray-100 p-3 md:p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
                 >
                   {typeof organization === 'string' ? organization : organization.name}
                 </li>
-              ))}
-              {user && user.organizations?.length === 0 && (
-                <p className="text-gray-500">No perteneces a ninguna organización.</p>
-              )}
-            </ul>
-          </div>
+              )
+            )}
+            {(isLoggedUser ? user.organizations : searchedUser?.organizations || []).length === 0 && (
+              <p className="text-gray-500">No pertenece a ninguna organización.</p>
+            )}
+          </ul>
+        </div>
   
           {/* Proyectos */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -207,7 +232,7 @@ const UserProfile: React.FC = () => {
                 </li>
               ))}
               {projects.length === 0 && (
-                <p className="text-gray-500">No tienes proyectos asignados.</p>
+                <p className="text-gray-500">No tiene proyectos asignados.</p>
               )}
             </ul>
           </div>

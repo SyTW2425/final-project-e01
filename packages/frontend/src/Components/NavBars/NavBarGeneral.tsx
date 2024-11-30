@@ -135,7 +135,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               <ul className="space-y-2">
                 <li>
                   <Link 
-                    to="/dashboard/profile" 
+                    to={`/dashboard/profile/${currentUser.username}`} 
                     className="text-gray-700 block px-4 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 hover:text-blue-600"
                   >
                     Perfil
