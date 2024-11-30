@@ -25,12 +25,66 @@ const dbAdapter = new MongoDB();
 export const organizationLogic = new OrganizationLogic(dbAdapter);
 
 /**
+ * @brief This endpoint is used to get all organizations
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
+  try {
+    const { name } = req.query;
+    const response = await organizationLogic.searchOrganizations(name as string);
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+  }
+});
+
+/**
+ * @brief This endpoint is used to get an organization by its id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await organizationLogic.searchOrganizationById(id);
+    if (response.error) {
+      res.status(404).json(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organization'));
+  }
+});
+
+/**
+ * @brief This endpoint is used to get an organization by its name
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await organizationLogic.searchOrganizations(id);
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+  }
+})
+
+/**
  * @brief This endpoint is used create a new organization
  * @param req The request object
  * @param res The response object
  * @returns void
  */
-
 organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, async (req, res) => {
   try {
     const { username } = req.params;
@@ -41,7 +95,6 @@ organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, as
     res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
   }
 })
-
 
 organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
@@ -84,17 +137,6 @@ organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, r
 })
 
 
-organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async (req, res) => {
-  try {
-    const { name } = req.params;
-    const response = await organizationLogic.searchOrganizationsByName(name);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
-
 /**
  * @brief This endpoint is used add a user to an organization
  * @param req The request object
@@ -126,44 +168,6 @@ organizationsRouter.post('/member', jwtMiddleware, async (req, res) => {
     res.status(200).send(response);
   } catch (error) {
     res.status(500).send(createResponseFormat(true, 'Cannot add member to organization'));
-  }
-});
-
-/**
- * @brief This endpoint is used to get all organizations
- * @param req The request object
- * @param res The response object
- * @returns void
- */
-organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
-  try {
-    const { name } = req.query;
-    const response = await organizationLogic.searchOrganizations(name as string);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-});
-
-/**
- * @brief This endpoint is used to get an organization by its id
- * @param req The request object
- * @param res The response object
- * @returns void
- */
-organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const response = await organizationLogic.searchOrganizationById(id);
-    if (response.error) {
-      res.status(404).json(response);
-      return;
-    }
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organization'));
   }
 });
 
