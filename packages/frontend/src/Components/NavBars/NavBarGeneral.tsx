@@ -23,7 +23,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const toggleCreate = () => setShowCreate(!showCreate);
   const toggleSearch = () => setShowSearch(!showSearch);
   const currentUser : any = useSelector((state: RootState) => state.session.userObject);
-  
+  {console.log(currentUser)}
   const [showCreateOrgPopup, setShowCreateOrgPopup] = useState(false); 
   const [showCreateProjectPopup, setShowCreateProjectPopup] = useState(false);
   
@@ -130,7 +130,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               onClick={toggleMenu}
             />
 
-            {showMenu && (
+            {showMenu && currentUser && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl p-4 z-10">
               <ul className="space-y-2">
                 <li>

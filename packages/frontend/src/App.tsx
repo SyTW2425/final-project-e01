@@ -38,6 +38,7 @@ const useSessionValidation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   let userObject : any = useSelector((state: RootState) => state.session.userObject);
+
   useEffect(() => {
     if (localStorage.getItem('token') && !userObject) {
       fetch(import.meta.env.VITE_BACKEND_URL + '/user/validate', {
@@ -76,6 +77,7 @@ const useSessionValidation = () => {
       if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
     }
   }, [dispatch, userObject]);
+
 };
 
 const App: React.FC = () => {

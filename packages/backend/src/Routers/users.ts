@@ -86,8 +86,17 @@ const deleteImage = async (imgPath: string) => {
   }
 }
 
+usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
+  try {
+    const userObject = await userLogic.searchUserById(req.userId);
+    res.status(200).send(createResponseFormat(false, userObject)); 
+  } catch (error) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
 
-usersRouter.get('/:username', jwtMiddleware, async (req, res) => {
+usersRouter.get('/search/:username', jwtMiddleware, async (req, res) => {
   try {
     const response = await userLogic.searchUsersByUsername(req.params.username);
     res.status(200).send(response);
@@ -139,15 +148,7 @@ usersRouter.get('/:username', jwtMiddleware, async (req, res) => {
   }
 })
 
-usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
-  try {
-    const userObject = await userLogic.searchUserById(req.userId);
-    res.status(200).send(createResponseFormat(false, userObject)); 
-  } catch (error) {
-    const errorParsed = error as Error;
-    res.status(500).send(createResponseFormat(true, errorParsed.message));
-  }
-});
+
 
 /**
  * @brief This endpoint is used to register a new user

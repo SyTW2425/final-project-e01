@@ -6,7 +6,6 @@ import { RootState } from '../../store/store';
 const MyProjectsPage: React.FC = () => {
   const dispatch = useDispatch();
   const sessionState = useSelector((state: RootState) => state.session);
-  console.log(sessionState.currentProject);
 
   return (
     <div className="flex-1 bg-gray-50 w-full h-auto">
