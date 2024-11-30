@@ -23,7 +23,6 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const toggleCreate = () => setShowCreate(!showCreate);
   const toggleSearch = () => setShowSearch(!showSearch);
   const currentUser : any = useSelector((state: RootState) => state.session.userObject);
-  {console.log(currentUser)}
   const [showCreateOrgPopup, setShowCreateOrgPopup] = useState(false); 
   const [showCreateProjectPopup, setShowCreateProjectPopup] = useState(false);
   
