@@ -120,7 +120,10 @@ export function isAdminOfOrganization(organization: any, userId: string) {
  * @returns Boolean indicating if the user is a member
  */
 export function isMemberOfOrganization(organization: any, userId: string) {
-  return organization.members.some((member: any) => member.user.toString() === userId.toString());
+  return organization.members.some((member: any) => {
+    const user = member.user?._id || member.user;
+    return user && user.toString() === userId.toString();
+  });
 }
 
 /**

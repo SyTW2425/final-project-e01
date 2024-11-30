@@ -16,7 +16,7 @@ import Express from 'express';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 import MongoDB from '../Class/DBAdapter.js';
 import OrganizationLogic from '../Class/OrganizationLogic.js';
-import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader } from '../Utils/CRUD-util-functions.js';
+import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
 
 export const organizationsRouter = Express.Router();
 
@@ -75,6 +75,10 @@ organizationsRouter.post('/member', jwtMiddleware, async (req, res) => {
     const organizationResult = await organizationLogic.searchOrganizationById(organization) as any;
     if (organizationResult.error) {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
+      return;
+    }
+    if (isMemberOfOrganization(organizationResult.result, member.user)) {
+      res.status(403).json(createResponseFormat(true, 'The user is already a member of the organization'));
       return;
     }
     if (!isAdminOfOrganization(organizationResult.result, user._id)) {
