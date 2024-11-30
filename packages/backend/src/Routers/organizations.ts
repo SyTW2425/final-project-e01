@@ -141,18 +141,15 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-
     const organization = await organizationLogic.searchOrganizationByName(name as string) as any;
     if (!organization) {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
       return;
     }
-
     if (!isAdminOfOrganization(organization, user._id)) {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-
     let membersWithObjectIds: any[] = [];
     if (members && members.length !== 0) {
       try {
@@ -162,11 +159,9 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
         return;
       }
     }
-
     if (membersWithObjectIds.length === 0 || !membersWithObjectIds.some((m: any) => m.role === 'admin')) {
       membersWithObjectIds.push({ user: user._id, role: 'admin' });
     }
-
     const response = await organizationLogic.updateOrganization(name as string, membersWithObjectIds, newName);
     res.status(200).send(response);
   } catch (error) {

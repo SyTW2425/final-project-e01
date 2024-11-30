@@ -9,6 +9,7 @@ import Organization from '../Models/Organization.js';
 
 const dbAdapter = new MongoDB();
 let token = "";
+let token1 = "";
 describe('Organization', () => {
   before(async () => {
     const user = "test_user3";
@@ -39,8 +40,15 @@ describe('Organization', () => {
         email: email,
         password: password
       });
+    const loginResponse1 = await request(app)
+      .post('/user/login')
+      .send({
+        email: email1,
+        password: password1
+      });
     expect(loginResponse.status).to.equal(200);
     token = loginResponse.body.result.token;
+    token1 = loginResponse1.body.result.token;
   });
 
   after(async () => {
@@ -155,22 +163,22 @@ describe('Organization', () => {
   });
 
   describe('PUT /Organization', () => {
-    // it('should update the organization created', async () => {
-    //   const orgName = "OrganizationExample_3";
-    //   const newName = "OrganizationExample_4";
-    //   const response = await request(app)
-    //     .put('/organization/')
-    //     .set('Authorization', `${token}`)
-    //     .query({ name: orgName })
-    //     .send({
-    //       members: [{ user: "test_user3", role: "admin" }],
-    //       newName: newName
-    //     });
-    //   expect(response.status).to.equal(200);
-    //   expect(response.body.error).to.equal(false);
-    //   expect(response.body.result).to.be.an('object');
-    //   expect(response.body.result.name).to.equal(newName);
-    // });
+    it('should update the organization created', async () => {
+      const orgName = "OrganizationExample_3";
+      const newName = "OrganizationExample_4";
+      const response = await request(app)
+        .put('/organization/')
+        .set('Authorization', `${token}`)
+        .query({ name: orgName })
+        .send({
+          members: [{ user: "test_user3", role: "admin" }],
+          newName: newName
+        });
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+      expect(response.body.result).to.be.an('object');
+      expect(response.body.result.name).to.equal(newName);
+    });
 
     it('should not update the organization created because the user is not authenticated', async () => {
       const orgName = "OrganizationExample_4";
@@ -190,13 +198,13 @@ describe('Organization', () => {
       const newName = "OrganizationExample_5";
       const response = await request(app)
         .put('/organization/')
-        .set('Authorization', `${token}`)
+        .set('Authorization', `${token1}`)
         .query({ name: orgName })
         .send({
           members: [{ user: "test_user3", role: "member" }],
           newName: newName
         });
-      expect(response.status).to.equal(404);
+      expect(response.status).to.equal(403);
     });
 
     it('should not update the organization created because the organization does not exist', async () => {
@@ -215,8 +223,19 @@ describe('Organization', () => {
   });
 
   describe('DELETE /Organization', () => {
+    it('should not delete the organization created because the user is not an admin', async () => {
+      const orgName = "OrganizationExample_4";
+      const response = await request(app)
+        .delete('/organization/')
+        .set('Authorization', `${token1}`)
+        .send({
+          name: orgName,
+        });
+      expect(response.status).to.equal(403);
+    });
+    
     it('should delete the organization created', async () => {
-      const orgName = "OrganizationExample_3";
+      const orgName = "OrganizationExample_4";
       const response = await request(app)
         .delete('/organization/')
         .set('Authorization', `${token}`)
@@ -237,17 +256,6 @@ describe('Organization', () => {
           name: orgName,
         });
       expect(response.status).to.equal(401);
-    });
-
-    it('should not delete the organization created because the user is not an admin', async () => {
-      const orgName = "OrganizationExample_4";
-      const response = await request(app)
-        .delete('/organization/')
-        .set('Authorization', `${token}`)
-        .send({
-          name: orgName,
-        });
-      expect(response.status).to.equal(404);
     });
 
     it('should not delete the organization created because the organization does not exist', async () => {

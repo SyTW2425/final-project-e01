@@ -98,9 +98,15 @@ export default class TasksLogic implements TasksAPI {
   }
 
   async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {
-    const org_id = await this.dbAdapter.findOne(Organization, { name: organization }, {});
-    const project_id = await this.dbAdapter.findOne(Project, { name: project, organization: org_id }, {});
-    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project: project_id, organization: org_id }, {});
+    const orgObject = await this.dbAdapter.findOne(Organization, { name: organization }, {});
+    if (!orgObject) {
+      throw new Error('Organization not found');
+    }
+    const projectObject = await this.dbAdapter.findOne(Project, { name: project, organization: orgObject._id }, {});
+    if (!projectObject) {
+      throw new Error('Project not found');
+    }
+    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, organization: orgObject._id, project: projectObject._id }, {});
     if (!taskToUpdate) {
       throw new Error('Task not found');
     }
@@ -110,7 +116,7 @@ export default class TasksLogic implements TasksAPI {
     if (priority) obj['priority'] = priority ;
     if (status) obj['status'] = status;
     if (assignedTo) obj['assignedTo'] = assignedTo;
-    const task = await this.dbAdapter.updateOne(Task, { name }, obj);
+    const task = await this.dbAdapter.updateOne(Task, { _id: taskToUpdate._id }, obj);
     return createResponseFormat(false, task);
   }
 

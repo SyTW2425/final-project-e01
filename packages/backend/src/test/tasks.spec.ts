@@ -74,8 +74,8 @@ describe('Task', () => {
         .post('/task')
         .set('Authorization', `${token}`)
         .send({
-          startDate: "2024-11-30T00:00:00Z",
-          endDate: "2024-12-15T00:00:00Z",
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
           name: "Implementación de la interfaz de usuario",
           description: "Tarea para desarrollar la interfaz de usuario en el proyecto",
           priority: "high",
@@ -86,7 +86,6 @@ describe('Task', () => {
           projectName: "Nuevo_Proyecto_2",
           organizationName: "OrganizationExample_2"
         });
-
       expect(response.status).to.equal(201);
       expect(response.body.result.name).to.equal("Implementación de la interfaz de usuario");
     });
@@ -155,7 +154,7 @@ describe('Task', () => {
     it('should update a task successfully', async () => {
       const taskName = "Implementación de la interfaz de usuario";
       const updatedDescription = "Tarea actualizada para desarrollar la interfaz de usuario en el proyecto";
-      const updatedEndDate = "2024-12-16T00:00:00Z";
+      const updatedEndDate = "2025-12-16T00:00:00Z";
       const updatedPriority = "low";
       const updatedState = "done";
       const projectName = "Nuevo_Proyecto_2";
@@ -180,7 +179,6 @@ describe('Task', () => {
       expect(response.body.result.status).to.equal(updatedState);
       expect(response.body.result.description).to.equal(updatedDescription);
       expect(new Date(response.body.result.endDate).getTime()).to.equal(new Date(updatedEndDate).getTime());
-
     });
 
     it('should not update the task because the user is not authenticated', async () => {
