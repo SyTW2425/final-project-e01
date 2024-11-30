@@ -11,6 +11,7 @@ import MyProjectsPage from './Subpages/MyProjectsPage';
 import KanbanBoardPage from './Subpages/KanbanBoardPage';
 import GanttDiagramPage from './Subpages/GanttDiagramPage';
 import ProjectMembersPage from './Subpages/ProjectMembersPage';
+import SprintMangerPage from './Subpages/SprintManagerPage';
 
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,6 +46,7 @@ const DashboardPage: React.FC = () => {
             <Route path="kanban" Component={KanbanBoardPage} />
             <Route path="gantt" Component={GanttDiagramPage}/>
             <Route path="tasks" Component={MyTasksPage} />
+            <Route path="taskmanager" Component={SprintMangerPage} />
             <Route path="/" Component={MyProjectsPage} />
             <Route path="members" Component={ProjectMembersPage} />
             <Route path="*" Component={() => {
