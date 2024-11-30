@@ -106,11 +106,11 @@ export async function getAuthenticatedUser(req: any, res: any) {
  * @returns Boolean indicating if the user is an admin
  */
 export function isAdminOfOrganization(organization: any, userId: string) {
-  let member = organization.members.find((m: any) => m.user.toString() === userId.toString());
-  if (!member) {
-    member = organization.members.find((m: any) => m.user._id.toString() === userId.toString()); 
-  }
-  return member && member.role === 'admin';
+  const member = organization.members.find((m: any) => {
+    const user = m.user?._id || m.user;
+    return user && user.toString() === userId.toString();
+  });
+  return member?.role === 'admin'; 
 }
 
 /**

@@ -105,6 +105,10 @@ export default class OrganizationLogic implements OrganizationsAPI {
       if (!organization) {
         throw new Error(`Organization with ID "${idOrg}" not found.`);
       }
+      const newMember = await userLogic.searchUserById(member.user);
+      if (newMember.error) {
+        throw new Error(`User with ID "${member.user}" not found.`);
+      }
       const members = organization.members || [];
       members.push(member);
       const data = {
