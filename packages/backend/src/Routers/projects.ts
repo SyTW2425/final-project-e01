@@ -51,7 +51,7 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
     }
     const organizationId = organizationResult._id;
     // Check if the user is an Admin of the organization
-    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
       return;
@@ -115,7 +115,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
     if (!isAdminOrOwner) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
@@ -154,6 +154,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
 projectsRouter.post('/sprint', jwtMiddleware, async (req, res) => {
   try {
     const { project, sprint } = req.body;
+    console.log(req.body);
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
     if (projectResult.error) {
@@ -167,7 +168,7 @@ projectsRouter.post('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
     if (!isAdminOrOwner) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
@@ -305,7 +306,7 @@ projectsRouter.put('/', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin of the organization
-    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
       return;
@@ -354,7 +355,7 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
     if (!isAdminOrOwner) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
@@ -393,7 +394,7 @@ projectsRouter.put('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
     if (!isAdminOrOwner) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
@@ -432,7 +433,7 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin of the organization
-    const isAdmin = await isAdminOfOrganization(organizationResult, user._id);
+    const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
       return;
@@ -510,7 +511,7 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
     if (!isAdminOrOwner) {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
