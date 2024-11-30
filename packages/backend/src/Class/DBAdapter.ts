@@ -50,7 +50,7 @@ export default class MongoDB implements databaseAdapter {
   }
 
   async updateOne(model : Model<any>, query : any, data : any) : Promise<any> {
-    return await model.findOneAndUpdate(query, data);
+    return await model.findOneAndUpdate(query, data, { new: true });
   }
   
   async updateMany(model : Model<any>, query : any, data : any) : Promise<any> {

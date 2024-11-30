@@ -32,8 +32,8 @@ export default class TasksLogic implements TasksAPI {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchTasks(name: string | null, projectID: string, organizationID: string, page: number = 1): Promise<APIResponseFormat> {
-    const query = this.buildSearchQuery(name, projectID, organizationID);
+  async searchTasks(name: string | null, projectID: string, page: number = 1): Promise<APIResponseFormat> {
+    const query = this.buildSearchQuery(name, projectID);
     const limit = LIMIT;
     const skip = (page - 1) * limit;
     const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, skip, limit);
@@ -75,7 +75,7 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, tasks);
   }
 
-  async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string, organization: string) : Promise<APIResponseFormat> {
+  async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string) : Promise<APIResponseFormat> {
     const actualDate = new Date();
     const progress : number = 0.0;
     let task_saved = await this.dbAdapter.create(Task, {
@@ -91,16 +91,21 @@ export default class TasksLogic implements TasksAPI {
       status,
       comments,
       users,
-      project,
-      organization
+      project
     });
     return createResponseFormat(false, task_saved); 
   }
 
   async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {
-    const org_id = await this.dbAdapter.findOne(Organization, { name: organization }, {});
-    const project_id = await this.dbAdapter.findOne(Project, { name: project, organization: org_id }, {});
-    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project: project_id, organization: org_id }, {});
+    const orgObject = await this.dbAdapter.findOne(Organization, { name: organization }, {});
+    if (!orgObject) {
+      throw new Error('Organization not found');
+    }
+    const projectObject = await this.dbAdapter.findOne(Project, { name: project, organization: orgObject._id }, {});
+    if (!projectObject) {
+      throw new Error('Project not found');
+    }
+    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project: projectObject._id }, {});
     if (!taskToUpdate) {
       throw new Error('Task not found');
     }
@@ -110,7 +115,7 @@ export default class TasksLogic implements TasksAPI {
     if (priority) obj['priority'] = priority ;
     if (status) obj['status'] = status;
     if (assignedTo) obj['assignedTo'] = assignedTo;
-    const task = await this.dbAdapter.updateOne(Task, { name }, obj);
+    const task = await this.dbAdapter.updateOne(Task, { _id: taskToUpdate._id }, obj);
     return createResponseFormat(false, task);
   }
 
@@ -119,14 +124,13 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, taskDelete);
   }
 
-  private buildSearchQuery(name: string | null, projectID: string, organizationID: string): any {
+  private buildSearchQuery(name: string | null, projectID: string): any {
     let query: { [key: string]: any } = {};
     // We need an regex to search by name
     if (name) {
       query['name'] = { $regex: name, $options: 'i' };
     }
     query['project'] = projectID;
-    query['organization'] = organizationID;
     return query; 
   }
 }

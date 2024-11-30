@@ -16,7 +16,7 @@ import Express from 'express';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 import MongoDB from '../Class/DBAdapter.js';
 import OrganizationLogic from '../Class/OrganizationLogic.js';
-import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader } from '../Utils/CRUD-util-functions.js';
+import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
 
 export const organizationsRouter = Express.Router();
 
@@ -103,6 +103,10 @@ organizationsRouter.post('/member', jwtMiddleware, async (req, res) => {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
       return;
     }
+    if (isMemberOfOrganization(organizationResult.result, member.user)) {
+      res.status(403).json(createResponseFormat(true, 'The user is already a member of the organization'));
+      return;
+    }
     if (!isAdminOfOrganization(organizationResult.result, user._id)) {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
@@ -167,18 +171,15 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-
     const organization = await organizationLogic.searchOrganizationByName(name as string) as any;
     if (!organization) {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
       return;
     }
-
     if (!isAdminOfOrganization(organization, user._id)) {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-
     let membersWithObjectIds: any[] = [];
     if (members && members.length !== 0) {
       try {
@@ -188,11 +189,9 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
         return;
       }
     }
-
     if (membersWithObjectIds.length === 0 || !membersWithObjectIds.some((m: any) => m.role === 'admin')) {
       membersWithObjectIds.push({ user: user._id, role: 'admin' });
     }
-
     const response = await organizationLogic.updateOrganization(name as string, membersWithObjectIds, newName);
     res.status(200).send(response);
   } catch (error) {
