@@ -146,6 +146,45 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to add a sprint to a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.post('/sprint', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, sprint } = req.body;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (projectResult.error) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
+    // Add the sprint to the project
+    const sprintAdded = await projectLogic.addSprintToProject(project, sprint);
+    if (!sprintAdded.result) {
+      res.status(404).send(createResponseFormat(true, 'Sprint not added to the project'));
+      return;
+    }
+    res.status(201).send(sprintAdded);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to search projects
  * @param req The request object
  * @param res The response object
@@ -319,6 +358,45 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to update the sprint of a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.put('/sprint', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, sprintID, sprint } = req.body;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (projectResult.error) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
+    // Update the sprint of the project
+    const sprintUpdate = await projectLogic.updateSprintOfProject(project, sprintID, sprint);
+    if (!sprintUpdate.result) {
+      res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
+      return;
+    }
+    res.status(200).send(sprintUpdate);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to delete a project
  * @param req The request object
  * @param res The response object
@@ -391,6 +469,45 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     res.status(200).send(projectDelete);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to delete a sprint from a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
+  try {
+    const { project, sprintID } = req.body;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (!projectResult) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = await isAdminOrOwnerOfProject(projectResult.result, user._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
+    // Delete the sprint from the project
+    const sprintDelete = await projectLogic.deleteSprintFromProject(project, sprintID);
+    if (!sprintDelete.result) {
+      res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
+      return;
+    }
+    res.status(200).send(sprintDelete);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
   }

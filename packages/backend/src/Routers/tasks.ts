@@ -42,7 +42,7 @@ tasksRouter.get('/', jwtMiddleware, async (req, res) => {
     if (isNaN(pageSelected) || pageSelected < 1) {
       pageSelected = 1;
     }
-    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), authResult.organizationId.toString(), pageSelected);
+    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), pageSelected);
     if (response.error) {
       res.status(404).send(response);
       return;
@@ -131,7 +131,7 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
         return;
       }
     }
-    const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, usersIds, authResult.projectId.toString(), authResult.organizationId.toString());
+    const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, usersIds, authResult.projectId.toString());
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
