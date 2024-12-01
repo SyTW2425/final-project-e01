@@ -250,18 +250,21 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
   }
 });
 
+
+
 /**
- * @brief This endpoint is used to search projects from a user
+ * @brief This endpoint is used to search projects from the id
  * @param req The request object
  * @param res The response object
  * @returns void
  */
 projectsRouter.get('/sprints', jwtMiddleware, async (req, res) => {
   try {
-    // We need obtain the user from the JWT
-    const user: any = await getUserFromHeader(req);
-    if (!user) {
-      res.status(401).send(createResponseFormat(true, 'User not found'));
+    const { id } = req.params;
+    // console.log(id);
+    const response = await projectLogic.searchProjectById(id);
+    if (response.error) {
+      res.status(404).send(response);
       return;
     }
     const response = await projectLogic.searchSprintsFromUser(user._id);

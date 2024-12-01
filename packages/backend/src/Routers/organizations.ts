@@ -125,10 +125,10 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   }
 });
 
-organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async (req, res) => {
+organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
   try {
-    const { name } = req.params;
-    const response = await organizationLogic.searchOrganizationsByName(name);
+    const { id } = req.params;
+    const response = await organizationLogic.searchOrganizations(id);
     res.status(200).send(response);
   } catch (error) {
     // console.error(error);
