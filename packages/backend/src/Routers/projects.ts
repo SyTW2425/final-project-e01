@@ -145,6 +145,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
   }
 });
 
+
 /**
  * @brief This endpoint is used to add a sprint to a project
  * @param req The request object
@@ -242,7 +243,7 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const response = await projectLogic.searchPorjectsFromUser(user._id);
+    const response = await projectLogic.searchProjectsFromUser(user._id);
     res.status(200).send(response);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
@@ -250,6 +251,28 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
 });
 
 
+
+/**
+ * @brief This endpoint is used to search projects from the id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.get('/sprints', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    // console.log(id);
+    const response = await projectLogic.searchProjectById(id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    const response = await projectLogic.searchSprintsFromUser(user._id);
+    res.status(200).send(response);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
 
 /**
  * @brief This endpoint is used to search projects from the id
@@ -285,7 +308,7 @@ projectsRouter.get('/searchprojects/:username', jwtMiddleware, async (req, res) 
       res.status(404).send(user);
       return;
     }
-    const response = await projectLogic.searchPorjectsFromUser(user.result._id);
+    const response = await projectLogic.searchProjectsFromUser(user.result._id);
     res.status(200).send(response);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));

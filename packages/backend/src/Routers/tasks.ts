@@ -108,6 +108,32 @@ tasksRouter.get('/project/:id', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to get the tasks not completed from a user of a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const response = await taskLogic.getTasksProjectFromUserNotCompleted(id, user._id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to create a task
  * @param req The request object
  * @param res The response object
@@ -140,6 +166,29 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
 });
 
 /**
+ * @brief This endpoint is used to create a task, using the id of the project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users } = req.body;
+    if (!validateRequiredFields(req.body, ['startDate', 'endDate', 'name', 'description', 'priority', 'status', 'comments', 'users'], res)) return;
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id);
+    res.status(201).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
  * @brief This endpoint is used to delete a task
  * @param req The request object
  * @param res The response object
@@ -155,6 +204,27 @@ tasksRouter.delete('/', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.deleteTask(name, authResult.projectId.toString());
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used to delete a task by its id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.delete('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      return;
+    }
+    const response = await taskLogic.deleteTaskById(id);
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -183,4 +253,26 @@ tasksRouter.put('/', jwtMiddleware, async (req, res) => {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
-})
+});
+
+/**
+ * @brief This endpoint is used to update a task by its id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description, endDate, priority, status, assignedTo } = req.body;
+    if (!id) {
+      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      return;
+    }
+    const response = await taskLogic.updateTaskById(id, description, endDate, priority, status, assignedTo);
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});

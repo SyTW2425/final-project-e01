@@ -136,7 +136,6 @@ organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, r
   }
 })
 
-
 /**
  * @brief This endpoint is used add a user to an organization
  * @param req The request object

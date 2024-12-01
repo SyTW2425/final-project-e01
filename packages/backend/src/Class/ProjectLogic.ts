@@ -30,9 +30,18 @@ export default class ProjectLogic implements ProjectsAPI {
     this.dbAdapter = dbAdapter;
   }
   
-  async searchPorjectsFromUser(userId : any) : Promise<APIResponseFormat> {
+  async searchProjectsFromUser(userId : any) : Promise<APIResponseFormat> {
     try {
       const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {__v: 0});
+      return createResponseFormat(false, projects);
+    } catch (error) {
+      return createResponseFormat(true, error);
+    }
+  }
+
+  async searchSprintsFromUser(userId : any) : Promise<APIResponseFormat> {
+    try {
+      const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {__v: 0}, undefined, undefined, ['sprints']);
       return createResponseFormat(false, projects);
     } catch (error) {
       return createResponseFormat(true, error);
