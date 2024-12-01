@@ -267,8 +267,9 @@ projectsRouter.get('/sprints', jwtMiddleware, async (req, res) => {
       res.status(404).send(response);
       return;
     }
-    const response = await projectLogic.searchSprintsFromUser(user._id);
-    res.status(200).send(response);
+    const user: any = await getUserFromHeader(req);
+    const response_2 = await projectLogic.searchSprintsFromUser(user._id);
+    res.status(200).send(response_2);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
   }
