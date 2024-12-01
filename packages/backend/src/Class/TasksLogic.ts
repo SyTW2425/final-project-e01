@@ -75,6 +75,15 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, tasks);
   }
 
+  async getTasksProjectFromUserNotCompleted(id: string, userId: string): Promise<APIResponseFormat> {
+    const query = { users: userId, project: id, status: { $ne: 'done' } };
+    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project']);
+    if (!tasks) {
+      return createResponseFormat(true, 'Tasks not found');
+    }
+    return createResponseFormat(false, tasks);
+  }
+
   async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string) : Promise<APIResponseFormat> {
     const actualDate = new Date();
     const progress : number = 0.0;
@@ -119,8 +128,24 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, task);
   }
 
+  async updateTaskById(taskId: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, assignedTo: string | null): Promise<APIResponseFormat> {
+    let obj: any = {};
+    if (description) obj['description'] = description;
+    if (endDate) obj['endDate'] = new Date(endDate);
+    if (priority) obj['priority'] = priority ;
+    if (status) obj['status'] = status;
+    if (assignedTo) obj['assignedTo'] = assignedTo;
+    const task = await this.dbAdapter.updateOne(Task, { _id: taskId }, obj);
+    return createResponseFormat(false, task);
+  }
+
   async deleteTask(taskToDelete: string, projectTask: string): Promise<APIResponseFormat> {
     const taskDelete = await this.dbAdapter.deleteOne(Task, { name: taskToDelete, project: projectTask });
+    return createResponseFormat(false, taskDelete);
+  }
+
+  async deleteTaskById(taskId: string): Promise<APIResponseFormat> {
+    const taskDelete = await this.dbAdapter.deleteOne(Task, { _id: taskId });
     return createResponseFormat(false, taskDelete);
   }
 

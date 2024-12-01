@@ -82,6 +82,7 @@ export const TaskSchema = new Schema<TaskInterface>({
   name: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: (v: string) => v.length > 0,
       message: (props) => {
