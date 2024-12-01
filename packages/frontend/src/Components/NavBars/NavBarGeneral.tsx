@@ -6,6 +6,8 @@ import Modal from '../Information/Modal';
 import { RootState } from '../../store/store';
 import SVGComponent from '../Icons/SVGComponent';
 import SearchComponent from '../Search/SearchInput';
+import { useDispatch } from 'react-redux';
+import { addOrganization, addProject } from '../../slices/sessionSlice';
 
 
 
@@ -31,6 +33,8 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   const projectDescriptionRef = useRef<HTMLTextAreaElement>(null);
   const projectEndDateRef = useRef<HTMLInputElement>(null);
   const projectOrganizationRef = useRef<HTMLSelectElement>(null);
+
+  const dispatch = useDispatch();
 
   // We need to send the backend form info to create a new organization
 
@@ -223,9 +227,9 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               body: JSON.stringify({ name, members: [] }),
             })
               .then((res) => res.json())
-              .then((_) => {
-                window.location.reload();
+              .then((data) => {
                 setShowCreateOrgPopup(false);
+                dispatch(addOrganization(data.result));
               })
               .catch((err) => console.error(err));
           }}
@@ -272,9 +276,9 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
               }),
             })
               .then((res) => res.json())
-              .then((_) => {
+              .then((data) => {
                 setShowCreateProjectPopup(false);
-                window.location.reload();
+                dispatch(addProject(data.result));
               })
               .catch((err) => console.error(err));
           }}

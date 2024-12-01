@@ -50,6 +50,20 @@ const sessionSlice = createSlice({
     setCurrentProject: (state, action: PayloadAction<any>) => {
       state.currentProject = action.payload;
     },
+    addOrganization: (state, action: PayloadAction<any>) => {
+      state.userObject.organizations.push(action.payload);
+    },
+    addProject: (state, action: PayloadAction<any>) => {
+      if (state.projects) state.projects.push(action.payload);
+    },
+    addSprint: (state, action: PayloadAction<any>) => {
+      if (state.currentProject) state.currentProject.sprints.push(action.payload);
+      // We need to update the projects array as well
+      if (state.projects) {
+        const projectIndex = state.projects.findIndex((project) => project._id === state.currentProject._id);
+        state.projects[projectIndex].sprints.push(action.payload);
+      }
+    }
 
   },
 });
@@ -60,5 +74,9 @@ export const {
   setUserObject,
   setCurrentProject,
   setProjects,
+  addOrganization,
+  addProject,
+  addSprint
+
  } = sessionSlice.actions;
 export default sessionSlice.reducer;
