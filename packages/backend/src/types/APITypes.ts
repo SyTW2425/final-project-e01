@@ -82,6 +82,7 @@ export interface ProjectsAPI {
 export interface OrganizationsAPI {
   searchOrganizationById(organizationId : any) : Promise<APIResponseFormat>;
   searchOrganizationByUser(username : string) : Promise<APIResponseFormat>;
+  searchOrganizationsByName(name : string) : Promise<APIResponseFormat>;
   searchOrganizations(name : string) : Promise<APIResponseFormat>;
   createOrganization(name : string, members : any) : Promise<APIResponseFormat>;
   deleteOrganization(organizationToDelete : string) : Promise<APIResponseFormat>;
