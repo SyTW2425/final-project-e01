@@ -15,6 +15,7 @@
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { APIResponseFormat, OrganizationsAPI, databaseAdapter } from '../types/APITypes.js';
 import Organization from '../Models/Organization.js';
+import User from '../Models/User.js';
 import { userLogic } from '../Routers/users.js';
 import { projectLogic } from '../Routers/projects.js';
 
@@ -31,11 +32,12 @@ export default class OrganizationLogic implements OrganizationsAPI {
   }
 
   async searchOrganizationByUser(username: string): Promise<APIResponseFormat> {
-    const organizations = await this.dbAdapter.find(Organization, { 'members.user': username }, { _id: 0, __v: 0, members: 0, projects: 0 });
+    const user = await this.dbAdapter.findOne(User, { username }, {});
+    const organizations = await this.dbAdapter.find(Organization, { 'members.user': user._id }, { _id: 0, __v: 0, members: 0, projects: 0 });
     return createResponseFormat(false, organizations);
   }
 
-  async searchOrganizationById(id: string) : Promise<APIResponseFormat> { // Realizar cambio de los usuarios de la organización por sus usuarios de forma completa
+  async searchOrganizationById(id: string) : Promise<APIResponseFormat> { 
     let organization = await this.dbAdapter.findOne(Organization, { _id: id }, {_id: 0, __v: 0}, ['members.user', 'projects']);
     if (!organization) {
       return createResponseFormat(true, "Organization not found");
@@ -60,6 +62,12 @@ export default class OrganizationLogic implements OrganizationsAPI {
     const query = this.buildSearchQuery(name);
     let organizations = await this.dbAdapter.find(Organization, query, {_id: 0, __v: 0, members: 0, projects: 0});
     return createResponseFormat(false, organizations);
+  }
+
+  async searchOrganizationsByName(name: string) : Promise<APIResponseFormat> {
+    const query = { name };
+    let organization = await this.dbAdapter.findOne(Organization, query);
+    return createResponseFormat(false, organization);
   }
 
   async searchOrganizationByProject(projectID: string) : Promise<any> {
@@ -105,20 +113,23 @@ export default class OrganizationLogic implements OrganizationsAPI {
       if (!organization) {
         throw new Error(`Organization with ID "${idOrg}" not found.`);
       }
-      const newMember = await userLogic.searchUserById(member.user);
+      const newMember = await userLogic.searchUserById(member);
       if (newMember.error) {
-        throw new Error(`User with ID "${member.user}" not found.`);
+        throw new Error(`User with ID "${member}" not found.`);
       }
       const members = organization.members || [];
-      members.push(member);
-      const data = {
-        members
-      };
+      const membertoAdd = {
+        user: member,
+        role: "member"
+      }
+      
+      members.push(membertoAdd);
+      const data = {members};
       const organization_updated = await this.dbAdapter.updateOne(Organization, query, data);
       if (!organization_updated) {
         throw new Error(`Failed to update organization with ID "${idOrg}".`);
       }
-      await userLogic.addOrganizationToUser(member.user, organization._id);
+      await userLogic.addOrganizationToUser(member, organization._id);
       return createResponseFormat(false, organization_updated);
     } catch (error) {
       return createResponseFormat(true, "Cannot add member to organization");
@@ -234,7 +245,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
     }
   }
 
-  async deleteMember(orgId: string, memberId: string): Promise<APIResponseFormat> {
+  async deleteMember(orgId: string, member_user: any): Promise<APIResponseFormat> {
     try {
       const query = { _id: orgId };
       const organization = await this.dbAdapter.findOne(Organization, query, {});
@@ -242,9 +253,10 @@ export default class OrganizationLogic implements OrganizationsAPI {
         throw new Error(`Organization with ID "${orgId}" not found.`);
       }
       const members = organization.members || [];
-      const memberIndex = members.findIndex((member: any) => member.user === memberId);
+      // @ts-ignore: Ignorar el error de código no retorna un valor
+      const memberIndex = members.findIndex((member: any) => member.user.toString() === member_user._id.toString());
       if (memberIndex === -1) {
-        throw new Error(`Member with ID "${memberId}" not found in organization with ID "${orgId}".`);
+        throw new Error(`Member with ID "${member_user._id}" not found in organization with ID "${orgId}".`);
       }
       const member = members[memberIndex];
       members.splice(memberIndex, 1);
@@ -265,7 +277,7 @@ export default class OrganizationLogic implements OrganizationsAPI {
               // console.warn(`Project with ID "${projectID}" not found.`);
               return;
             }
-            const project_updated = await projectLogic.deleteUserFromProject(projectID, memberId);
+            const project_updated = await projectLogic.deleteUserFromProject(projectID, member.user._id);
             if (project_updated.error) {
               // console.warn(`Failed to update project with ID "${projectID}".`);
             }            

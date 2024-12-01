@@ -16,6 +16,7 @@ import Express from 'express';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 import MongoDB from '../Class/DBAdapter.js';
 import OrganizationLogic from '../Class/OrganizationLogic.js';
+import User from '../Models/User.js';
 import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
 
 export const organizationsRouter = Express.Router();
@@ -88,7 +89,6 @@ organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, as
   try {
     const { username } = req.params;
     const response = await organizationLogic.searchOrganizationByUser(username);
-    console.log(response);
     res.status(200).send(response);
   } catch (error) {
     // console.error(error);
@@ -125,6 +125,17 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   }
 });
 
+organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const response = await organizationLogic.searchOrganizationsByName(name);
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+  }
+})
+
 /**
  * @brief This endpoint is used add a user to an organization
  * @param req The request object
@@ -144,7 +155,7 @@ organizationsRouter.post('/member', jwtMiddleware, async (req, res) => {
       res.status(404).json(createResponseFormat(true, 'Organization not found'));
       return;
     }
-    if (isMemberOfOrganization(organizationResult.result, member.user)) {
+    if (isMemberOfOrganization(organizationResult.result, member)) {
       res.status(403).json(createResponseFormat(true, 'The user is already a member of the organization'));
       return;
     }
@@ -251,7 +262,8 @@ organizationsRouter.delete('/member', jwtMiddleware, async (req, res) => {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-    const response = await organizationLogic.deleteMember(id, member);
+    const user_member = await dbAdapter.findOne(User, { _id: member });
+    const response = await organizationLogic.deleteMember(id, user_member);
     if (response.error) {
       res.status(404).json(response);
       return;
