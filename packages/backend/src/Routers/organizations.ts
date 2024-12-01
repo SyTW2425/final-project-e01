@@ -80,6 +80,23 @@ organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, r
 })
 
 /**
+ * @brief This endpoint is used to search organizations by name
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const response = await organizationLogic.searchOrganizationsByName(name);
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+  }
+})
+
+/**
  * @brief This endpoint is used create a new organization
  * @param req The request object
  * @param res The response object

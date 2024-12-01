@@ -16,6 +16,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RootState } from '../../store/store';
+import { useDispatch } from 'react-redux';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
 
 
@@ -63,6 +64,7 @@ const UserProfile: React.FC = () => {
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   
@@ -184,11 +186,10 @@ const UserProfile: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-
+      console.log(user.img_path)
       const updatedUser = await handleUpdateUser(username, user.email, profilePic);
-      setImageSRC(`${import.meta.env.VITE_BACKEND_URL}/userImg/${updatedUser.img_path}`);
-      setUsername(updatedUser.username);
-
+      setImageSRC(`${import.meta.env.VITE_BACKEND_URL}/userImg/${updatedUser.result.result.img_path}`);
+      setUsername(updatedUser.result.result.username);
       setShowModal(false);
 
     } catch (error) {
@@ -251,7 +252,6 @@ const UserProfile: React.FC = () => {
       })
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         alert('Usuario eliminado de la organización con éxito.');
         setShowModalRemoveUser(false);
         return data;
@@ -319,6 +319,7 @@ const UserProfile: React.FC = () => {
         await handleAddToOrganization(org.result._id, searchedUser?._id);
         alert('Usuario añadido a la organización con éxito.');
       } catch (error) {
+        console.log(error)
         console.error('Error al añadir a la organización:', error);
         alert('Hubo un problema al añadir a la organización.');
       }
@@ -327,7 +328,6 @@ const UserProfile: React.FC = () => {
     }
   };
   
-
 
   useEffect(() => {
     if (!imageSRC && user) {
@@ -342,13 +342,13 @@ const UserProfile: React.FC = () => {
     fetchProjects();
     fetchUser();
     fetchOrganizations();
-  }, [user]);
+  }, [user, imageSRC]);
 
   useEffect(() => {
     fetchOrganizations();
     fetchProjects();
     fetchUser();
- }, []);
+ }, [user, imageSRC]);
 
 
   return (
