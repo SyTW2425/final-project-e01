@@ -40,6 +40,9 @@ const uploadDir = path.join(process.cwd(), 'public/userImages');
   }
 })();
 
+/**
+ * Multer storage configuration
+ */
 const storage = multer.diskStorage({
   destination: uploadDir,
   filename: (_, file, cb) => {
@@ -74,7 +77,11 @@ const upload = multer({
 });
 
 
-
+/**
+ * @brief This function is used to delete an image
+ * @param imgPath The path of the image to delete
+ * @returns void
+ */
 const deleteImage = async (imgPath: string) => {
   if (imgPath !== "default.png") {
     const imgPathToDelete = path.join(uploadDir, imgPath);
@@ -86,6 +93,12 @@ const deleteImage = async (imgPath: string) => {
   }
 }
 
+/**
+ * @brief This endpoint is used to validate the token
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
   try {
     const userObject = await userLogic.searchUserById(req.userId);
@@ -95,16 +108,6 @@ usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
-
-usersRouter.get('/search/:username', jwtMiddleware, async (req, res) => {
-  try {
-    const response = await userLogic.searchUsersByUsername(req.params.username);
-    res.status(200).send(response);
-  } catch (error) {
-    const errorParsed = error as Error;
-    res.status(500).send(createResponseFormat(true, errorParsed.message));
-  }
-})
 
 /**
  * @brief This endpoint is used to search for users
@@ -137,6 +140,37 @@ usersRouter.get('/', jwtMiddleware, async (req, res) => {
   }
 }); 
 
+/**
+ * @brief This endpoint is used to search for a user by username
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+usersRouter.get('/search/:username', jwtMiddleware, async (req, res) => {
+  try {
+    const response = await userLogic.searchUsersByUsername(req.params.username);
+    res.status(200).send(response);
+  } catch (error) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+})
+
+/**
+ * @brief This endpoint is used to search for a user by id
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+usersRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const response = await userLogic.searchUserById(req.params.id);
+    res.status(200).send(response);
+  } catch (error) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
 
 /**
  * @brief This endpoint is used to register a new user
@@ -181,7 +215,6 @@ usersRouter.post('/login', async (req, res) => {
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
 });
-
 
 /**
  * @brief This endpoint is used to delete a user

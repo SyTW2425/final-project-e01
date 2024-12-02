@@ -47,7 +47,7 @@ export default class TasksLogic implements TasksAPI {
   }
 
   async getTaskById(id: string): Promise<APIResponseFormat> {
-    const task = await this.dbAdapter.findOne(Task, { _id: id }, { _id: 0, __v: 0 }, ['users', 'project', 'organization']);
+    const task = await this.dbAdapter.findOne(Task, { _id: id }, { _id: 0, __v: 0 }, ['users', 'project']);
     if (!task) {
       return createResponseFormat(true, 'Task not found');
     }
@@ -69,7 +69,7 @@ export default class TasksLogic implements TasksAPI {
 
   async getTasksProjectFromUser(id: string, userId: string): Promise<APIResponseFormat> {
     const query = { users: userId, project: id };
-    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project', 'organization']);
+    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project']);
     if (!tasks) {
       return createResponseFormat(true, 'Tasks not found');
     }
