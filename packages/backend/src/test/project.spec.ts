@@ -44,7 +44,6 @@ describe('Projects API Endpoints', () => {
     expect(createOrganizationResponse.status).to.equal(201);
   });
 
-
   after(async () => {
     await request.delete('/project')
       .set('Authorization', `${token}`)

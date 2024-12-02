@@ -85,7 +85,7 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, tasks);
   }
 
-  async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string) : Promise<APIResponseFormat> {
+  async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string): Promise<APIResponseFormat> {
     const actualDate = new Date();
     const progress : number = 0.0;
     let task_saved = await this.dbAdapter.create(Task, {
@@ -103,7 +103,6 @@ export default class TasksLogic implements TasksAPI {
       users,
       project
     });
-
     return createResponseFormat(false, task_saved); 
   }
 
@@ -123,21 +122,19 @@ export default class TasksLogic implements TasksAPI {
       status,
       comments,
       users,
-      project
+      project,
+      sprint
     });
-
     const sprintId = new mongoose.Types.ObjectId(sprint);
-
-    const miau = await this.dbAdapter.updateOne(
+    const sprintUpdateResult = await this.dbAdapter.updateOne(
       Project,
       { _id: project, "sprints._id": sprintId },
       { $push: { "sprints.$.tasks": task_saved._id } }
     );
-
-    
-    console.log(miau);
+    if (!sprintUpdateResult) {
+      return createResponseFormat(true, 'Task not added to sprint of project');
+    }
     return createResponseFormat(false, task_saved); 
-
   }
 
   async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {
@@ -180,8 +177,32 @@ export default class TasksLogic implements TasksAPI {
   }
 
   async deleteTaskById(taskId: string): Promise<APIResponseFormat> {
-    const taskDelete = await this.dbAdapter.deleteOne(Task, { _id: taskId });
-    return createResponseFormat(false, taskDelete);
+    try {
+      // Search the task to delete
+      const taskToDelete = await this.dbAdapter.findOne(Task, { _id: taskId }, { sprint: 1, project: 1 });
+      if (!taskToDelete) {
+        return createResponseFormat(true, 'Task not found');
+      }
+      // Delete the task
+      const taskDeleteResult = await this.dbAdapter.deleteOne(Task, { _id: taskId });
+      if (!taskDeleteResult) {
+        return createResponseFormat(true, 'Failed to delete the task');
+      }  
+      // Delete the task from the sprint if it exists
+      if (taskToDelete.sprint) {
+        const sprintUpdateResult = await this.dbAdapter.updateOne(
+          Project,
+          { _id: taskToDelete.project, "sprints._id": taskToDelete.sprint },
+          { $pull: { "sprints.$.tasks": taskId } }
+        );
+        if (!sprintUpdateResult) {
+          return createResponseFormat(true, 'Failed to remove task ID from sprint');
+        }
+      }
+      return createResponseFormat(false, 'Task successfully deleted and removed from sprint');
+    } catch (error) {
+      return createResponseFormat(true, `Error deleting task: ${(error as Error).message}`);
+    }
   }
 
   private buildSearchQuery(name: string | null, projectID: string): any {
