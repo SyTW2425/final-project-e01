@@ -120,7 +120,7 @@ const KanbanBoardPage: React.FC = () => {
   }
 };
 
-
+ 
   return (
     <div className="flex-1 bg-gray-50 z-10">
       <KanbanBoard initialData={kanbanData} onUpdate={handleDataUpdate} />
