@@ -103,7 +103,7 @@ const KanbanBoardPage: React.FC = () => {
     // Actualiza cada tarea individualmente en el backend.
     await Promise.all(
       Object.values(updatedData.tasks).map((task: any) => {
-        const response = fetch(`${BACKEND_UPDATE_TASKS_URL}/${task.id}`, {
+        fetch(`${BACKEND_UPDATE_TASKS_URL}/${task.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -111,7 +111,6 @@ const KanbanBoardPage: React.FC = () => {
           },
           body: JSON.stringify({ status: task.state }),
         })
-        console.log(task)
       })
     );
 
