@@ -52,6 +52,7 @@ export interface TaskInterface extends Document {
   comments: string[];
   users: Schema.Types.ObjectId[];
   project: Schema.Types.ObjectId;
+  sprint: Schema.Types.ObjectId;
 }
 
 /**
@@ -129,7 +130,11 @@ export const TaskSchema = new Schema<TaskInterface>({
     ref: 'Projects',
     required: true,
     _id: false,
-  }
+  },
+  sprint: {
+    type: Schema.Types.ObjectId,
+    _id: false,
+  },
 });
 
 const Task = model<TaskInterface>('Tasks', TaskSchema);

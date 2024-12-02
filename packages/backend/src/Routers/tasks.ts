@@ -173,14 +173,14 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
  */
 tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
   try {
-    const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users } = req.body;
+    const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprint } = req.body;
     if (!validateRequiredFields(req.body, ['startDate', 'endDate', 'name', 'description', 'priority', 'status', 'comments', 'users'], res)) return;
     const user: any = await getUserFromHeader(req);
     if (!user) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id);
+    const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprint);
     console.log(response);
     res.status(201).send(response);
   } catch (error: unknown) {
@@ -278,7 +278,12 @@ tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
   }
 });
 
-
+/**
+ * @brief This endpoint is used to create a task for a sprint
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
   try {
     const {  startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprintID } = req.body;
