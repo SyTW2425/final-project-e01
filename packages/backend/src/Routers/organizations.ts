@@ -113,6 +113,29 @@ organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, as
   }
 })
 
+/**
+ * @brief This endpoint is used create a new organization
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await organizationLogic.searchOrganizations(id);
+    res.status(200).send(response);
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+  }
+})
+
+/**
+ * @brief This endpoint is used create a new organization
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, members } = req.body;
@@ -141,17 +164,6 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, 'Cannot create organization'));
   }
 });
-
-organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const response = await organizationLogic.searchOrganizations(id);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
 
 /**
  * @brief This endpoint is used add a user to an organization

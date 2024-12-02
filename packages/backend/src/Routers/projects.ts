@@ -249,8 +249,6 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
   }
 });
 
-
-
 /**
  * @brief This endpoint is used to search projects from the id
  * @param req The request object
