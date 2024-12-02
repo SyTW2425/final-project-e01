@@ -19,6 +19,7 @@ import Task from '../Models/Task.js';
 import { LIMIT } from './DBAdapter.js';
 import Organization from '../Models/Organization.js';
 import Project from '../Models/Project.js';
+import mongoose from 'mongoose';
 
 /**
  * Class that contains the logic of the tasks
@@ -102,7 +103,41 @@ export default class TasksLogic implements TasksAPI {
       users,
       project
     });
+
     return createResponseFormat(false, task_saved); 
+  }
+
+  async createTaskForSprint(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string, sprint: string) : Promise<APIResponseFormat> {
+    const actualDate = new Date();
+    const progress : number = 0.0;
+    let task_saved = await this.dbAdapter.create(Task, {
+      startDate,
+      endDate,
+      name,
+      progress,
+      description,
+      priority,
+      dependenciesTasks,
+      createdAt: actualDate.toString(),
+      updatedAt: actualDate.toString(),
+      status,
+      comments,
+      users,
+      project
+    });
+
+    const sprintId = new mongoose.Types.ObjectId(sprint);
+
+    const miau = await this.dbAdapter.updateOne(
+      Project,
+      { _id: project, "sprints._id": sprintId },
+      { $push: { "sprints.$.tasks": task_saved._id } }
+    );
+
+    
+    console.log(miau);
+    return createResponseFormat(false, task_saved); 
+
   }
 
   async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {

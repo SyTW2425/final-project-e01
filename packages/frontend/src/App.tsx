@@ -63,6 +63,7 @@ const useSessionValidation = () => {
             if (!data.error) {
               dispatch(setProjects(data.result));
               dispatch(setCurrentProject(data.result[0]));
+
             } 
           })
           .catch((error) => {
@@ -77,7 +78,7 @@ const useSessionValidation = () => {
       const page = window.location.href.split('/').pop();
       if (page?.length !== 0 && page !== 'register' && page !== 'login') navigate('/login', { replace: true });
     }
-  }, [dispatch, userObject]);
+  }, [dispatch, sessionState]);
 };
 
 const App: React.FC = () => {

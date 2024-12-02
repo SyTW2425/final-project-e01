@@ -155,7 +155,6 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
 projectsRouter.post('/sprint', jwtMiddleware, async (req, res) => {
   try {
     const { project, sprint } = req.body;
-    console.log(req.body);
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
     if (projectResult.error) {
@@ -452,6 +451,7 @@ projectsRouter.put('/sprint', jwtMiddleware, async (req, res) => {
 projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
   try {
     const { organization, project } = req.body;
+
     // We need search the organization
     const organizationResult = await organizationLogic.searchOrganizationByName(organization);
     if (!organizationResult) {
@@ -530,6 +530,7 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
 projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
   try {
     const { project, sprintID } = req.body;
+
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
     if (!projectResult) {

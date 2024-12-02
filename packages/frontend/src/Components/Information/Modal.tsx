@@ -15,13 +15,13 @@ const Modal: React.FC<ModalProps> = ({ title, children, onClose, onSubmit }) => 
     >
       <div
         className="bg-white rounded-md p-6 w-full max-w-md md:max-w-lg lg:max-w-xl mx-4 md:mx-auto max-h-screen overflow-y-auto"
-        onClick={(e) => e.stopPropagation()} // Previene cerrar al hacer clic dentro del modal
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-bold mb-4">{title}</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSubmit) onSubmit(); // Llama a la lógica de envío, si se proporciona
+            if (onSubmit) onSubmit();
           }}
         >
           {children}
@@ -38,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({ title, children, onClose, onSubmit }) => 
                 type="submit"
                 className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                Guardar
+                Continuar
               </button>
             )}
           </div>

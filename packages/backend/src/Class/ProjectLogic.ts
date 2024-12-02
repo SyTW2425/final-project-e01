@@ -67,11 +67,15 @@ export default class ProjectLogic implements ProjectsAPI {
 
   async searchProjectById(id: string): Promise<APIResponseFormat> {
     try {
-      const project = await this.dbAdapter.findOne(Project, { _id: id }, {__v: 0}, {
+      const project = await this.dbAdapter.findOne(Project, { _id: id }, {__v: 0}, [{
         path: 'users.user',
         model: 'Users',
-        select: 'username email img_path '
-      });
+        select: 'username email img_path '},
+        {
+          path: 'sprints.tasks',
+          model: 'Tasks'
+        }
+      ]);
       if (!project) {
         return createResponseFormat(true, 'Project not found!');
       }
@@ -260,6 +264,7 @@ export default class ProjectLogic implements ProjectsAPI {
     if (!projectUpdated) {
       return createResponseFormat(true, 'Cannot update project');
     }
+    projectUpdated._doc.sprintIndex = sprintIndex;
     return createResponseFormat(false, projectUpdated);
   }
 

@@ -57,6 +57,7 @@ export interface UsersAPI {
 export interface TasksAPI {
   searchTasks(name : string, project: string, page?: number) : Promise<APIResponseFormat>;
   createTask(name : string, startDate : string, endDate : string, description : string, priority : string, dependenciesTasks : string[], status : string, comments : string[], users : string[], project : string) : Promise<APIResponseFormat>;
+  createTaskForSprint(name : string, startDate : string, endDate : string, description : string, priority : string, dependenciesTasks : string[], status : string, comments : string[], users : string[], project : string, sprint : string) : Promise<APIResponseFormat>;
   deleteTask(taskToDelete : string, projectTask: string) : Promise<APIResponseFormat>;
   updateTask(name : string, description : string | null, deadline : string | null, priority : string | null, state : string | null, project : string, Organization: string, assignedTo : string | null) : Promise<APIResponseFormat>;
 }

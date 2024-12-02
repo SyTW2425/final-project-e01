@@ -181,6 +181,7 @@ tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id);
+    console.log(response);
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -271,6 +272,24 @@ tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
     }
     const response = await taskLogic.updateTaskById(id, description, endDate, priority, status, assignedTo);
     res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+});
+
+
+tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const {  startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprintID } = req.body;
+    if (!validateRequiredFields(req.body, ['name', 'description', 'startDate', 'endDate', 'users'], res)) return;
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprintID);
+    res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));

@@ -62,12 +62,6 @@ export const TaskSchema = new Schema<TaskInterface>({
   startDate: {
     type: Date,
     required: true,
-    validate: {
-      validator: (v: Date) => v.getTime() > Date.now(),
-      message: (props) => {
-        return `${props.value} is not a valid date. The start date must be greater than the current date.`;
-      },
-    },
   },
   endDate: {
     type: Date,
