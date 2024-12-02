@@ -181,7 +181,6 @@ tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprint);
-    console.log(response);
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -262,9 +261,10 @@ tasksRouter.put('/', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-tasksRouter.put('/:id', jwtMiddleware, async (req, res) => {
+tasksRouter.put('/update/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(req.body)
     const { description, endDate, priority, status, assignedTo } = req.body;
     if (!id) {
       res.status(400).send(createResponseFormat(true, 'The task id is required'));

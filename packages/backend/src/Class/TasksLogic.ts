@@ -78,7 +78,7 @@ export default class TasksLogic implements TasksAPI {
 
   async getTasksProjectFromUserNotCompleted(id: string): Promise<APIResponseFormat> {
     const query = { project: id, status: { $ne: 'done' } };
-    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project']);
+    const tasks = await this.dbAdapter.find(Task, query, { __v: 0 }, undefined, undefined, ['users', 'project']);
     if (!tasks) {
       return createResponseFormat(true, 'Tasks not found');
     }

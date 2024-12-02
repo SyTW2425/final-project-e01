@@ -24,48 +24,67 @@ interface KanbanBoardProps {
     columns: Record<string, column>;
     columnOrder: string[];
   };
+  onUpdate?: (updatedData: any) => Promise<void>;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData, onUpdate }) => {
   const [data, setData] = useState(initialData);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
-
+  
     if (!destination) return;
-
+  
     const sourceColumn = data.columns[source.droppableId];
     const destinationColumn = data.columns[destination.droppableId];
-
+    const taskId = draggableId; // ID de la tarea movida
+  
+    let newData = { ...data };
+  
+    // Actualización visual de las columnas
     if (sourceColumn === destinationColumn) {
       const newTaskIds = Array.from(sourceColumn.taskIds);
-      newTaskIds.splice(source.index, 1); // Eliminar de la posición inicial
-      newTaskIds.splice(destination.index, 0, draggableId); // Insertar en la nueva posición
-
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
+  
       const newColumn = { ...sourceColumn, taskIds: newTaskIds };
-
-      setData({
-        ...data,
+  
+      newData = {
+        ...newData,
         columns: {
-          ...data.columns,
+          ...newData.columns,
           [newColumn.id]: newColumn,
         },
-      });
+      };
     } else {
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       sourceTaskIds.splice(source.index, 1);
-
+  
       const destinationTaskIds = Array.from(destinationColumn.taskIds);
       destinationTaskIds.splice(destination.index, 0, draggableId);
-
-      setData({
-        ...data,
+  
+      newData = {
+        ...newData,
         columns: {
-          ...data.columns,
+          ...newData.columns,
           [sourceColumn.id]: { ...sourceColumn, taskIds: sourceTaskIds },
           [destinationColumn.id]: { ...destinationColumn, taskIds: destinationTaskIds },
         },
-      });
+      };
+  
+      // Actualizar el estado de la tarea cuando se mueve de una columna a otra
+      const updatedTask = newData.tasks[taskId];
+      updatedTask.state = destinationColumn.title === "TODO" ? "todo" : "in_progress";
+  
+      // Actualiza la tarea en el estado local con el nuevo estado
+      newData.tasks[taskId] = updatedTask;
+    }
+  
+    setData(newData);
+  
+    // Llamar a la función onUpdate para enviar los datos actualizados al componente superior
+    if (onUpdate) {
+      onUpdate(newData);  // Aquí se pasa el nuevo estado actualizado
     }
   };
 
