@@ -18,6 +18,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import { useDispatch } from 'react-redux';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
+import { setSession } from '../../slices/sessionSlice';
 
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
@@ -188,7 +189,10 @@ const UserProfile: React.FC = () => {
     try {
       console.log(user.img_path)
       const updatedUser = await handleUpdateUser(username, user.email, profilePic);
+      dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: updatedUser.result.result, projects: null, currentProject: null }));
       setImageSRC(`${import.meta.env.VITE_BACKEND_URL}/userImg/${updatedUser.result.result.img_path}`);
+      navigate('/dashboard/profile/' + updatedUser.result.result.username);
+      window.location.reload();
       setUsername(updatedUser.result.result.username);
       setShowModal(false);
 
