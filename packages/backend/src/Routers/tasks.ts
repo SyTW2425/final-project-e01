@@ -121,7 +121,7 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const response = await taskLogic.getTasksProjectFromUserNotCompleted(id, user._id);
+    const response = await taskLogic.getTasksProjectFromUserNotCompleted(id);
     if (response.error) {
       res.status(404).send(response);
       return;
