@@ -57,14 +57,17 @@ const UserProfile: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalAddOrg, setShowModalAddOrg] = useState<boolean>(false);
   const [showModalRemoveUser, setShowModalRemoveUser] = useState<boolean>(false);
+  const [showModalAddProject, setShowModalAddProject] = useState<boolean>(false);
   const [searchedUser, setSearchedUser] = useState<any>(null);
   const [username, setUsername] = useState<string>('');
   const [imageSRC, setImageSRC] = useState<string>('');
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [loggedOrganizations, setLoggedOrganizations] = useState<any[]>([]);
+  const [loggedProjects, setLoggedProjects] = useState<any[]>([]);
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [selectedProject, setSelectedProject] = useState<string>('');
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
@@ -145,6 +148,25 @@ const UserProfile: React.FC = () => {
       }
     } catch (error) {
       console.error('Error al obtener organizaciones del usuario logueado:', error);
+    }
+  };
+
+  const fetchProjectsForLoggedUser = async () => {
+    try {
+      const URL = BACKEND_PROJECTS_USER_URL + `/${user?.username}`;
+      const response = await fetch(URL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('token') || '',
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLoggedProjects(data.result);
+      } 
+    } catch (error) {
+      console.error('Error al obtener los proyectos del usuario:', error);
     }
   };
 
@@ -240,6 +262,11 @@ const UserProfile: React.FC = () => {
     setShowModalRemoveUser(true);
   }
 
+  const handleAddtoProject = () => {
+    fetchProjectsForLoggedUser();
+    setShowModalAddProject(true);
+  }
+
 
   const handleRemoveFromOrganization = async (organizationId: string, memberId: string) => {
     try {
@@ -318,7 +345,6 @@ const UserProfile: React.FC = () => {
         if (!response.ok) {
           throw new Error('Error al buscar la organización');
         }
-  
         const org = await response.json();
         await handleAddToOrganization(org.result._id, searchedUser?._id);
         alert('Usuario añadido a la organización con éxito.');
@@ -331,6 +357,37 @@ const UserProfile: React.FC = () => {
       alert('Por favor, selecciona una organización');
     }
   };
+
+  const handleSubmitAddProjects = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  
+    if (selectedProject) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/project/user`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `${localStorage.getItem('token') || ''}`,
+            },
+            body: JSON.stringify({ project: selectedProject, user: searchedUser?._id }),
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error('Error al buscar el proyecto');
+        }
+        setShowModalAddProject(false);
+        alert('Usuario añadido al proyecto con éxito.');
+      } catch (error) {
+        console.error('Error al añadir al proyecto:', error);
+        alert('Hubo un problema al añadir al proyecto.');
+      }
+    } else {
+      alert('Por favor, selecciona un proyecto');
+    }
+  }
   
 
   useEffect(() => {
@@ -383,6 +440,12 @@ const UserProfile: React.FC = () => {
               className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-700 transition duration-200"
             >
               Eliminar de Organización
+            </button>
+            <button
+              onClick={handleAddtoProject}
+              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Añadir a Proyecto
             </button>
           </div>
           )}
@@ -477,6 +540,52 @@ const UserProfile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModalAddOrg(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                >
+                  Añadir
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showModalAddProject && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Añadir a Proyecto</h2>
+            <form onSubmit={handleSubmitAddProjects}>
+              <div className="mb-4">
+                <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Selecciona un Proyecto</label>
+                <select
+                  name="organization"
+                  id="organization"
+                  value={selectedProject}
+                  onChange={(e) => { setSelectedProject(e.target.value);
+                  }}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Selecciona un proyecto</option>
+                  {loggedProjects && loggedProjects.length > 0 ? (
+                    loggedProjects.map((projects: any) => (
+                      <option key={projects._id} value={projects._id}>
+                        {projects.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No tienes proyectos disponibles</option>
+                  )}
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModalAddProject(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 >
                   Cancelar

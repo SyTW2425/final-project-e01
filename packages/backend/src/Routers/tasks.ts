@@ -287,7 +287,6 @@ tasksRouter.put('/', jwtMiddleware, async (req, res) => {
 tasksRouter.put('/update/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(req.body)
     const { description, endDate, priority, status, assignedTo } = req.body;
     if (!id) {
       res.status(400).send(createResponseFormat(true, 'The task id is required'));

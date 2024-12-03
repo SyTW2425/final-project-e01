@@ -44,7 +44,6 @@ const KanbanBoardPage: React.FC = () => {
       if (formattedTasks[taskId]) {
         console.warn(`Tarea duplicada detectada: ${taskId}`, task);
       }
-      console.log(taskId);
       formattedTasks[taskId] = {
         id: taskId,
         name: task.name,
