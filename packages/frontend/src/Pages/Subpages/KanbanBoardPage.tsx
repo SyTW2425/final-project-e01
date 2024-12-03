@@ -18,6 +18,18 @@ enum TaskStatus {
   IN_PROGRESS = "IN_PROGRESS",
 }
 
+const initializeColumns = (): Record<string, { id: string; title: TaskStatus; taskIds: string[] }> => ({
+  "column-todo": {
+    id: "column-todo",
+    title: TaskStatus.TODO,
+    taskIds: [],
+  },
+  "column-in-progress": {
+    id: "column-in-progress",
+    title: TaskStatus.IN_PROGRESS,
+    taskIds: [],
+  },
+});
 
 const KanbanBoardPage: React.FC = () => {
   const sessionState = useSelector((state: RootState) => state.session);
@@ -26,29 +38,21 @@ const KanbanBoardPage: React.FC = () => {
 
   const formatTasksToKanban = (tasks: any[]) => {
     const formattedTasks: Record<string, any> = {};
-    const columns: Record<string, any> = {};
-    const columnOrder: string[] = [];
+    const columns = initializeColumns();
+    const columnOrder = ["column-todo", "column-in-progress"]
     tasks.forEach((task) => {
-      const columnId = `column-${task.status}`;
-      const title_column = task.status === "todo" ? TaskStatus.TODO : TaskStatus.IN_PROGRESS;
-      if (!columns[columnId]) {
-        columns[columnId] = {
-          id: columnId,
-          title: title_column,
-          taskIds: [],
-        };
-        columnOrder.push(columnId);
-      }
+      const columnId = task.status === "todo" ? "column-todo" : "column-in-progress";
+      
 
       const taskId = `${task._id}`;
-      if (formattedTasks[taskId]) {
-        console.warn(`Tarea duplicada detectada: ${taskId}`, task);
-      }
       formattedTasks[taskId] = {
         id: taskId,
         name: task.name,
         state: task.status,
-        assignedTo: { name: task.assignedToName, avatar: task.assignedToAvatar },
+        assignedTo: {
+          name: task.assignedToName,
+          avatar: task.assignedToAvatar,
+        },
         description: task.description,
       };
       columns[columnId].taskIds.push(taskId);

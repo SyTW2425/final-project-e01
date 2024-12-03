@@ -49,12 +49,12 @@ const MyTasksPage: React.FC = () => {
       }
     };
 
-    setLoading(true); // Iniciar carga al cambiar el proyecto
+    setLoading(true);
     fetchTasks();
   }, [currentProject]);
 
   if (loading) {
-    return <p>Loading tasks...</p>; // Mensaje de carga mientras esperamos
+    return <p>Loading tasks...</p>;
   }
 
   return (
