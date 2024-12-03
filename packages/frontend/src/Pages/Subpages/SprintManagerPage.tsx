@@ -108,48 +108,110 @@ const ProjectSprintsPage: React.FC = () => {
     }, [currentProject?._id, dispatch]);
   
 
-  return (
-    <div className="bg-gray-50 w-full h-auto">
-      <h1 className="text-2xl font-bold text-center mt-10">Project Sprints</h1>
-      <button
-        onClick={() => setShowCreatePopup(true)}
-
-        className="bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 mx-auto block mt-6"
-      >
-        Add Sprint
-      </button>
-
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 p-4">
-        {Array.isArray(sprints) && sprints?.map((sprint) => (
-          <div key={sprint._id} className="bg-white shadow-md p-4 rounded-lg border border-gray-200">
-        <h2 className="text-xl font-semibold">{sprint.name}</h2>
-        <p className="text-gray-600">{sprint.description}</p>
-        <p><strong>Start:</strong> {new Date(sprint.startDate).toLocaleDateString()}</p>
-        <p><strong>End:</strong> {new Date(sprint.endDate).toLocaleDateString()}</p>
-        <div className="flex space-x-2 mt-4">
-          <button onClick={() => { setCurrentSprint(sprint); setShowUpdatePopup(true); }} className="text-blue-500">Editar</button>
-          <button onClick={() => { setCurrentSprint(sprint); setShowDeletePopup(true); }} className="text-red-500">Eliminar</button>
+    return (
+      <div className="bg-gray-50 w-full h-auto p-6">
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Project Sprints</h1>
+        <button
+          onClick={() => setShowCreatePopup(true)}
+          className="bg-blue-500 text-white px-6 py-3 rounded shadow hover:bg-blue-600 block mx-auto"
+        >
+          Add Sprint
+        </button>
+  
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          {Array.isArray(sprints) &&
+            sprints.map((sprint) => (
+              <div
+                key={sprint._id}
+                className="bg-white shadow rounded-lg p-6 hover:shadow-md transition"
+              >
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">{sprint.name}</h2>
+                <p className="text-gray-600 mb-4">{sprint.description}</p>
+                <p>
+                  <strong>Start:</strong> {new Date(sprint.startDate).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>End:</strong> {new Date(sprint.endDate).toLocaleDateString()}
+                </p>
+                <div className="flex gap-4 mt-4">
+                  <button
+                    onClick={() => {
+                      setCurrentSprint(sprint);
+                      setShowUpdatePopup(true);
+                    }}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrentSprint(sprint);
+                      setShowDeletePopup(true);
+                    }}
+                    className="text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-gray-800">Tasks</h3>
+                  <button
+                    onClick={() => {
+                      setCurrentSprint(sprint);
+                      setShowCreateTaskPopup(true);
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded shadow mt-2"
+                  >
+                    Add Task
+                  </button>
+                  {sprint.tasks?.map((task) => (
+                    <div
+                      key={task._id}
+                      className="bg-gray-100 p-4 rounded-lg shadow mt-4 hover:shadow-lg transition"
+                    >
+                      <h4 className="text-lg font-semibold text-gray-700">{task.name}</h4>
+                      <p className="text-gray-600">{task.description}</p>
+                      <p>
+                        <strong>Start:</strong> {new Date(task.startDate).toLocaleDateString()}
+                      </p>
+                      <p>
+                        <strong>End:</strong> {new Date(task.endDate).toLocaleDateString()}
+                      </p>
+                      <div className="flex gap-4 mt-4">
+                        <button
+                          onClick={() => {
+                            setCurrentTask(task);
+                            setShowUpdateTaskPopup(true);
+                          }}
+                          className="text-blue-500 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCurrentTask(task);
+                            setShowRemoveTaskPopup(true);
+                          }}
+                          className="text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCurrentTask(task);
+                            setShowTaskPopup(true);
+                          }}
+                          className="text-green-500 hover:underline"
+                        >
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
         </div>
-        {/* Render tasks of the sprint */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Tasks</h3>
-          <button onClick={() => { setCurrentSprint(sprint); setShowCreateTaskPopup(true); }} className="bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600">Add Task</button>
-          {Array.isArray(sprint.tasks) && sprint.tasks.map((task) => (
-            <div key={Date.now() + Math.random() } className="bg-gray-100 p-4 rounded-lg border border-gray-200 mt-2 hover:cursor-pointer hover:bg-blue-200 transition-all" >
-          <h4 className="text-lg font-semibold">{task.name}</h4>
-          <p className="text-gray-600">{task.description}</p>
-          <p><strong>Start:</strong> {new Date(task.startDate).toLocaleDateString()}</p>
-          <p><strong>End:</strong> {new Date(task.endDate).toLocaleDateString()}</p>
-          <div className="flex space-x-2 mt-4">
-            <button onClick={() => { setCurrentTask(task); setShowUpdateTaskPopup(true); }} className="text-blue-500">Editar</button>
-            <button onClick={() => { setCurrentTask(task); setShowRemoveTaskPopup(true); }} className="text-red-500">Eliminar</button>
-            <button onClick={() => { setCurrentTask(task); setShowTaskPopup(true); }} className="text-green-500">Ver</button>
-          </div>
-            </div>
-          ))}
-        </div>
-      </div>))}
-      </div>
       
       {showCreatePopup && (
         <Modal title="Create Sprints" onClose={() => setShowCreatePopup(!showCreatePopup)}

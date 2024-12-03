@@ -19,9 +19,57 @@ export interface taskInfo {
   id: string;
   name: string;
   state: string;
-  assignedTo: { name: string; avatar: string };
+  priority: string;
   description: string;
 }
+
+const getPrioritySVG = (priority: string) => {
+  switch (priority.toLowerCase()) {
+    case "high":
+      return (
+        <svg
+          className="w-6 h-6 text-red-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 110 20 10 10 0 010-20z" />
+          <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      );
+    case "medium":
+      return (
+        <svg
+          className="w-6 h-6 text-orange-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 110 20 10 10 0 010-20z" />
+          <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      );
+    case "low":
+      return (
+        <svg
+          className="w-6 h-6 text-green-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 110 20 10 10 0 010-20z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
 
 interface TaskProps {
   taskData: taskInfo;
@@ -38,19 +86,13 @@ const Task: React.FC<TaskProps> = ({ taskData, index }) => {
           ref={provided.innerRef}
           className="bg-white rounded-lg p-4 shadow-md flex items-center md:justify-between md:flex-row flex-col space-y-4 md:space-y-0"
         >
-          {/* Imagen y contenido */}
           <div className="flex items-center space-x-4 w-full md:w-auto">
-            <img
-              src={taskData.assignedTo.avatar}
-              alt={taskData.assignedTo.name}
-              className="w-10 h-10 rounded-full flex-shrink-0"
-            />
+            {getPrioritySVG(taskData.priority)}
             <div className="flex-1">
               <h4 className="font-semibold text-base md:text-lg">{taskData.name}</h4>
               <p className="text-sm text-gray-600">{taskData.description}</p>
             </div>
           </div>
-          {/* Estado */}
           <span
             className={`text-sm font-medium px-3 py-1 rounded ${
               taskData.state === "completed"

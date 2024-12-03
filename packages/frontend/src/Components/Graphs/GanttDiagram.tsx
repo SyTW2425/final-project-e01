@@ -48,10 +48,10 @@ const GanttDiagram: React.FC = () => {
     };
 
     fetchTasks();
-  }, currentProject);
+  }, [currentProject]);
   return (
     <div className="h-screen">
-      {tasks.length > 0 ? <Gantt tasks={tasks} /> : <p>Cargando tareas...</p>}
+      {tasks.length > 0 ? <Gantt tasks={tasks} /> : <p>Loading tasks...</p>}
     </div>
   );
 };

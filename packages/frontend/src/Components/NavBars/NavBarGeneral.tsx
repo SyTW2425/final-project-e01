@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 3/12/2024
+ * @brief Navbar de la aplicación.
+ */
+
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import React, { useEffect, useState, useRef } from 'react';
@@ -41,7 +55,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
   }, [currentUser, imageSRC]);
 
   return (
-    <nav className="bg-blue-600 shadow-lg p-4  top-0 w-full z-2">
+    <nav className="bg-blue-800 shadow-lg p-4  top-0 w-full z-2">
       <div className="container mx-auto flex justify-between items-center">
         {/* Sidebar Toggle y Logo */}
         <div className="flex items-center gap-4">
@@ -72,15 +86,15 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           </Link>
         </div>
 
-        {/* Barra de Búsqueda */}
+        {/* Searchvar */}
         <div className="hidden md:block flex-1 mx-6 relative">
           <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} />
         </div>
 
-        {/* Botones y Notificaciones */}
+        {/* Buttons of create organization and pproject */}
         <div className="flex items-center gap-4">
 
-          {/* Barra de Búsqueda Móvil */}
+          {/* Searchvar Mobile */}
           <button
             className="text-white hover:text-gray-300 md:hidden focus:outline-none"
             onClick={() => setShowSearch(!showSearch)}
@@ -88,11 +102,11 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             <SVGComponent className="w-6 h-6" d={searchIcon} />
           </button>
 
-          {/* Crear Organización y Proyecto */}
+          {/* Buttons of create organization and pproject Mobile version */}
           <div className="hidden md:flex gap-2">
             <button
               onClick={() => setShowCreateOrgPopup(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition"
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition"
             >
               Create Organization
             </button>
@@ -105,7 +119,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
           </div>
 
 
-          {/* Imagen de Perfil */}
+          {/* Profile image */}
           <div className="relative">
             <img
               src={imageSRC}
@@ -134,14 +148,14 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         </div>
       </div>
 
-      {/* Barra de Búsqueda Móvil */}
+      {/* Searchvar */}
       {showSearch && (
         <div className="mt-2 md:hidden">
           <SearchComponent url={`${import.meta.env.VITE_BACKEND_URL}/user/`} mobile={true} />
         </div>
       )}
 
-      {/* Modal para Crear Organización */}
+      {/* Pop Up for Organization Creation */}
       {showCreateOrgPopup && (
         <Modal
           title="Crear Organización"
@@ -176,7 +190,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
       )}
 
 
-      {/* Modal para Crear Proyecto */}
+      {/* Pop Up for Project Creation */}
       {showCreateProjectPopup && (
         <Modal
           title="Crear Proyecto"
@@ -250,7 +264,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
         </Modal>
       )}
 
-      {/* Botón flotante con menú desplegable */}
+      {/* Menu of mobile version for buttons */}
       <div className="fixed bottom-4 right-4 md:hidden z-40">
         <button
           onClick={toggleCreate}
@@ -276,7 +290,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
                 }}
                 className="block w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
               >
-                Crear Organización
+                Create Organization
               </button>
               <button
                 onClick={() => {
@@ -285,7 +299,7 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
                 }}
                 className="block w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
               >
-                Crear Proyecto
+                Create Project
               </button>
             </div>
           </>

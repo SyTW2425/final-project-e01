@@ -4,9 +4,6 @@ import { RootState } from "../../store/store";
 import { setCurrentProject } from "../../slices/sessionSlice";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-/**
- * Enum of roles
- */
 export enum Role {
   DEVELOPER = "developer",
   PRODUCT_OWNER = "product_owner",
@@ -34,9 +31,6 @@ const ProjectMembersPage: React.FC = () => {
   const [newRole, setNewRole] = useState<Role | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  /**
-   * Fetch members of the current project
-   */
   useEffect(() => {
     const fetchProjectMembers = async () => {
       if (!currentProject?._id) return;
@@ -64,9 +58,6 @@ const ProjectMembersPage: React.FC = () => {
     fetchProjectMembers();
   }, [currentProject?._id, dispatch]);
 
-  /**
-   * Handle role editing
-   */
   const handleEditRole = async () => {
     if (!selectedUser || !newRole) return;
 
@@ -93,25 +84,19 @@ const ProjectMembersPage: React.FC = () => {
     }
   };
 
-  /**
-   * Handle removing a user
-   */
   const handleRemoveUser = async (userId: string) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/project/user`,
-        {
-          method: "DELETE",
-          headers: {
-            authorization: localStorage.getItem("token") || "",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            project: currentProject._id,
-            user: userId
-          }),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/project/user`, {
+        method: "DELETE",
+        headers: {
+          authorization: localStorage.getItem("token") || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          project: currentProject._id,
+          user: userId,
+        }),
+      });
 
       if (!response.ok) throw new Error("Error removing user");
       window.location.reload();
@@ -120,9 +105,6 @@ const ProjectMembersPage: React.FC = () => {
     }
   };
 
-  /**
-   * Check if the current user can edit roles
-   */
   const canEdit = (): boolean => {
     const currentUser = currentProject?.users?.find(
       (u: User) => u.user._id === sessionState.userObject._id
@@ -130,9 +112,6 @@ const ProjectMembersPage: React.FC = () => {
     return [Role.ADMIN, Role.OWNER].includes(currentUser?.role || "");
   };
 
-  /**
-   * Render project members
-   */
   const renderMembers = () => {
     if (!currentProject?.users?.length) {
       return <p className="text-center text-gray-700 mt-10">No members in this project yet 😅</p>;
@@ -143,18 +122,24 @@ const ProjectMembersPage: React.FC = () => {
         {currentProject.users.map((user: User) => (
           <div
             key={Date.now() + Math.random()}
-            className="bg-white rounded-lg shadow-md p-4 relative hover:shadow-lg transition-all"
+            className="bg-white rounded-lg shadow-lg p-6 relative hover:shadow-xl transition-all"
           >
             <img
               src={`${import.meta.env.VITE_BACKEND_URL}/userImg/${user.user.img_path}`}
               alt={`${user.user.username}'s avatar`}
               className="w-24 h-24 rounded-full mx-auto mb-4"
             />
-            <h2 className="text-xl font-semibold text-gray-800 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 text-center">
               {user.user.username}
             </h2>
             <p className="text-gray-600 text-center">{user.user.email}</p>
-            <span className="mt-2 px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-800 block text-center">
+            <span
+              className={`mt-2 px-4 py-1 text-sm rounded-full block text-center ${
+                user.role === Role.ADMIN || user.role === Role.OWNER
+                  ? "bg-green-100 text-green-700"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
               {user.role}
             </span>
 
@@ -184,9 +169,6 @@ const ProjectMembersPage: React.FC = () => {
     );
   };
 
-  /**
-   * Popup Component
-   */
   const renderEditPopup = () => {
     if (!isEditing || !selectedUser) return null;
 

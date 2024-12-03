@@ -9,12 +9,11 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 18/11/2024
- * @brief Componente de tablero Kanban
+ * @brief Componente del tablero Kanban
  */
 
 import React, { useState } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-
 import { taskInfo } from "../Information/TaskCard";
 import Column, { column } from "./Column";
 
@@ -32,23 +31,20 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData, onUpdate }) => {
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
-  
     if (!destination) return;
-  
+
     const sourceColumn = data.columns[source.droppableId];
     const destinationColumn = data.columns[destination.droppableId];
-    const taskId = draggableId; // ID de la tarea movida
-  
+    const taskId = draggableId;
+
     let newData = { ...data };
-  
-    // Actualización visual de las columnas
+
     if (sourceColumn === destinationColumn) {
       const newTaskIds = Array.from(sourceColumn.taskIds);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
-  
+
       const newColumn = { ...sourceColumn, taskIds: newTaskIds };
-  
       newData = {
         ...newData,
         columns: {
@@ -59,10 +55,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData, onUpdate }) => {
     } else {
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       sourceTaskIds.splice(source.index, 1);
-  
+
       const destinationTaskIds = Array.from(destinationColumn.taskIds);
       destinationTaskIds.splice(destination.index, 0, draggableId);
-  
+
       newData = {
         ...newData,
         columns: {
@@ -71,20 +67,15 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData, onUpdate }) => {
           [destinationColumn.id]: { ...destinationColumn, taskIds: destinationTaskIds },
         },
       };
-  
-      // Actualizar el estado de la tarea cuando se mueve de una columna a otra
+
       const updatedTask = newData.tasks[taskId];
-      updatedTask.state = destinationColumn.title === "TODO" ? "todo" : "in_progress";
-  
-      // Actualiza la tarea en el estado local con el nuevo estado
+      updatedTask.state = destinationColumn.title === "TODO" ? "todo" : "in-progress";
       newData.tasks[taskId] = updatedTask;
     }
-  
+
     setData(newData);
-  
-    // Llamar a la función onUpdate para enviar los datos actualizados al componente superior
     if (onUpdate) {
-      onUpdate(newData);  // Aquí se pasa el nuevo estado actualizado
+      onUpdate(newData);
     }
   };
 
