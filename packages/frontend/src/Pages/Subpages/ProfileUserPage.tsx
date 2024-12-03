@@ -371,7 +371,7 @@ const UserProfile: React.FC = () => {
               'Content-Type': 'application/json',
               Authorization: `${localStorage.getItem('token') || ''}`,
             },
-            body: JSON.stringify({ project: selectedProject, user: searchedUser?._id }),
+            body: JSON.stringify({ project: selectedProject, user: searchedUser?._id, role: 'developer' }),
           }
         );
   
