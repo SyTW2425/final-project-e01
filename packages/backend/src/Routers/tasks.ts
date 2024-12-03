@@ -133,6 +133,26 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
   }
 });
 
+tasksRouter.get('/project/tasks/:id', jwtMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const response = await taskLogic.getAllTasksProject(id);
+    if (response.error) {
+      res.status(404).send(response);
+      return;
+    }
+    res.status(200).send(response);
+  } catch (error: unknown) {
+    const errorParsed = error as Error;
+    res.status(500).send(createResponseFormat(true, errorParsed.message));
+  }
+})
+
 /**
  * @brief This endpoint is used to create a task
  * @param req The request object
