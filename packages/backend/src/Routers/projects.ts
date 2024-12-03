@@ -99,7 +99,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
     const { project, user, role } = req.body;
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project as string);
-    if (!projectResult) {
+    if (projectResult.error) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
