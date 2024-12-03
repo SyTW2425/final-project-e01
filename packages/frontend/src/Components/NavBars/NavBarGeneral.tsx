@@ -17,10 +17,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import React, { useEffect, useState, useRef } from 'react';
 
 import Modal from '../Information/Modal';
+import { RootState } from '../../store/store';
 import SVGComponent from '../Icons/SVGComponent';
 import SearchComponent from '../Search/SearchInput';
 import { addOrganization, addProject } from '../../slices/sessionSlice';
-import { RootState } from '../../store/store';
+
+import { successNotification, errorNotification } from '../../Components/Information/Notification';
+
 
 const searchIcon = "M21.71,20.29,18,16.61A9,9,0,1,0,16.61,18l3.68,3.68a1,1,0,0,0,1.42,0A1,1,0,0,0,21.71,20.29ZM11,18a7,7,0,1,1,7-7A7,7,0,0,1,11,18Z";
 
@@ -174,10 +177,17 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             })
               .then((res) => res.json())
               .then((data) => {
-                setShowCreateOrgPopup(false);
-                dispatch(addOrganization(data.result));
+                if (!data.error) {
+                  setShowCreateOrgPopup(false);
+                  dispatch(addOrganization(data.result));
+                  successNotification(`Organization "${data.result.name}" created successfully`);
+                } else {
+                  errorNotification(data.result);
+                }
               })
-              .catch((err) => console.error(err));
+              .catch((err) => {
+                errorNotification(err)
+              });
           }}
         >
           <input

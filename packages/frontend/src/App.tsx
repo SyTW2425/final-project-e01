@@ -30,6 +30,8 @@ import LoginPage from './Pages/Login';
 import DashboardPage from './Pages/Dashboard';
 import ProfileUserPage from './Pages/Subpages/ProfileUserPage';
 
+// import { ToastContainer, toast, Flip } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // We need a custom hook in order to validate the session
 // in the case that user refreshes the page
@@ -95,6 +97,7 @@ const useSessionValidation = () => {
 const App: React.FC = () => {
   useSessionValidation();
   return (
+    <>
     <Routes>
       <Route path="/" Component={HomePage} />
       <Route path="/login" Component={LoginPage} />
@@ -102,6 +105,7 @@ const App: React.FC = () => {
       <Route path="/dashboard/profile/:username" element={<ProfileUserPage />} />
       <Route path="*" Component={HomePage} />
     </Routes>
+    </>
   );
 };
 

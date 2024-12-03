@@ -17,6 +17,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUserObject, setToken } from '../slices/sessionSlice';
 import blankLogo from '../../public/blank_logo.png';
+import { successNotification } from '../Components/Information/Notification';
+
 
 const LoginAndRegister: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);

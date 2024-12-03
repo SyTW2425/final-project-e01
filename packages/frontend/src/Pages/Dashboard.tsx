@@ -13,6 +13,10 @@ import GanttDiagramPage from './Subpages/GanttDiagramPage';
 import ProjectMembersPage from './Subpages/ProjectMembersPage';
 import SprintMangerPage from './Subpages/SprintManagerPage';
 
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
+
 const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -21,6 +25,7 @@ const DashboardPage: React.FC = () => {
   return (
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
+
       <div className="relative h-screen flex bg-gray-50">
         {/* Sidebar */}
         <div
@@ -61,6 +66,17 @@ const DashboardPage: React.FC = () => {
           </Routes>
         </div>
       </div>
+      <ToastContainer
+      position="bottom-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"/>
        <FooterDashboard currentUser={currentUser} />
     </>
   );
