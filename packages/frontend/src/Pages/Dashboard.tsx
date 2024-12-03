@@ -60,9 +60,8 @@ const DashboardPage: React.FC = () => {
             }} />
           </Routes>
         </div>
-    
       </div>
-      <FooterDashboard currentUser={currentUser} />
+       <FooterDashboard currentUser={currentUser} />
     </>
   );
 };

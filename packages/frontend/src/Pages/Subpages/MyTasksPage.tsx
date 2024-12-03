@@ -45,7 +45,7 @@ const MyTasksPage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching tasks:", error);
       } finally {
-        setLoading(false); // La carga ha terminado
+        setLoading(false);
       }
     };
 
@@ -65,7 +65,7 @@ const MyTasksPage: React.FC = () => {
           {Array.isArray(tasks) && tasks.length > 0 ? (
             tasks.map((task) => (
               <div
-                key={task._id} // Clave única
+                key={Date.now() + Math.random()}
                 className="bg-white shadow-md p-4 rounded-lg border border-gray-200"
               >
                 <h2 className="text-xl font-semibold">{task.name}</h2>

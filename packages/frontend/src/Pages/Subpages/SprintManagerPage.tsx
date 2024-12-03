@@ -4,7 +4,6 @@ import { RootState } from "../../store/store";
 import Modal from "../../Components/Information/Modal";
 import { addSprint, deleteSprint, updateSprint, setCurrentProject, addTask, updateTask, deleteTask } from "../../slices/sessionSlice";
 
-// Tipos de datos (ya definidos)
 enum Priority {
   LOW = "low",
   MEDIUM = "medium",
@@ -45,7 +44,6 @@ const ProjectSprintsPage: React.FC = () => {
   const sprints: Sprint[] = useSelector((state: RootState) => state.session.currentProject?.sprints);
   const currentProject = useSelector((state: RootState) => state.session.currentProject);
 
-
   const [currentSprint, setCurrentSprint] = useState<Sprint | null>(null);
   const [currentTask, setCurrentTask] = useState<TaskInterface | null>(null);
 
@@ -70,7 +68,6 @@ const ProjectSprintsPage: React.FC = () => {
   const taskEndDateRef = useRef<HTMLInputElement>(null);
   const taskPriorityRef = useRef<HTMLSelectElement>(null);
   const taskStatusRef = useRef<HTMLSelectElement>(null);
-  const startUser = useRef<HTMLSelectElement>(null);
   const taskDependency = useRef<HTMLSelectElement>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
@@ -122,7 +119,7 @@ const ProjectSprintsPage: React.FC = () => {
         Add Sprint
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 p-4">
         {Array.isArray(sprints) && sprints?.map((sprint) => (
           <div key={sprint._id} className="bg-white shadow-md p-4 rounded-lg border border-gray-200">
         <h2 className="text-xl font-semibold">{sprint.name}</h2>
@@ -138,7 +135,7 @@ const ProjectSprintsPage: React.FC = () => {
           <h3 className="text-lg font-semibold">Tasks</h3>
           <button onClick={() => { setCurrentSprint(sprint); setShowCreateTaskPopup(true); }} className="bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600">Add Task</button>
           {Array.isArray(sprint.tasks) && sprint.tasks.map((task) => (
-            <div key={task._id} className="bg-gray-100 p-4 rounded-lg border border-gray-200 mt-2 hover:cursor-pointer hover:bg-blue-200 transition-all" >
+            <div key={Date.now() + Math.random() } className="bg-gray-100 p-4 rounded-lg border border-gray-200 mt-2 hover:cursor-pointer hover:bg-blue-200 transition-all" >
           <h4 className="text-lg font-semibold">{task.name}</h4>
           <p className="text-gray-600">{task.description}</p>
           <p><strong>Start:</strong> {new Date(task.startDate).toLocaleDateString()}</p>
@@ -267,100 +264,128 @@ const ProjectSprintsPage: React.FC = () => {
       </Modal>
     )}
 
-
     {showCreateTaskPopup && (
-      <Modal title={"Create Task"} onClose={() => setShowCreateTaskPopup(!showCreateTaskPopup)} onSubmit={() => {
-        const name = taskNameRef.current?.value || "";
-        const description = taskDescriptionRef.current?.value || "";
-        const startDate = taskStartDateRef.current?.value || "";
-        const endDate = taskEndDateRef.current?.value || "";
-        const priority = taskPriorityRef.current?.value || Priority.LOW;
-        const status = taskStatusRef.current?.value || Status.TODO;
+      <Modal
+        title={"Create Task"}
+        onClose={() => setShowCreateTaskPopup(false)}
+        onSubmit={() => {
+          const name = taskNameRef.current?.value || "";
+          const description = taskDescriptionRef.current?.value || "";
+          const startDate = taskStartDateRef.current?.value || "";
+          const endDate = taskEndDateRef.current?.value || "";
+          const priority = taskPriorityRef.current?.value || Priority.LOW;
+          const status = taskStatusRef.current?.value || Status.TODO;
 
-        if (!name || !description || !startDate || !endDate) {
-          console.error("All fields are required");
-          return;
-        }
-        const taskData = {
-          name,
-          description,
-          startDate,
-          endDate,
-          priority,
-          status,
-          dependenciesTasks: [],
-          comments: [],
-          users: []
-        };
+          if (!name || !description || !startDate || !endDate) {
+            console.error("All fields are required");
+            return;
+          }
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/task/project/sprints/${currentProject._id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: localStorage.getItem("token") || "",
-          },
-          body: JSON.stringify({
-            startDate: taskData.startDate,
-            endDate: taskData.endDate,
-            name: taskData.name,
-            progress: 0,
-            description: taskData.description,
-            priority: taskData.priority,
-            dependenciesTasks: taskDependency.current?.value ? [taskDependency.current?.value] : [],
-            status: taskData.status,
-            comments: [],
-            users: selectedUsers,
-            sprintID: currentSprint?._id
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (!data.error) {
-              dispatch(addTask({task: data.result, sprintIndex: currentProject.sprints.findIndex((sprint : any) => sprint._id === currentSprint?._id)}));
-              setShowUpdatePopup(false);
-            }
+          fetch(`${import.meta.env.VITE_BACKEND_URL}/task/project/sprints/${currentProject._id}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: localStorage.getItem("token") || "",
+            },
+            body: JSON.stringify({
+              startDate,
+              endDate,
+              name,
+              progress: 0,
+              description,
+              priority,
+              dependenciesTasks: taskDependency.current?.value
+                ? [taskDependency.current?.value]
+                : [],
+              status,
+              comments: [],
+              users: selectedUsers,
+              sprintID: currentSprint?._id,
+            }),
           })
-          .catch((err) => console.error(err));
-
-      setShowCreateTaskPopup(false);
-      }}>
-        <input name="name" ref={taskNameRef} placeholder="Name of the task" className="border p-2 mb-2 w-full" />
-        <textarea name="description" ref={taskDescriptionRef} placeholder="Description" className="border p-2 mb-2 w-full"></textarea>
-        <input name="startDate" ref={taskStartDateRef} type="date" className="border p-2 mb-2 w-full" />
-        <input name="endDate" ref={taskEndDateRef} type="date" className="border p-2 mb-2 w-full" />
-        <select name="priority" ref={taskPriorityRef} className="border p-2 mb-2 w-full">
+            .then((res) => res.json())
+            .then((data) => {
+              if (!data.error) {
+                dispatch(
+                  addTask({
+                    task: data.result,
+                    sprintIndex: currentProject.sprints.findIndex(
+                      (sprint: any) => sprint._id === currentSprint?._id
+                    ),
+                  })
+                );
+                setSelectedUsers([]);
+                setShowCreateTaskPopup(false);
+              }
+            })
+            .catch((err) => console.error(err));
+        }}
+      >
+        <input
+          name="name"
+          ref={taskNameRef}
+          placeholder="Name of the task"
+          className="border p-2 mb-2 w-full"
+        />
+        <textarea
+          name="description"
+          ref={taskDescriptionRef}
+          placeholder="Description"
+          className="border p-2 mb-2 w-full"
+        ></textarea>
+        <input
+          name="startDate"
+          ref={taskStartDateRef}
+          type="date"
+          className="border p-2 mb-2 w-full"
+        />
+        <input
+          name="endDate"
+          ref={taskEndDateRef}
+          type="date"
+          className="border p-2 mb-2 w-full"
+        />
+        <select
+          name="priority"
+          ref={taskPriorityRef}
+          className="border p-2 mb-2 w-full"
+        >
           <option value={Priority.LOW}>Low</option>
           <option value={Priority.MEDIUM}>Medium</option>
           <option value={Priority.HIGH}>High</option>
         </select>
-        <select name="status" ref={taskStatusRef} className="border p-2 mb-2 w-full">
+        <select
+          name="status"
+          ref={taskStatusRef}
+          className="border p-2 mb-2 w-full"
+        >
           <option value={Status.TODO}>To Do</option>
           <option value={Status.IN_PROGRESS}>In Progress</option>
           <option value={Status.DONE}>Done</option>
         </select>
-        {/* We need to assign any person in the project */}
-        
-        <select name="user" ref={startUser} className="border p-2 mb-2 w-full">
-          {currentProject?.users.map((user : any) => (
-            <option key={user._id} value={user._id} onClick={() => setSelectedUsers(selectedUsers + user._id)}>
+        <label htmlFor="users" className="block font-semibold">
+          Assign Users:
+        </label>
+        <select
+          name="users"
+          multiple
+          className="border p-2 mb-2 w-full"
+        >
+          {currentProject?.users.map((user: any) => (
+            <option
+              key={user._id}
+              onClick={() => {
+                setSelectedUsers((prev) => prev.includes(user.user._id) ? prev.filter((id) => id !== user.user._id) : [...prev, user.user._id]);
+              }}
+            >
               {`${user.user.username} (${user.role})`}
             </option>
           ))}
         </select>
-
-
-        { currentSprint?.tasks && currentSprint.tasks.length > 0 && (
-          <>
-          <label htmlFor="dependencies">Dependencies</label>
-          <select name="dependencies" ref={taskDependency} className="border p-2 mb-2 w-full">
-            {currentSprint?.tasks?.map((task) => (
-              <option key={Date.now() + Math.random()} value={task._id}>{task.name}</option>
-            ))}
-          </select>
-          </>
-        )}
       </Modal>
     )}
+
+
 
       {showUpdateTaskPopup && (
         <Modal title={"Update Task"} onClose={() => setShowUpdateTaskPopup(!showUpdateTaskPopup)} onSubmit={() => {
@@ -404,8 +429,6 @@ const ProjectSprintsPage: React.FC = () => {
               setShowUpdateTaskPopup(false);
             })
             .catch((err) => console.error(err));
-            {console.log(currentProject.sprints.tasks.findIndex((task : any) => task._id === currentTask?._id))}
-
         }}>
         <textarea name="description" ref={taskDescriptionRef} placeholder="Description" className="border p-2 mb-2 w-full" defaultValue={currentTask?.description}></textarea>
         <input name="endDate" ref={taskEndDateRef} type="date" className="border p-2 mb-2 w-full" defaultValue={currentTask?.endDate} />
@@ -426,7 +449,7 @@ const ProjectSprintsPage: React.FC = () => {
         className="border rounded p-2 w-full"
       >
         {currentProject.users.map((user : any) => (
-          <option key={user._id} value={user._id}>
+          <option key={Date.now() + Math.random()} value={user._id}>
             {user.name}
           </option>
         ))}
@@ -435,16 +458,47 @@ const ProjectSprintsPage: React.FC = () => {
     )}
 
     {showTaskPopup && (
-      <Modal title="Task" onClose={() => setShowTaskPopup(!showTaskPopup)} onSubmit={() => {}}>
-        <h2>{currentTask?.name}</h2>
-        <p>{currentTask?.description}</p>
-        <p>Start: {currentTask?.startDate}</p>
-        <p>End: {currentTask?.endDate}</p>
-        <p>Priority: {currentTask?.priority}</p>
-        <p>Status: {currentTask?.status}</p>
-        <p>Dependencies: {currentTask?.dependenciesTasks.join(", ")}</p>
-        <p>Comments: {currentTask?.comments.join(", ")}</p>
-        <p>Users: {currentTask?.users.join(", ")}</p>
+      <Modal
+        title="Task Details"
+        onClose={() => setShowTaskPopup(!showTaskPopup)}
+        onSubmit={() => {}}
+      >
+        <div className="p-4 space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">{currentTask?.name}</h2>
+            <p className="text-sm text-gray-500">{currentTask?.description}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">Start:</span> {currentTask?.startDate}
+              </p>
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">End:</span> {currentTask?.endDate}
+              </p>
+            </div>
+            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">Priority:</span> {currentTask?.priority}
+              </p>
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">Status:</span> {currentTask?.status}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-gray-800">Dependencies</h3>
+            <p className="text-sm text-gray-600">{currentTask?.dependenciesTasks.join(", ") || "None"}</p>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-gray-800">Comments</h3>
+            <p className="text-sm text-gray-600">{currentTask?.comments.join(", ") || "No comments"}</p>
+          </div>
+
+        </div>
       </Modal>
     )}
 
@@ -463,7 +517,11 @@ const ProjectSprintsPage: React.FC = () => {
         })
           .then((res) => res.json())
           .then((_) => {
-            dispatch(deleteTask({taskIndex: currentProject.sprints.tasks.findIndex((task : any) => task._id === currentTask?._id) , sprintIndex: currentProject.sprints.findIndex((sprint : any) => sprint._id === currentSprint?._id)}));
+            {console.log(currentProject.sprints.tasks)}
+            dispatch(deleteTask({
+              taskIndex: currentProject.sprints.tasks.findIndex((task : any) => task._id === currentTask?._id),
+              sprintIndex: currentProject.sprints.findIndex((sprint : any) => sprint._id === currentSprint?._id)
+            }));
             setShowRemoveTaskPopup(false);
           })
           .catch((err) => console.error(err));

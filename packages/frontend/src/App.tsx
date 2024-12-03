@@ -63,7 +63,19 @@ const useSessionValidation = () => {
             if (!data.error) {
               dispatch(setProjects(data.result));
               dispatch(setCurrentProject(data.result[0]));
-
+              fetch(`${import.meta.env.VITE_BACKEND_URL}/project/id/${data.result[0]._id}`, {
+                method: 'GET',
+                headers: { authorization: localStorage.getItem('token') || '' },
+              })
+              .then((res) => res.json())
+              .then((data) => {
+                if (!data.error) {
+                  dispatch(setCurrentProject(data.result));
+                }
+              })
+              .catch((error) => {
+                console.error('Error fetching current project:', error);
+              });
             } 
           })
           .catch((error) => {
