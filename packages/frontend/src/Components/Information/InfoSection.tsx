@@ -20,29 +20,29 @@ interface InfoSectionProps {
   paragraphs: string[];
   image: string;
   position: 'left' | 'right';
-  className?: string; // Hacer className opcional
+  className?: string;
 }
 
 const InfoSection: React.FC<InfoSectionProps> = ({ id, title, paragraphs, image, position, className }) => {
   const isLeft = position === 'left';
-  
+
   return (
     <div
       id={id}
-      className={`pt-4 flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-700 to-blue-500 text-white px-6 ${className || ''}`}
+      className={`py-12 flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 px-6 ${className || ''}`}
     >
-      <div className="flex flex-col md:flex-row justify-between items-center max-w-6xl bg-white text-black rounded-lg shadow-xl overflow-hidden p-8">
+      <div className="flex flex-col md:flex-row justify-between items-center max-w-6xl bg-white text-gray-800 rounded-3xl shadow-2xl overflow-hidden p-10">
         {isLeft && (
           <div className="md:w-1/2 p-6 flex justify-center">
             <img
               src={image}
-              className="w-full max-w-sm border-4 border-blue-700 rounded-lg shadow-md"
+              className="w-full max-w-sm rounded-lg shadow-lg"
               alt={title}
             />
           </div>
         )}
         <div className="md:w-1/2 p-6">
-          <h2 className="text-5xl font-extrabold mb-4 text-blue-700 drop-shadow-lg">
+          <h2 className="text-4xl font-bold mb-4 text-blue-700">
             {title}
           </h2>
           {paragraphs.map((paragraph, index) => (
@@ -55,7 +55,7 @@ const InfoSection: React.FC<InfoSectionProps> = ({ id, title, paragraphs, image,
           <div className="md:w-1/2 p-6 flex justify-center">
             <img
               src={image}
-              className="w-full max-w-sm border-4 border-blue-700 rounded-lg shadow-md"
+              className="w-full max-w-sm rounded-lg shadow-lg"
               alt={title}
             />
           </div>

@@ -15,45 +15,60 @@
 import React from 'react';
 import { Link as LinkP } from 'react-scroll';
 
-
-
-const NavbarHome : React.FC = () => {
+const NavbarHome: React.FC = () => {
   return (
-    <nav className="fixed top-0 left-0 w-full bg-blue-600 text-white shadow-md z-50">
+    <nav className="fixed top-0 left-0 w-full bg-blue-700 text-white shadow-md z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="text-xl font-bold">
-          <img src="blank_logo.png" className="inline-block w-8 h-8 mr-2" alt="logo" />
+        {/* Logo */}
+        <div className="text-xl font-bold flex items-center">
+          <img
+            src="blank_logo.png"
+            className="inline-block w-8 h-8 mr-2"
+            alt="logo"
+          />
           Velia
         </div>
-        <ul className="flex space-x-4">
+
+        {/* Navigation Links */}
+        <ul className="flex space-x-6">
           <li>
-            <LinkP 
-              to="home" 
-              smooth={true} 
-              duration={500} 
-              className="text-white hover:text-gray-400 cursor-pointer"
+            <LinkP
+              to="hero"
+              smooth={true}
+              duration={500}
+              className="text-white hover:text-blue-300 cursor-pointer transition duration-300"
             >
               Home
             </LinkP>
           </li>
           <li>
-            <LinkP 
-              to="whatis" 
-              smooth={true} 
-              duration={500} 
-              className="text-white hover:text-gray-400 cursor-pointer"
+            <LinkP
+              to="features"
+              smooth={true}
+              duration={500}
+              className="text-white hover:text-blue-300 cursor-pointer transition duration-300"
             >
-              What is Velia?
+              Features
             </LinkP>
           </li>
           <li>
-            <LinkP 
-              to="whyvelia" 
-              smooth={true} 
-              duration={500} 
-              className="text-white hover:text-gray-400 cursor-pointer"
+            <LinkP
+              to="testimonials"
+              smooth={true}
+              duration={500}
+              className="text-white hover:text-blue-300 cursor-pointer transition duration-300"
             >
-              Why Velia?
+              Testimonials
+            </LinkP>
+          </li>
+          <li>
+            <LinkP
+              to="getstarted"
+              smooth={true}
+              duration={500}
+              className="text-white hover:text-blue-300 cursor-pointer transition duration-300"
+            >
+              Get Started
             </LinkP>
           </li>
         </ul>

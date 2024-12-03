@@ -27,7 +27,6 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 // Import Pages
 import HomePage from './Pages/Home';
 import LoginPage from './Pages/Login';
-import RegisterPage from './Pages/Register';
 import DashboardPage from './Pages/Dashboard';
 import ProfileUserPage from './Pages/Subpages/ProfileUserPage';
 
@@ -99,7 +98,6 @@ const App: React.FC = () => {
     <Routes>
       <Route path="/" Component={HomePage} />
       <Route path="/login" Component={LoginPage} />
-      <Route path="/register" Component={RegisterPage} />
       <Route path="/dashboard/*" Component={DashboardPage} />
       <Route path="/dashboard/profile/:username" element={<ProfileUserPage />} />
       <Route path="*" Component={HomePage} />

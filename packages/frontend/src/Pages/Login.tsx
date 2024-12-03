@@ -9,39 +9,44 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief Página de inicio de sesión.
+ * @brief Página de inicio de sesión y registro.
  */
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { setUserObject, setToken } from '../slices/sessionSlice';
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store/store';
+import { setUserObject, setToken } from '../slices/sessionSlice';
+import blankLogo from '../../public/blank_logo.png';
 
-const BACKEND_LOGIN_URL = import.meta.env.VITE_BACKEND_URL + '/user/login';
-export const LOCAL_STORAGE_NAME = import.meta.env.VITE_LOCAL_STORAGE_NAME || 'token';
-
-const LoginForm: React.FC = () => {
+const LoginAndRegister: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [email, setEmail] = React.useState<string>('');
-  const [password, setPassword] = React.useState<string>('');
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  const validateInputs = () => {
-    if (!email.trim()) return 'Email is required.';
-    if (!/\S+@\S+\.\S+/.test(email)) return 'Invalid email format.';
-    if (!password.trim()) return 'Password is required.';
-    return null;
-  };
+  // Login State
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  const handleLogin = async (email: string, password: string, dispatch: AppDispatch) => {
+  // Register State
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+
     try {
-      const response = await fetch(BACKEND_LOGIN_URL, {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/user/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
 
       if (!response.ok) {
@@ -50,108 +55,187 @@ const LoginForm: React.FC = () => {
       }
 
       const data = await response.json();
-      localStorage.setItem(LOCAL_STORAGE_NAME, data.result.token);
+      localStorage.setItem(import.meta.env.VITE_LOCAL_STORAGE_NAME || 'token', data.result.token);
       dispatch(setToken(data.result.token));
       dispatch(setUserObject(data.result.userObject));
       navigate('/dashboard', { replace: true });
-      window.location.reload();
     } catch (error: any) {
-      setErrorMessage(error.message);
-      throw error;
+      setLoginError(error.message);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
+    setRegisterError(null);
 
-    const validationError = validateInputs();
-    if (validationError) {
-      setErrorMessage(validationError);
+    if (registerPassword !== passwordConfirmation) {
+      setRegisterError('Passwords do not match');
       return;
     }
 
     try {
-      await handleLogin(email, password, dispatch);
-    } catch (error) {
-      console.error("Login failed:", error);
+      const formData = new FormData();
+      formData.append('email', registerEmail);
+      formData.append('username', username);
+      formData.append('password', registerPassword);
+      if (profilePic) formData.append('profilePic', profilePic);
+
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/user/register', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to register');
+      }
+
+      navigate('/dashboard', { replace: true });
+    } catch (error: any) {
+      setRegisterError(error.message);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-blue-700">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg"
-      >
-        <div className="text-center mb-6">
-          <Link to="/">
-            <img
-              src="blank_logo.png"
-              className="h-16 mx-auto cursor-pointer hover:scale-105 transition-transform duration-200"
-              alt="logo"
-            />
-          </Link>
+    <div className="min-h-screen bg-blue-700 flex items-center justify-center">
+      <div
+        className="bg-white rounded-lg shadow-lg w-full max-w-md p-8 transform transition-all duration-500 ease-in-out h-auto">
+        {/* Home Navigation */}
+        <div className="flex justify-center mb-6 relative">
+          <img
+            src={blankLogo}
+            alt="Return to Home"
+            className="h-14 w-14 cursor-pointer hover:scale-110 transition-transform duration-200"
+            onClick={() => navigate('/')}
+            title="Click to return to Home"
+          />
+          <span className="absolute -bottom-6 text-sm text-gray-500">
+            Click the logo to go Home
+          </span>
         </div>
-        <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">Login</h2>
 
-        {errorMessage && (
-          <div className="bg-red-300 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            {errorMessage}
-          </div>
-        )}
-
-        <label
-          htmlFor="email"
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          Email:
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your email"
-        />
-
-        <label
-          htmlFor="password"
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          Password:
-        </label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your password"
-        />
-
-        <p className="mb-4 text-center text-gray-600">
-          Don't have an account?{' '}
-          <Link
-            to="/register"
-            className="text-blue-500 hover:text-blue-700 font-medium"
+        {/* Toggle Login/Register */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={() => setIsLogin(true)}
+            className={`px-4 py-2 text-lg font-semibold ${
+              isLogin ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'
+            } transition`}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setIsLogin(false)}
+            className={`px-4 py-2 text-lg font-semibold ${
+              !isLogin ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'
+            } transition`}
           >
             Register
-          </Link>
-        </p>
+          </button>
+        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Login
-        </button>
-      </form>
+        {/* Form Animation */}
+        <div className="overflow-hidden transform transition-all duration-500 ease-in-out">
+          {isLogin ? (
+            <form onSubmit={handleLoginSubmit}>
+              <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">Login</h2>
+              {loginError && (
+                <div className="bg-red-300 text-red-700 p-2 rounded mb-4">{loginError}</div>
+              )}
+              <label htmlFor="loginEmail" className="block text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="loginEmail"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="loginPassword" className="block text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="loginPassword"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+              >
+                Login
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleRegisterSubmit}>
+              <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">Register</h2>
+              {registerError && (
+                <div className="bg-red-300 text-red-700 p-2 rounded mb-4">{registerError}</div>
+              )}
+              <label htmlFor="username" className="block text-gray-700 mb-2">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="registerEmail" className="block text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="registerEmail"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="registerPassword" className="block text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="registerPassword"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="passwordConfirmation" className="block text-gray-700 mb-2">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="passwordConfirmation"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="profilePic" className="block text-gray-700 mb-2">
+                Profile Picture
+              </label>
+              <input
+                type="file"
+                id="profilePic"
+                onChange={(e) => setProfilePic(e.target.files ? e.target.files[0] : null)}
+                className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+              >
+                Register
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default LoginForm;
+export default LoginAndRegister;
