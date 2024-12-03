@@ -386,9 +386,11 @@ const ProjectSprintsPage: React.FC = () => {
     )}
 
 
-
-      {showUpdateTaskPopup && (
-        <Modal title={"Update Task"} onClose={() => setShowUpdateTaskPopup(!showUpdateTaskPopup)} onSubmit={() => {
+    {showUpdateTaskPopup && (
+      <Modal
+        title={"Update Task"}
+        onClose={() => setShowUpdateTaskPopup(false)}
+        onSubmit={() => {
           if (!currentTask?._id) {
             console.error("No task selected");
             return;
@@ -406,56 +408,114 @@ const ProjectSprintsPage: React.FC = () => {
             return;
           }
 
-          fetch(`${import.meta.env.VITE_BACKEND_URL}/task/${currentTask._id}`, {
+          fetch(`${import.meta.env.VITE_BACKEND_URL}/task/update/${currentTask._id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               authorization: localStorage.getItem("token") || "",
             },
             body: JSON.stringify({
-              name,
+              startDate,
+              endDate,
+              progress: currentTask.progress || 0,
               description,
-              deadline: endDate,
               priority,
-              state: status,
-              project: currentProject?._id,
-              Organization: currentProject?._id,
-              assignedTo: selectedUsers,
+              dependenciesTasks: taskDependency.current?.value
+                ? [taskDependency.current?.value]
+                : currentTask.dependenciesTasks,
+              status,
+              comments: currentTask.comments || [],
+              users: selectedUsers.length > 0 ? selectedUsers : currentTask.users,
+              sprintID: currentSprint?._id,
             }),
           })
             .then((res) => res.json())
             .then((data) => {
-              dispatch(updateTask({task: data.result, taskIndex: currentProject.sprints.tasks.findIndex((task : any) => task._id === currentTask?._id) , sprintIndex: currentProject.sprints.findIndex((sprint : any) => sprint._id === currentSprint?._id)}));
-              setShowUpdateTaskPopup(false);
+              if (!data.error) {
+                dispatch(
+                  updateTask({
+                    task: data.result,
+                    taskIndex: (() => {
+                      const sprint = currentProject.sprints.find(
+                        (sprint: Sprint) => sprint._id === currentSprint?._id
+                      );
+                      return sprint?.tasks?.findIndex(
+                        (task: TaskInterface) => task._id === currentTask?._id
+                      ) ?? -1; // Devuelve -1 si no encuentra la tarea
+                    })(),
+                    sprintIndex: currentProject.sprints.findIndex(
+                      (sprint: Sprint) => sprint._id === currentSprint?._id
+                    ),
+                  })
+                );
+                setSelectedUsers([]);
+                setShowUpdateTaskPopup(false);
+              }
             })
             .catch((err) => console.error(err));
-        }}>
-        <textarea name="description" ref={taskDescriptionRef} placeholder="Description" className="border p-2 mb-2 w-full" defaultValue={currentTask?.description}></textarea>
-        <input name="endDate" ref={taskEndDateRef} type="date" className="border p-2 mb-2 w-full" defaultValue={currentTask?.endDate} />
-        <select name="priority" ref={taskPriorityRef} className="border p-2 mb-2 w-full" defaultValue={currentTask?.priority}>
+        }}
+      >
+
+        <textarea
+          name="description"
+          ref={taskDescriptionRef}
+          placeholder="Description"
+          className="border p-2 mb-2 w-full"
+          defaultValue={currentTask?.description}
+        ></textarea>
+        <input
+          name="startDate"
+          ref={taskStartDateRef}
+          type="date"
+          className="border p-2 mb-2 w-full"
+          defaultValue={currentTask?.startDate}
+        />
+        <input
+          name="endDate"
+          ref={taskEndDateRef}
+          type="date"
+          className="border p-2 mb-2 w-full"
+          defaultValue={currentTask?.endDate}
+        />
+        <select
+          name="priority"
+          ref={taskPriorityRef}
+          className="border p-2 mb-2 w-full"
+          defaultValue={currentTask?.priority}
+        >
           <option value={Priority.LOW}>Low</option>
           <option value={Priority.MEDIUM}>Medium</option>
           <option value={Priority.HIGH}>High</option>
         </select>
-        <select name="status" ref={taskStatusRef} className="border p-2 mb-2 w-full" defaultValue={currentTask?.status}>
+        <select
+          name="status"
+          ref={taskStatusRef}
+          className="border p-2 mb-2 w-full"
+          defaultValue={currentTask?.status}
+        >
           <option value={Status.TODO}>To Do</option>
           <option value={Status.IN_PROGRESS}>In Progress</option>
           <option value={Status.DONE}>Done</option>
         </select>
+        <label htmlFor="users" className="block font-semibold">
+          Assign Users:
+        </label>
         <select
-        multiple
-        value={selectedUsers}
-        onChange={(e) => handleUserSelection(e)}
-        className="border rounded p-2 w-full"
-      >
-        {currentProject.users.map((user : any) => (
-          <option key={Date.now() + Math.random()} value={user._id}>
-            {user.name}
-          </option>
-        ))}
-      </select>
+          name="users"
+          multiple
+          value={selectedUsers.length > 0 ? selectedUsers : currentTask?.users || []}
+          onChange={(e) => handleUserSelection(e)}
+          className="border p-2 mb-2 w-full"
+        >
+          {currentProject?.users.map((user: any) => (
+            <option key={user.user._id} value={user.user._id}>
+              {`${user.user.username} (${user.role})`}
+            </option>
+          ))}
+        </select>
       </Modal>
     )}
+
 
     {showTaskPopup && (
       <Modal
