@@ -126,6 +126,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ url, mobile }) => {
     setSearch(user.username);
     setResults([]);
     navigate(`/dashboard/profile/${user.username}`);
+    window.location.reload();
   };
 
   
