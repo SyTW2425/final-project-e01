@@ -18,8 +18,8 @@ import { useEffect } from 'react';
 // Setting up Redux
 import { RootState } from './store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSession, setCurrentProject, setProjects } from './slices/sessionSlice';
-
+import { setSession, setCurrentProject, setProjects, setUserObject } from './slices/sessionSlice';
+import { setPersistedProject } from './slices/projectSlice';
 
 // Routing
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -30,7 +30,6 @@ import LoginPage from './Pages/Login';
 import DashboardPage from './Pages/Dashboard';
 import ProfileUserPage from './Pages/Subpages/ProfileUserPage';
 
-// import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // We need a custom hook in order to validate the session
@@ -39,6 +38,8 @@ const useSessionValidation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const sessionState = useSelector((state: RootState) => state.session);
+  const persistedProject = useSelector((state: RootState) => state.project.idPersistedProject);
+
   let userObject : any = sessionState.userObject;
 
   useEffect(() => {
@@ -52,7 +53,7 @@ const useSessionValidation = () => {
         .then((res) => res.json()).then((data) => {
           if (!data.error) {
             dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: data.result, projects: null, currentProject: null }));
-            userObject = data.result;
+            dispatch(setUserObject(data.result));
           } 
 
           fetch(import.meta.env.VITE_BACKEND_URL + '/project/user', {
@@ -63,16 +64,16 @@ const useSessionValidation = () => {
           .then((data) => {
             if (!data.error) {
               dispatch(setProjects(data.result));
-              dispatch(setCurrentProject(data.result[0]));
-              fetch(`${import.meta.env.VITE_BACKEND_URL}/project/id/${data.result[0]._id}`, {
+              let queryId = persistedProject ?? data.result[0]._id;
+
+              fetch(`${import.meta.env.VITE_BACKEND_URL}/project/id/${queryId}`, {
                 method: 'GET',
                 headers: { authorization: localStorage.getItem('token') || '' },
               })
               .then((res) => res.json())
               .then((data) => {
-                if (!data.error) {
-                  dispatch(setCurrentProject(data.result));
-                }
+                dispatch(setCurrentProject(data.result));
+                dispatch(setPersistedProject(data.result._id));
               })
               .catch((error) => {
                 console.error('Error fetching current project:', error);

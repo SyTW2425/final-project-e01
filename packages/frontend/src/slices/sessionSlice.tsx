@@ -13,7 +13,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { update } from 'lodash';
+
 
 interface SessionState {
   token: string;
@@ -121,8 +121,6 @@ const sessionSlice = createSlice({
         state.projects[projectIndex].sprints[sprintIndex].tasks = state.projects[projectIndex].sprints[sprintIndex].tasks.filter((task : any, index : number) => index !== taskIndex);
       }
     }
-
-
   },
 });
 
@@ -142,4 +140,5 @@ export const {
   deleteTask
 
  } = sessionSlice.actions;
+
 export default sessionSlice.reducer;

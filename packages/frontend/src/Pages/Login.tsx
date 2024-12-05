@@ -60,7 +60,7 @@ const LoginAndRegister: React.FC = () => {
       localStorage.setItem(import.meta.env.VITE_LOCAL_STORAGE_NAME || 'token', data.result.token);
       dispatch(setToken(data.result.token));
       dispatch(setUserObject(data.result.userObject));
-      navigate('/dashboard', { replace: true });
+      window.location.href = 'dashboard';
     } catch (error: any) {
       setLoginError(error.message);
     }
@@ -91,8 +91,8 @@ const LoginAndRegister: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to register');
       }
-
-      navigate('/dashboard', { replace: true });
+      successNotification('User registered successfully');
+      window.location.href = 'dashboard';
     } catch (error: any) {
       setRegisterError(error.message);
     }
@@ -151,7 +151,7 @@ const LoginAndRegister: React.FC = () => {
                 type="email"
                 id="loginEmail"
                 value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
+                onChange={e => setLoginEmail(e.target.value)}
                 className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <label htmlFor="loginPassword" className="block text-gray-700 mb-2">
@@ -161,7 +161,7 @@ const LoginAndRegister: React.FC = () => {
                 type="password"
                 id="loginPassword"
                 value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                onChange={e => setLoginPassword(e.target.value)}
                 className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button

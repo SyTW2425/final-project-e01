@@ -17,6 +17,7 @@ import { Gantt, Task } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store"
+import { errorNotification } from "../Information/Notification";
 
 const BACKEND_GET_TASKS_PROJECT_URL = import.meta.env.VITE_BACKEND_URL + "/task/project/tasks";
 
@@ -40,10 +41,9 @@ const GanttDiagram: React.FC = () => {
           end: new Date(task.endDate),
           progress: task.progress || 0,
         }));
-        console.log(mappedTasks);
         setTasks(mappedTasks);
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        errorNotification("Error fetching tasks: " + error);
       }
     };
 

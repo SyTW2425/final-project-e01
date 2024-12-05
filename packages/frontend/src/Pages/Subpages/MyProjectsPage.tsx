@@ -14,6 +14,7 @@
 
 import React from "react";
 import { setCurrentProject } from '../../slices/sessionSlice';
+import { setPersistedProject } from "../../slices/projectSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 
@@ -31,6 +32,7 @@ const MyProjectsPage: React.FC = () => {
 
   const handleProjectClick = (project: Project) => {
     dispatch(setCurrentProject(project));
+    dispatch(setPersistedProject(project._id));
   };
   return (
     <div className="flex-1 bg-gray-50 w-full h-auto p-6">

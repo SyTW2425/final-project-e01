@@ -1,8 +1,11 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { format } from 'date-fns';
 import { RootState } from "../../store/store";
+import { useSelector, useDispatch } from "react-redux";
 import Modal from "../../Components/Information/Modal";
+import React, { useRef, useState, useEffect } from "react";
 import { addSprint, deleteSprint, updateSprint, setCurrentProject, addTask, updateTask, deleteTask } from "../../slices/sessionSlice";
+import { da } from 'date-fns/locale';
+import { errorNotification, successNotification } from '../../Components/Information/Notification';
 
 enum Priority {
   LOW = "low",
@@ -122,7 +125,7 @@ const ProjectSprintsPage: React.FC = () => {
           {Array.isArray(sprints) &&
             sprints.map((sprint) => (
               <div
-                key={sprint._id}
+                key={Date.now() + Math.random()}
                 className="bg-white shadow rounded-lg p-6 hover:shadow-md transition"
               >
                 <h2 className="text-xl font-semibold text-gray-700 mb-2">{sprint.name}</h2>
@@ -166,8 +169,9 @@ const ProjectSprintsPage: React.FC = () => {
                   </button>
                   {sprint.tasks?.map((task) => (
                     <div
-                      key={task._id}
+                      key={Date.now() + Math.random()}
                       className="bg-gray-100 p-4 rounded-lg shadow mt-4 hover:shadow-lg transition"
+                      onClick={() => {setCurrentTask(task)}}
                     >
                       <h4 className="text-lg font-semibold text-gray-700">{task.name}</h4>
                       <p className="text-gray-600">{task.description}</p>
@@ -435,7 +439,7 @@ const ProjectSprintsPage: React.FC = () => {
         >
           {currentProject?.users.map((user: any) => (
             <option
-              key={user._id}
+              key={Date.now() + Math.random()}
               onClick={() => {
                 setSelectedUsers((prev) => prev.includes(user.user._id) ? prev.filter((id) => id !== user.user._id) : [...prev, user.user._id]);
               }}
@@ -494,27 +498,12 @@ const ProjectSprintsPage: React.FC = () => {
             .then((res) => res.json())
             .then((data) => {
               if (!data.error) {
-                dispatch(
-                  updateTask({
-                    task: data.result,
-                    taskIndex: (() => {
-                      const sprint = currentProject.sprints.find(
-                        (sprint: Sprint) => sprint._id === currentSprint?._id
-                      );
-                      return sprint?.tasks?.findIndex(
-                        (task: TaskInterface) => task._id === currentTask?._id
-                      ) ?? -1; // Devuelve -1 si no encuentra la tarea
-                    })(),
-                    sprintIndex: currentProject.sprints.findIndex(
-                      (sprint: Sprint) => sprint._id === currentSprint?._id
-                    ),
-                  })
-                );
+                window.location.reload();
                 setSelectedUsers([]);
                 setShowUpdateTaskPopup(false);
               }
             })
-            .catch((err) => console.error(err));
+            .catch((err) => errorNotification("Error updating task: " + err));
         }}
       >
 
@@ -570,7 +559,7 @@ const ProjectSprintsPage: React.FC = () => {
           className="border p-2 mb-2 w-full"
         >
           {currentProject?.users.map((user: any) => (
-            <option key={user.user._id} value={user.user._id}>
+            <option key={Date.now() + Math.random()} value={user.user._id}>
               {`${user.user.username} (${user.role})`}
             </option>
           ))}
@@ -579,50 +568,63 @@ const ProjectSprintsPage: React.FC = () => {
     )}
 
 
-    {showTaskPopup && (
-      <Modal
-        title="Task Details"
-        onClose={() => setShowTaskPopup(!showTaskPopup)}
-        onSubmit={() => {}}
-      >
-        <div className="p-4 space-y-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">{currentTask?.name}</h2>
-            <p className="text-sm text-gray-500">{currentTask?.description}</p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
-              <p className="text-gray-600 text-sm">
-                <span className="font-medium">Start:</span> {currentTask?.startDate}
-              </p>
-              <p className="text-gray-600 text-sm">
-                <span className="font-medium">End:</span> {currentTask?.endDate}
+      {showTaskPopup && (
+        <Modal
+          title="Task Details"
+          onClose={() => setShowTaskPopup(!showTaskPopup)}
+        >
+          <div className="p-6 space-y-6 bg-blue-50 rounded-lg shadow">
+            {/* Title and description */}
+            <div className="text-center">
+              <h2 className="text-3xl font-semibold text-blue-600">{currentTask?.name}</h2>
+              <p className="text-base text-gray-600 mt-2">{currentTask?.description}</p>
+            </div>
+
+            {/* Key Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-4 rounded-lg shadow-md border border-blue-200">
+                <p className="text-gray-700 text-sm">
+                  <span className="font-medium text-blue-600">Start Date:</span>{" "}
+                  {currentTask?.startDate ? format(new Date(currentTask.startDate), "MMMM dd, yyyy") : "N/A"}
+                </p>
+                <p className="text-gray-700 text-sm mt-2">
+                  <span className="font-medium text-blue-600">End Date:</span>{" "}
+                  {currentTask?.endDate ? format(new Date(currentTask.endDate), "MMMM dd, yyyy") : "N/A"}
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-md border border-blue-200">
+                <p className="text-gray-700 text-sm">
+                  <span className="font-medium text-blue-600">Priority:</span>{" "}
+                  <span
+                    className={`inline-block px-2 py-1 rounded text-white ${
+                      currentTask?.priority === "high"
+                        ? "bg-red-500"
+                        : currentTask?.priority === "medium"
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                  >
+                    {currentTask?.priority}
+                  </span>
+                </p>
+                <p className="text-gray-700 text-sm mt-2">
+                  <span className="font-medium text-blue-600">Status:</span> {currentTask?.status}
+                </p>
+              </div>
+            </div>
+
+            {/* Comments */}
+            <div className="bg-white p-4 rounded-lg shadow-md border border-blue-200">
+              <h3 className="text-lg font-medium text-blue-600 mb-2">Comments</h3>
+              <p className="text-gray-700 text-sm">
+                {currentTask && currentTask.comments && currentTask?.comments.length > 0 ? currentTask.comments.join(", ") : "No comments"}
               </p>
             </div>
-            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
-              <p className="text-gray-600 text-sm">
-                <span className="font-medium">Priority:</span> {currentTask?.priority}
-              </p>
-              <p className="text-gray-600 text-sm">
-                <span className="font-medium">Status:</span> {currentTask?.status}
-              </p>
-            </div>
           </div>
+        </Modal>
+      )}
 
-          <div>
-            <h3 className="text-lg font-medium text-gray-800">Dependencies</h3>
-            <p className="text-sm text-gray-600">{currentTask?.dependenciesTasks.join(", ") || "None"}</p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium text-gray-800">Comments</h3>
-            <p className="text-sm text-gray-600">{currentTask?.comments.join(", ") || "No comments"}</p>
-          </div>
-
-        </div>
-      </Modal>
-    )}
 
     {showRemoveTaskPopup && (
       <Modal title="Remove Task" onClose={() => setShowRemoveTaskPopup(!showRemoveTaskPopup)} onSubmit={() => {
@@ -639,14 +641,14 @@ const ProjectSprintsPage: React.FC = () => {
         })
           .then((res) => res.json())
           .then((_) => {
-            {console.log(currentProject.sprints.tasks)}
-            dispatch(deleteTask({
-              taskIndex: currentProject.sprints.tasks.findIndex((task : any) => task._id === currentTask?._id),
-              sprintIndex: currentProject.sprints.findIndex((sprint : any) => sprint._id === currentSprint?._id)
-            }));
+            successNotification("Task removed successfully");
+            //synchroneous call to force the page to reload after 2 seconds
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
             setShowRemoveTaskPopup(false);
           })
-          .catch((err) => console.error(err));
+          .catch((err) => errorNotification("Error removing task: " + err));
       }
 
       }>
