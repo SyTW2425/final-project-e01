@@ -249,6 +249,10 @@ tasksRouter.delete('/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.deleteTaskById(id);
+    if (response.error || !response.result) {
+      res.status(404).send(response);
+      return;
+    }
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
