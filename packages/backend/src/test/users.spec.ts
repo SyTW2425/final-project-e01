@@ -140,3 +140,72 @@ describe('Users API Endpoints', () => {
     });
   });
 });
+
+let token: string;
+describe('Additional Users API Endpoints', () => {
+  let userId: string;
+
+  before(async () => {
+    const userResponse = await request.post('/user/register')
+      .send({ username: 'testUserExtra', email: 'testExtra@example.com', password: 'Password123' });
+    expect(userResponse.status).to.equal(201);
+    userId = userResponse.body.result._id;
+    const loginResponse = await request.post('/user/login')
+      .send({ email: 'testExtra@example.com', password: 'Password123' });
+    expect(loginResponse.status).to.equal(200);
+    token = loginResponse.body.result.token;
+  });
+
+  after(async () => {
+    await request.delete('/user/delete')
+      .set('Authorization', `${token}`)
+      .send({ email: 'testExtra@example.com' });
+  });
+
+  describe('GET /user/validate', () => {
+    it('should validate the token and return user details', async () => {
+      const response = await request.get('/user/validate')
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+      expect(response.body.result).to.have.property('_id', userId);
+    });
+
+    it('should return 401 if the token is invalid', async () => {
+      const response = await request.get('/user/validate')
+        .set('Authorization', 'invalidToken');
+      expect(response.status).to.equal(401);
+    });
+  });
+
+  describe('GET /user/search/:username', () => {
+    it('should return user details for a valid username', async () => {
+      const response = await request.get('/user/search/testUserExtra')
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+      expect(response.body.result).to.have.property('username', 'testUserExtra');
+    });
+
+    it('should return null if username does not exist', async () => {
+      const response = await request.get('/user/search/nonExistentUser')
+        .set('Authorization', `${token}`);
+      expect(response.body.result).to.be.null;
+    });
+  });
+
+  describe('GET /user/id/:id', () => {
+    it('should return user details for a valid ID', async () => {
+      const response = await request.get(`/user/id/${userId}`)
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('_id', userId);
+    });
+
+    it('should return undefined if ID does not exist', async () => {
+      const response = await request.get('/user/id/61a5f2118dfe0b1a98765432')
+        .set('Authorization', `${token}`);
+      expect(response.body.result).to.be.undefined;
+    });
+  });
+});
