@@ -20,6 +20,8 @@ import { useDispatch } from 'react-redux';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
 import { setSession } from '../../slices/sessionSlice';
 import { errorNotification, infoNotification, successNotification } from '../../Components/Information/Notification';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
@@ -210,7 +212,6 @@ const UserProfile: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      console.log(user.img_path)
       const updatedUser = await handleUpdateUser(username, user.email, profilePic);
       dispatch(setSession({ token: localStorage.getItem('token') || '', userObject: updatedUser.result.result, projects: null, currentProject: null }));
       setImageSRC(`${import.meta.env.VITE_BACKEND_URL}/userImg/${updatedUser.result.result.img_path}`);
@@ -246,10 +247,8 @@ const UserProfile: React.FC = () => {
   
       const data = await response.json();
       setShowModalAddOrg(false);
-      successNotification('Member added to organization successfully');
       return data;
     } catch (error) {
-      errorNotification('Failed to add member to organization: ' + error);
       throw error;
     }
   };
@@ -319,8 +318,7 @@ const UserProfile: React.FC = () => {
         await handleRemoveFromOrganization(org.result._id, searchedUser?._id);
         successNotification('User removed from organization successfully');
       } catch (error) {
-        console.error('Error al eliminar de la organización:', error);
-        alert('Hubo un problema al eliminar de la organización.');
+        errorNotification('Hubo un problema al eliminar de la organización.');
       }
     } else {
       infoNotification('Please select an organization');
@@ -330,7 +328,6 @@ const UserProfile: React.FC = () => {
 
   const handleSubmitAddOrg = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
     if (selectedOrg) {
       try {
         const response = await fetch(
@@ -349,6 +346,7 @@ const UserProfile: React.FC = () => {
         }
         const org = await response.json();
         await handleAddToOrganization(org.result._id, searchedUser?._id);
+        window.location.reload();
         successNotification('User added to organization successfully');
       } catch (error) {
         console.log(error)
@@ -415,14 +413,14 @@ const UserProfile: React.FC = () => {
   return (
     <>
       <Navbar onToggleSidebar={() => {}} />
-      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-        {/* Sección del perfil del usuario */}
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-200">
+        {/* profile user */}
         <div className="w-full md:w-1/3 bg-white p-6 md:p-8 shadow-lg">
           <div className="text-center mb-8">
             <img
               src={isLoggedUser ? imageSRC : `${import.meta.env.VITE_BACKEND_URL}/userImg/${searchedUser?.img_path}`}
               alt="Profile"
-              className="w-32 h-32 md:w-48 md:h-48 rounded-full mx-auto border-4 md:border-8 border-blue-600 shadow-lg"
+              className="w-64 h-64 md:w-60 md:h-60 rounded-full mx-auto border-4 md:border-4 border-blue-900 shadow-lg"
             />
             <h2 className="text-xl md:text-2xl font-bold text-gray-700">{isLoggedUser ? user.username : searchedUser?.username}</h2>
             <p className="text-sm text-gray-500">{isLoggedUser ? user.email : searchedUser?.email}</p>
@@ -431,21 +429,22 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleAddtoOrg}
-              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              Añadir a Organización
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-white transition duration-200"
+  >
+              Add to a Organization
             </button>
             <button
               onClick={handleRemoveToOrg}
-              className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-700 transition duration-200"
+              className="w-full bg-white-900 text-blue-900 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-900 transition duration-200"
+
             >
-              Eliminar de Organización
+              Delete from Organization
             </button>
             <button
               onClick={handleAddtoProject}
-              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-white transition duration-200"
             >
-              Añadir a Proyecto
+              Add to a Project
             </button>
           </div>
           )}
@@ -453,44 +452,39 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleUpdate}
-              className="w-full bg-blue-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-600 transition duration-200"
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-blue-400 transition duration-200"
             >
-              Actualizar Perfil
+              Update Profile
             </button>
             <button
               onClick={handleDelete}
-              className="w-full bg-red-500 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-red-600 transition duration-200"
+              className="w-full bg-white-900 text-blue-900 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-900 transition duration-200"
             >
-              Eliminar Cuenta
+              Delete Account
             </button>
           </div>
           )}
         </div>
-  
-        {/* Sección de organizaciones y proyectos */}
         <div className="w-full md:w-2/3 flex flex-col space-y-6 p-4 md:p-8">
-          {/* Organizaciones */}
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-4">Organizaciones</h3>
+          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-blue-400 shadow-lg">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-4">Organizations</h3>
             <ul className="space-y-3">
             {organizations.map((organization: any, index: number) => (
                 <li
                   key={organization._id || index}
-                  className="bg-gray-100 p-3 md:p-4 rounded-lg shadow-sm hover:bg-gray-200 transition"
+                  className="bg-gray-100 p-3 md:p-4 rounded-lg md:border-2 border-blue-900 shadow-sm hover:bg-gray-200 transition"
                 >
                   {organization.name || "Organización sin nombre"}
                 </li>
               )
             )}
             {organizations.length === 0 && (
-              <p className="text-gray-500">No pertenece a ninguna organización.</p>
+              <p className="text-white">Doesn't belong to a organization.</p>
             )}
           </ul>
         </div>
-  
-          {/* Proyectos */}
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg md:text-xl font-bold text-gray-700 mb-4">Proyectos</h3>
+          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-blue-400 shadow-lg">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-4">Projects</h3>
             <ul className="space-y-3">
               {projects.map((project: any, index: number) => (
                 <li
@@ -501,21 +495,19 @@ const UserProfile: React.FC = () => {
                 </li>
               ))}
               {projects.length === 0 && (
-                <p className="text-gray-500">No tiene proyectos asignados.</p>
+                <p className="text-white">Doesn't have projects assigned</p>
               )}
             </ul>
           </div>
         </div>
       </div>
-              
-      {/* Modal para añadir a organización */}
       {showModalAddOrg && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Añadir a Organización</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-800">Add to a Organization</h2>
             <form onSubmit={handleSubmitAddOrg}>
               <div className="mb-4">
-                <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Selecciona una Organización</label>
+                <label htmlFor="organization" className="block text-gray-800 font-bold mb-2">Select a Organization</label>
                 <select
                   name="organization"
                   id="organization"
@@ -524,7 +516,7 @@ const UserProfile: React.FC = () => {
                   }}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Selecciona una organización</option>
+                  <option value="">Select a organization</option>
                   {loggedOrganizations && loggedOrganizations.length > 0 ? (
                     loggedOrganizations.map((organization: any) => (
                       <option key={organization._id} value={organization._id}>
@@ -532,7 +524,7 @@ const UserProfile: React.FC = () => {
                       </option>
                     ))
                   ) : (
-                    <option disabled>No tienes organizaciones disponibles</option>
+                    <option disabled>Does not have organizations availables</option>
                   )}
                 </select>
               </div>
@@ -542,13 +534,13 @@ const UserProfile: React.FC = () => {
                   onClick={() => setShowModalAddOrg(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  Añadir
+                  Add
                 </button>
               </div>
             </form>
@@ -561,7 +553,7 @@ const UserProfile: React.FC = () => {
             <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Añadir a Proyecto</h2>
             <form onSubmit={handleSubmitAddProjects}>
               <div className="mb-4">
-                <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Selecciona un Proyecto</label>
+                <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Select a Project</label>
                 <select
                   name="organization"
                   id="organization"
@@ -570,7 +562,7 @@ const UserProfile: React.FC = () => {
                   }}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Selecciona un proyecto</option>
+                  <option value="">Select a project</option>
                   {loggedProjects && loggedProjects.length > 0 ? (
                     loggedProjects.map((projects: any) => (
                       <option key={projects._id} value={projects._id}>
@@ -578,7 +570,7 @@ const UserProfile: React.FC = () => {
                       </option>
                     ))
                   ) : (
-                    <option disabled>No tienes proyectos disponibles</option>
+                    <option disabled>Does not have projects availables</option>
                   )}
                 </select>
               </div>
@@ -588,13 +580,13 @@ const UserProfile: React.FC = () => {
                   onClick={() => setShowModalAddProject(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  Añadir
+                  Add
                 </button>
               </div>
             </form>
@@ -607,7 +599,7 @@ const UserProfile: React.FC = () => {
             <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Eliminar Usuario de la Organización</h2>
             <form onSubmit={handleSubmitRemoveOrg}>
             <p className="mb-6 text-red-600">
-              ¿Estás seguro de que deseas eliminar al usuario de la organización? Esta acción no se puede deshacer.
+              Are you sure you want to remove the user from the organization? This action cannot be undone.
             </p>
               <div className="mb-4">
                 <label htmlFor="organization" className="block text-gray-700 font-bold mb-2">Selecciona una Organización</label>
@@ -619,7 +611,7 @@ const UserProfile: React.FC = () => {
                   }}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Selecciona una organización</option>
+                  <option value="">Select a organization</option>
                   {loggedOrganizations && loggedOrganizations.length > 0 ? (
                     loggedOrganizations.map((organization: any) => (
                       <option key={organization._id} value={organization._id}>
@@ -627,7 +619,7 @@ const UserProfile: React.FC = () => {
                       </option>
                     ))
                   ) : (
-                    <option disabled>No tienes organizaciones disponibles</option>
+                    <option disabled>Does not have a organizations availables</option>
                   )}
                 </select>
               </div>
@@ -637,27 +629,26 @@ const UserProfile: React.FC = () => {
                   onClick={() => setShowModalRemoveUser(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  Eliminar
+                  Remove
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-      {/* Modal para actualizar perfil */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Actualizar Perfil</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-700">Update Profile</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-700 font-bold mb-2">Nombre de Usuario</label>
+                <label htmlFor="username" className="block text-gray-700 font-bold mb-2">Username</label>
                 <input
                   type="text"
                   name="username"
@@ -668,7 +659,7 @@ const UserProfile: React.FC = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="profilePic" className="block text-gray-700 font-bold mb-2">Imagen de Perfil</label>
+                <label htmlFor="profilePic" className="block text-gray-700 font-bold mb-2">Profile Image</label>
                 <input
                   type="file"
                   id="profilePic"
@@ -684,19 +675,30 @@ const UserProfile: React.FC = () => {
                   onClick={handleModalClose}
                   className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  Guardar Cambios
+                  Save Changes
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+      <ToastContainer
+      position="bottom-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"/>
     </>
   );
 };  
