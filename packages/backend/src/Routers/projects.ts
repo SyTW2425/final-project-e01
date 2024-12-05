@@ -99,7 +99,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
     const { project, user, role } = req.body;
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project as string);
-    if (!projectResult) {
+    if (projectResult.error) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
@@ -257,8 +257,7 @@ projectsRouter.get('/user', jwtMiddleware, async (req, res) => {
  */
 projectsRouter.get('/sprints', jwtMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
-    // console.log(id);
+    const { id } = req.body;
     const response = await projectLogic.searchProjectById(id);
     if (response.error) {
       res.status(404).send(response);
@@ -281,7 +280,6 @@ projectsRouter.get('/sprints', jwtMiddleware, async (req, res) => {
 projectsRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    // console.log(id);
     const response = await projectLogic.searchProjectById(id);
     if (response.error) {
       res.status(404).send(response);
@@ -302,8 +300,8 @@ projectsRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
 projectsRouter.get('/searchprojects/:username', jwtMiddleware, async (req, res) => {
   try {
     const user = await userLogic.searchUsersByUsername(req.params.username);
-    if (user.error) {
-      res.status(404).send(user);
+    if (user.error || !user.result) {
+      res.status(404).send(createResponseFormat(true, 'User not found'));
       return;
     }
     const response = await projectLogic.searchProjectsFromUser(user.result._id);
@@ -353,7 +351,7 @@ projectsRouter.put('/', jwtMiddleware, async (req, res) => {
     }));
     // Update the project
     const projectUpdate = await projectLogic.updateProject(name, description, startDate, endDate, usersWithRoles, sprints);
-    if (!projectUpdate.result) {
+    if (projectUpdate.error || !projectUpdate.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
     }
     res.status(200).send(projectUpdate);
@@ -373,7 +371,7 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
     const { project, user, role } = req.body;
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
-    if (!projectResult) {
+    if (projectResult.error) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
@@ -389,9 +387,15 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
       res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
       return;
     }
+    // Check if the user is in the project
+    const userToUpdate = await userLogic.searchUserById(user);
+    if (!userToUpdate) {
+      res.status(404).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
     // Update the role of the user in the project
     const userUpdate = await projectLogic.updateRoleOfUserInProject(project, user, role);
-    if (!userUpdate.result) {
+    if (userUpdate.error) {
       res.status(404).send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
@@ -430,7 +434,7 @@ projectsRouter.put('/sprint', jwtMiddleware, async (req, res) => {
     }
     // Update the sprint of the project
     const sprintUpdate = await projectLogic.updateSprintOfProject(project, sprintID, sprint);
-    if (!sprintUpdate.result) {
+    if (sprintUpdate.error) {
       res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
       return;
     }
@@ -470,7 +474,7 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
     }
     // Delete the project
     const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
-    if (!projectDelete.result) {
+    if (projectDelete.error || !projectDelete.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
@@ -491,7 +495,7 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
     const { project, user } = req.body;
     // We need search the project 
     const projectResult = await projectLogic.searchProjectById(project);
-    if (!projectResult) {
+    if (projectResult.error || !projectResult.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
@@ -507,9 +511,15 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
+    // Check if the user is an Admin or Owner of the project
+    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    if (!isAdminOrOwner) {
+      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      return;
+    }
     // Delete the user from the project
     const projectDelete = await projectLogic.deleteUserFromProject(project, user); 
-    if (!projectDelete.result) {
+    if (projectDelete.error) {
       res.status(404).send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
@@ -528,10 +538,9 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
 projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
   try {
     const { project, sprintID } = req.body;
-
     // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
-    if (!projectResult) {
+    if (projectResult.error || !projectResult.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
     }
@@ -549,7 +558,7 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
     }
     // Delete the sprint from the project
     const sprintDelete = await projectLogic.deleteSprintFromProject(project, sprintID);
-    if (!sprintDelete.result) {
+    if (sprintDelete.error || !sprintDelete.result) {
       res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
       return;
     }

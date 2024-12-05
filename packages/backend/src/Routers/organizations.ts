@@ -63,7 +63,7 @@ organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
 });
 
 /**
- * @brief This endpoint is used to get an organization by its name
+ * @brief This endpoint is used to get an organization by its id 
  * @param req The request object
  * @param res The response object
  * @returns void
@@ -97,7 +97,7 @@ organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async 
 })
 
 /**
- * @brief This endpoint is used create a new organization
+ * @brief This endpoint is used search the organization by user
  * @param req The request object
  * @param res The response object
  * @returns void
@@ -106,23 +106,6 @@ organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, as
   try {
     const { username } = req.params;
     const response = await organizationLogic.searchOrganizationByUser(username);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
-
-/**
- * @brief This endpoint is used create a new organization
- * @param req The request object
- * @param res The response object
- * @returns void
- */
-organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const response = await organizationLogic.searchOrganizations(id);
     res.status(200).send(response);
   } catch (error) {
     // console.error(error);

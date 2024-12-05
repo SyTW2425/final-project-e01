@@ -112,6 +112,86 @@ describe('Task', () => {
     });
   });
 
+  describe('POST /task', () => {
+    let taskId: string;
+  
+    it('should create a task successfully', async () => {
+      const response = await request(app)
+        .post('/task')
+        .set('Authorization', `${token}`)
+        .send({
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
+          name: "TaskPostTest",
+          description: "Task creation test",
+          priority: "high",
+          dependenciesTasks: [],
+          status: "todo",
+          comments: ["Initial setup required"],
+          users: ["test_user2"],
+          projectName: "Nuevo_Proyecto_2",
+          organizationName: "OrganizationExample_2"
+        });
+  
+      expect(response.status).to.equal(201);
+      expect(response.body.error).to.equal(false);
+      expect(response.body.result.name).to.equal("TaskPostTest");
+      taskId = response.body.result._id; // Guardar el ID de la tarea creada
+    });
+  
+    it('should return 404 if user does not exist', async () => {
+      const response = await request(app)
+        .post('/task')
+        .set('Authorization', `${token}`)
+        .send({
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
+          name: "TaskInvalidUser",
+          description: "Testing with invalid user",
+          priority: "medium",
+          dependenciesTasks: [],
+          status: "todo",
+          comments: [],
+          users: ["invalid_user"],
+          projectName: "Nuevo_Proyecto_2",
+          organizationName: "OrganizationExample_2"
+        });
+  
+      expect(response.status).to.equal(404);
+      expect(response.body.error).to.equal(true);
+      expect(response.body.result).to.equal("User invalid_user not found");
+    });
+  
+    it('should return 401 if the user is not authenticated', async () => {
+      const response = await request(app)
+        .post('/task')
+        .send({
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
+          name: "TaskUnauthenticated",
+          description: "Testing without authentication",
+          priority: "low",
+          dependenciesTasks: [],
+          status: "todo",
+          comments: [],
+          users: ["test_user2"],
+          projectName: "Nuevo_Proyecto_2",
+          organizationName: "OrganizationExample_2"
+        });
+  
+      expect(response.status).to.equal(401);
+    });
+  
+    after(async () => {
+      if (taskId) {
+        const response = await request(app)
+          .delete(`/task/${taskId}`)
+          .set('Authorization', `${token}`);
+        expect(response.status).to.equal(200);
+      }
+    });
+  });
+
   describe('GET /task', () => {
     it('should get the task successfully', async () => {
       const response = await request(app)
@@ -150,6 +230,63 @@ describe('Task', () => {
     });
   });
 
+  describe('GET /task/:id', () => {
+    let taskId: string;
+  
+    before(async () => {
+      // Crear una tarea para la prueba
+      const taskResponse = await request(app)
+        .post('/task')
+        .set('Authorization', `${token}`)
+        .send({
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
+          name: "TaskById",
+          description: "Testing retrieval by ID",
+          priority: "medium",
+          dependenciesTasks: [],
+          status: "todo",
+          comments: [],
+          users: ["test_user2"],
+          projectName: "Nuevo_Proyecto_2",
+          organizationName: "OrganizationExample_2"
+        });
+      expect(taskResponse.status).to.equal(201);
+      taskId = taskResponse.body.result._id;
+    });
+  
+    after(async () => {
+      // Eliminar la tarea creada
+      const deleteResponse = await request(app)
+        .delete(`/task/${taskId}`)
+        .set('Authorization', `${token}`);
+      expect(deleteResponse.status).to.equal(200);
+    });
+  
+    it('should retrieve a task by ID successfully', async () => {
+      const response = await request(app)
+        .get(`/task/${taskId}`)
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+      expect(response.body.result.name).to.equal("TaskById");
+    });
+  
+    it('should return 404 if task ID does not exist', async () => {
+      const response = await request(app)
+        .get('/task/61a5f2118dfe0b1a98765432') // ID inexistente
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(404);
+      expect(response.body.error).to.equal(true);
+      expect(response.body.result).to.equal('Task not found');
+    });
+  
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app).get(`/task/${taskId}`);
+      expect(response.status).to.equal(401);
+    });
+  });
+  
   describe('PUT /task', () => {
     it('should update a task successfully', async () => {
       const taskName = "Implementación de la interfaz de usuario";
@@ -256,4 +393,53 @@ describe('Task', () => {
       expect(response.status).to.equal(404);
     });
   });
+
+  describe('DELETE /task/:id', () => {
+    let taskId: string;
+  
+    before(async () => {
+      // Crear una tarea para la prueba
+      const taskResponse = await request(app)
+        .post('/task')
+        .set('Authorization', `${token}`)
+        .send({
+          startDate: "2025-12-10T00:00:00Z",
+          endDate: "2025-12-30T00:00:00Z",
+          name: "TaskToDelete",
+          description: "Tarea para probar eliminación",
+          priority: "medium",
+          dependenciesTasks: [],
+          status: "todo",
+          comments: [],
+          users: ["test_user2"],
+          projectName: "Nuevo_Proyecto_2",
+          organizationName: "OrganizationExample_2"
+        });
+      expect(taskResponse.status).to.equal(201);
+      taskId = taskResponse.body.result._id;
+    });
+  
+    it('should delete a task successfully by ID', async () => {
+      const response = await request(app)
+        .delete(`/task/${taskId}`)
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.error).to.equal(false);
+    });
+  
+    it('should return 404 if the task ID does not exist', async () => {
+      const response = await request(app)
+        .delete('/task/61a5f2118dfe0b1a98765432') // ID inexistente
+        .set('Authorization', `${token}`);
+      expect(response.status).to.equal(404);
+      expect(response.body.error).to.equal(true);
+      expect(response.body.result).to.equal('Task not found');
+    });
+  
+    it('should return 401 if the user is not authenticated', async () => {
+      const response = await request(app)
+        .delete(`/task/${taskId}`);
+      expect(response.status).to.equal(401);
+    });
+  });  
 });
