@@ -96,7 +96,7 @@ tasksRouter.get('/project/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.getTasksProjectFromUser(id, user._id);
-    if (response.error) {
+    if (response.error || !response.result) {
       res.status(404).send(response);
       return;
     }
@@ -122,6 +122,7 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.getTasksProjectFromUserNotCompleted(id);
+    console.log(response);
     if (response.error) {
       res.status(404).send(response);
       return;
