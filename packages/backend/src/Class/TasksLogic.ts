@@ -135,6 +135,9 @@ export default class TasksLogic implements TasksAPI {
       project,
       sprint
     });
+    if (!task_saved) {
+      return createResponseFormat(true, 'Task not saved');
+    }
     const sprintId = new mongoose.Types.ObjectId(sprint);
     const sprintUpdateResult = await this.dbAdapter.updateOne(
       Project,
