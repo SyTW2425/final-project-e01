@@ -9,7 +9,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief organizations.ts file that contains the routes for the organizations
+ * @brief organizations.ts - Organizations routes
  */
 
 import Express from 'express';

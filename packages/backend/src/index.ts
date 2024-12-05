@@ -11,6 +11,7 @@
  * @date 28/10/2024
  * @brief Entrypoint of the backend server
  */
+
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';

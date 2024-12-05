@@ -9,7 +9,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief tasks.ts file that contains the routes for the tasks
+ * @brief tasks.ts - Router for the tasks
  */
 
 import Express from 'express';
@@ -134,6 +134,12 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @brief This endpoint is used to get the tasks from a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 tasksRouter.get('/project/tasks/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;

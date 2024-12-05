@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 28/10/2024
+ * @brief tasks.spec.ts - Tests for the task endpoints
+ */
+
 import { expect } from 'chai';
 import 'mocha';
 import request from 'supertest';
@@ -6,7 +20,6 @@ import MongoDB from '../Class/DBAdapter.js';
 import User from '../Models/User.js';
 import Organization from '../Models/Organization.js';
 import Project from '../Models/Project.js';
-
 
 const dbAdapter = new MongoDB();
 let token = "";

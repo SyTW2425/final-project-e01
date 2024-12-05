@@ -1,3 +1,17 @@
+/**
+ * Proyecto Final: Aplicación gestora de proyectos
+ * Asignatura: Sistemas y Tecnologías Web
+ * Grado en Ingeniería Informática
+ * Universidad de La Laguna
+ *
+ * @author Pablo Rodríguez de la Rosa
+ * @author Javier Almenara Herrera
+ * @author Omar Suárez Doro
+ * @version 1.0
+ * @date 28/10/2024
+ * @brief project.test.ts - Tests for the project endpoints
+ */
+
 import * as chai from 'chai';
 import chaiHttp from 'chai-http';
 import { app } from '../index.js'; // Asegúrate de que apunta al archivo principal de tu app
