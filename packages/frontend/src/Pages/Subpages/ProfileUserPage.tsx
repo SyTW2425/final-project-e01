@@ -19,6 +19,7 @@ import { RootState } from '../../store/store';
 import { useDispatch } from 'react-redux';
 import Navbar from '../../Components/NavBars/NavBarGeneral';
 import { setSession } from '../../slices/sessionSlice';
+import { errorNotification, infoNotification, successNotification } from '../../Components/Information/Notification';
 
 
 const BACKEND_DELETE_USER_URL = import.meta.env.VITE_BACKEND_URL + '/user/delete';
@@ -105,10 +106,10 @@ const UserProfile: React.FC = () => {
         const data = await response.json();
         setOrganizations(data.result);
       } else {
-        console.error('Error al obtener organizaciones');
+        errorNotification('Failed to get organizations');
       }
     } catch (error) {
-      console.error('Error al obtener organizaciones:', error);
+      errorNotification('Failed to get organizations: ' + error);
     }
   };
   
@@ -127,7 +128,7 @@ const UserProfile: React.FC = () => {
         setProjects(data.result);
       } 
     } catch (error) {
-      console.error('Error al obtener los proyectos del usuario:', error);
+      errorNotification('Failed to get projects: ' + error);
     }
   };
   
@@ -173,7 +174,7 @@ const UserProfile: React.FC = () => {
 
   const handleDelete = () => {
     const confirmDelete = window.confirm(
-      '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'
+      'Are you sure you want to delete your account? This action cannot be undone.'
     );
     if (confirmDelete) {
       fetch(BACKEND_DELETE_USER_URL, {
@@ -189,7 +190,7 @@ const UserProfile: React.FC = () => {
             localStorage.removeItem('token');
             navigate('/login');
           } else {
-            console.error('Failed to delete user');
+            errorNotification('Failed to delete user');
           }
         })
         .catch((err) => console.error(err));
@@ -219,7 +220,7 @@ const UserProfile: React.FC = () => {
       setShowModal(false);
 
     } catch (error) {
-      console.error('Error al actualizar el perfil:', error);
+      errorNotification('Failed to update profile: ' + error);
     }
     setShowModal(false);
   };
@@ -240,14 +241,15 @@ const UserProfile: React.FC = () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al añadir miembro a la organización');
+        throw new Error(errorData.message || 'Failed to add member to organization');
       }
   
       const data = await response.json();
       setShowModalAddOrg(false);
+      successNotification('Member added to organization successfully');
       return data;
     } catch (error) {
-      console.error('Error al añadir miembro a la organización:', error);
+      errorNotification('Failed to add member to organization: ' + error);
       throw error;
     }
   };
@@ -283,14 +285,14 @@ const UserProfile: React.FC = () => {
       })
       if (response.ok) {
         const data = await response.json();
-        alert('Usuario eliminado de la organización con éxito.');
+        successNotification('User removed from organization successfully');
         setShowModalRemoveUser(false);
         return data;
       } else {
-        throw new Error('Error al eliminar usuario de la organización');
+        throw new Error('Error in removing user from organization');
       }
     } catch (error) {
-    alert('Hubo un problema al eliminar al usuario de la organización.');
+      errorNotification('Failed to remove user from organization: ' + error);
     }
   };
 
@@ -315,13 +317,13 @@ const UserProfile: React.FC = () => {
   
         const org = await response.json();
         await handleRemoveFromOrganization(org.result._id, searchedUser?._id);
-        alert('Usuario eliminado de la organización con éxito.');
+        successNotification('User removed from organization successfully');
       } catch (error) {
         console.error('Error al eliminar de la organización:', error);
         alert('Hubo un problema al eliminar de la organización.');
       }
     } else {
-      alert('Por favor, selecciona una organización');
+      infoNotification('Please select an organization');
     }
   }
  
@@ -347,14 +349,13 @@ const UserProfile: React.FC = () => {
         }
         const org = await response.json();
         await handleAddToOrganization(org.result._id, searchedUser?._id);
-        alert('Usuario añadido a la organización con éxito.');
+        successNotification('User added to organization successfully');
       } catch (error) {
         console.log(error)
-        console.error('Error al añadir a la organización:', error);
-        alert('Hubo un problema al añadir a la organización.');
+        errorNotification('Failed to add user to organization: ' + error);
       }
     } else {
-      alert('Por favor, selecciona una organización');
+      infoNotification('Please select an organization');
     }
   };
 
@@ -376,16 +377,15 @@ const UserProfile: React.FC = () => {
         );
   
         if (!response.ok) {
-          throw new Error('Error al buscar el proyecto');
+          throw new Error('Error searching projects');
         }
         setShowModalAddProject(false);
-        alert('Usuario añadido al proyecto con éxito.');
+        successNotification('User added to project successfully');
       } catch (error) {
-        console.error('Error al añadir al proyecto:', error);
-        alert('Hubo un problema al añadir al proyecto.');
+        errorNotification('Failed to add user to project: ' + error);
       }
     } else {
-      alert('Por favor, selecciona un proyecto');
+      infoNotification('Please select a project');
     }
   }
   
