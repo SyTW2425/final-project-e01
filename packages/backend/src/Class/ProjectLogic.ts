@@ -204,7 +204,6 @@ export default class ProjectLogic implements ProjectsAPI {
       return createResponseFormat(true, 'Project not found');
     }
     const sprints = project.sprints;
-    console.log('Sprints: ', sprints);
     const newSprints = sprints.filter((sprint: any) => sprint._id != sprintID);
     const data = {
       sprints: newSprints
