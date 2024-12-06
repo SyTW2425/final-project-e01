@@ -50,8 +50,14 @@ const GanttDiagram: React.FC = () => {
     fetchTasks();
   }, [currentProject]);
   return (
-    <div className="h-screen w-[87vw]">
-      {tasks.length > 0 ? <Gantt tasks={tasks} /> : <p>Loading tasks...</p>}
+    <div className="flex items-center justify-center h-screen w-[87vw] bg-gray-100">
+      {tasks.length > 0 ? (
+        <Gantt tasks={tasks} />
+      ) : (
+        <p className="text-lg font-semibold text-gray-500 bg-white px-6 py-4 rounded-lg shadow-md">
+          No tasks found
+        </p>
+      )}
     </div>
   );
 };
