@@ -113,7 +113,7 @@ const MyProjectsPage: React.FC = () => {
             <p className="text-gray-600 mt-4">{selectedProject.description}</p>
             <p className="text-gray-500 mt-4">
               <strong>Created on:</strong>{" "}
-              {new Date(selectedProject.createdAt).toLocaleDateString()}
+              {new Date(selectedProject.startDate).toLocaleDateString()}
             </p>
             <p className="text-gray-500 mt-2">
               <strong>Members:</strong> {selectedProject.users.length}
