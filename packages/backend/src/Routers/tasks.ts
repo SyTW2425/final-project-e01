@@ -9,7 +9,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief tasks.ts file that contains the routes for the tasks
+ * @brief tasks.ts - Router for the tasks
  */
 
 import Express from 'express';
@@ -17,9 +17,9 @@ import MongoDB from '../Class/DBAdapter.js';
 import TasksLogic from '../Class/TasksLogic.js';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
 import { createResponseFormat, mapUsersToObjectIds, validateRequiredFields, authenticateAndAuthorizeUser, getUserFromHeader } from '../Utils/CRUD-util-functions.js';
+import { projectLogic } from './projects.js';
 
 export const tasksRouter = Express.Router();
-
 const dbAdapter = new MongoDB();
 export const taskLogic = new TasksLogic(dbAdapter);
 
@@ -95,6 +95,11 @@ tasksRouter.get('/project/:id', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
+    const projectResponse = await projectLogic.searchProjectById(id);
+    if (projectResponse.error || !projectResponse.result) {
+      res.status(404).send(projectResponse);
+      return;
+    }
     const response = await taskLogic.getTasksProjectFromUser(id, user._id);
     if (response.error || !response.result) {
       res.status(404).send(response);
@@ -121,8 +126,12 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
+    const projectResponse = await projectLogic.searchProjectById(id);
+    if (projectResponse.error || !projectResponse.result) {
+      res.status(404).send(projectResponse);
+      return;
+    }
     const response = await taskLogic.getTasksProjectFromUserNotCompleted(id);
-    console.log(response);
     if (response.error) {
       res.status(404).send(response);
       return;
@@ -134,12 +143,23 @@ tasksRouter.get('/project/:id/notdone', jwtMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @brief This endpoint is used to get the tasks from a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
 tasksRouter.get('/project/tasks/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const user: any = await getUserFromHeader(req);
     if (!user) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    const projectResponse = await projectLogic.searchProjectById(id);
+    if (projectResponse.error || !projectResponse.result) {
+      res.status(404).send(projectResponse);
       return;
     }
     const response = await taskLogic.getAllTasksProject(id);
@@ -196,6 +216,11 @@ tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
   try {
     const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprint } = req.body;
     if (!validateRequiredFields(req.body, ['startDate', 'endDate', 'name', 'description', 'priority', 'status', 'comments', 'users'], res)) return;
+    const projectResponse = await projectLogic.searchProjectById(req.params.id);
+    if (projectResponse.error || !projectResponse.result) {
+      res.status(404).send(projectResponse);
+      return;
+    }
     const user: any = await getUserFromHeader(req);
     if (!user) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
@@ -224,7 +249,16 @@ tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
+    const projectResponse = await projectLogic.searchProjectById(req.params.id);
+    if (projectResponse.error || !projectResponse.result) {
+      res.status(404).send(projectResponse);
+      return;
+    }
     const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprintID);
+    if (response.error || !response.result) {
+      res.status(404).send(response);
+      return;
+    }
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -318,6 +352,10 @@ tasksRouter.put('/update/:id', jwtMiddleware, async (req, res) => {
       return;
     }
     const response = await taskLogic.updateTaskById(id, description, endDate, priority, status, assignedTo);
+    if (response.error || !response.result) {
+      res.status(404).send(createResponseFormat(true, 'Task not found'));
+      return;
+    }
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;

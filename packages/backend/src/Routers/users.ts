@@ -9,7 +9,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief Main
+ * @brief users.ts - User routes
  */
 
 import Express from 'express';

@@ -33,7 +33,6 @@ export interface ApplicationAdapter {
   organizationsAPI : OrganizationsAPI;
 }
 
-
 /**
  * UsersAPI
  * @description Users API
@@ -48,7 +47,6 @@ export interface UsersAPI {
   updateUser(email : string, username : string | null, password : string | null, role : string | null, userId : any) : Promise<APIResponseFormat>;
 }
 
-
 /**
  * OrganizationsAPI
  * @description Organizations API
@@ -62,7 +60,6 @@ export interface TasksAPI {
   updateTask(name : string, description : string | null, deadline : string | null, priority : string | null, state : string | null, project : string, Organization: string, assignedTo : string | null) : Promise<APIResponseFormat>;
 }
 
-
 /**
  * ProjectsAPI
  * @description Projects API
@@ -74,7 +71,6 @@ export interface ProjectsAPI {
   deleteProject(nameOrg: string, projectToDelete : string) : Promise<APIResponseFormat>;
   updateProject(nameProject : string, description : string, startDate : string, endDate : string, users : string[], sprints : any) : Promise<APIResponseFormat>;
 }
-
 
 /**
  * OrganizationsAPI
@@ -90,7 +86,10 @@ export interface OrganizationsAPI {
   updateOrganization(name : string, newName:string, members : any) : Promise<APIResponseFormat>;
 }
 
-
+/**
+ * databaseAdapter
+ * @description Database adapter
+ */
 export interface databaseAdapter {
   findOne(model : Model<any>, query : any, filter? : object, populateFields?: null | PopulateOptions | (string | PopulateOptions | object)[]) : Promise<any>;
   find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number, populateFields?: null | PopulateOptions | (string | PopulateOptions)[]) : Promise<any>;
@@ -101,4 +100,3 @@ export interface databaseAdapter {
   deleteMany : (model : Model<any>, query : any) => Promise<any>;
   countDocuments : (model : Model<any>, query : any) => Promise<number>;
 }
-
