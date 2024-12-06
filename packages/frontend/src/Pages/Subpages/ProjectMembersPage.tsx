@@ -145,6 +145,7 @@ const ProjectMembersPage: React.FC = () => {
 
             {canEdit() && user.user.email !== sessionState.userObject.email && (
               <div className="absolute bottom-2 right-2 flex space-x-2">
+                <br/>
                 <button
                   className="text-blue-500 hover:text-blue-700"
                   onClick={() => {
