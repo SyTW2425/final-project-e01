@@ -143,7 +143,6 @@ const ProjectMembersPage: React.FC = () => {
               {user.role}
             </span>
             <br/>
-            <br/>
 
             {canEdit() && user.user.email !== sessionState.userObject.email && (
               <div className="absolute bottom-2 right-2 flex space-x-2">
