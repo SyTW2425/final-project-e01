@@ -147,10 +147,10 @@ const UserProfile: React.FC = () => {
         const data = await response.json();
         setLoggedOrganizations(data.result);
       } else {
-        console.error('Error al obtener organizaciones del usuario logueado');
+        console.error('Error fetching organizations for the logged-in user');
       }
     } catch (error) {
-      console.error('Error al obtener organizaciones del usuario logueado:', error);
+      console.error('Error fetching organizations for the logged-in user:', error);
     }
   };
 
@@ -431,7 +431,7 @@ const UserProfile: React.FC = () => {
               onClick={handleAddtoOrg}
               className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-white transition duration-200"
   >
-              Add to a Organization
+              Add to an Organization
             </button>
             <button
               onClick={handleRemoveToOrg}
