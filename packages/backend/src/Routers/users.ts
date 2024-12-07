@@ -116,6 +116,7 @@ usersRouter.get('/validate', jwtMiddleware, async (req, res) => {
  * @returns void
  */
 usersRouter.get('/', jwtMiddleware, async (req, res) => { 
+  //const userSearching = await userLogic.searchUserById(req.userId);
   try {
     const { username, email, page = 1 } = req.query;
     if (!username && !email) {
