@@ -49,7 +49,7 @@ const ProjectSprintsPage: React.FC = () => {
 
   const [currentSprint, setCurrentSprint] = useState<Sprint | null>(null);
   const [currentTask, setCurrentTask] = useState<TaskInterface | null>(null);
-
+  const [currentUsersInTask, setCurrentUsersInTask] = useState<string[]>([]);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
@@ -79,11 +79,43 @@ const ProjectSprintsPage: React.FC = () => {
     setSelectedUsers(selectedOptions);
   };
   
-
     /**
    * Fetch members of the current project
    */
     useEffect(() => {
+      const fetchTasksUsers = async () => {
+        console.log("currentTask", currentTask?.users);
+        if (currentTask?.users) {
+          const users: string[] = [];
+          try {
+            for (const user of currentTask?.users) {
+              console.log("user", user);
+              const response = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/user/id/${user}`,
+                {
+                  method: "GET",
+                  headers: {
+                    content: "application/json",
+                    authorization: localStorage.getItem("token") || "",
+                  },
+                }
+              );
+              if (response.ok) {
+                const data = await response.json();
+                users.push(data.username);
+              } else {
+                throw new Error("Error fetching users");
+              }
+            }
+            setCurrentUsersInTask(users);
+          } catch (error) {
+            console.error("Error fetching users:", error);
+          }
+        } else {
+          setCurrentUsersInTask([]);
+        }
+      };
+    
       const fetchProjectMembers = async () => {
         if (!currentProject?._id) return;
   
@@ -108,9 +140,9 @@ const ProjectSprintsPage: React.FC = () => {
       };
   
       fetchProjectMembers();
-    }, [currentProject?._id, dispatch]);
+      fetchTasksUsers();
+    }, [currentProject?._id, dispatch, currentTask]);
   
-
     return (
       <div className="bg-gray-50 w-full h-auto p-6">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Project Sprints</h1>
@@ -613,7 +645,12 @@ const ProjectSprintsPage: React.FC = () => {
                 </p>
               </div>
             </div>
-
+            <div className="bg-white p-4 rounded-lg shadow-md border border-blue-200">
+              <h3 className="text-lg font-medium text-blue-600 mb-2">Users Assigned</h3>
+              <p className="text-gray-700 text-sm">
+                {currentUsersInTask.length > 0 ? currentUsersInTask.join(", ") : "No users assigned"}
+              </p>
+            </div>
             {/* Comments */}
             <div className="bg-white p-4 rounded-lg shadow-md border border-blue-200">
               <h3 className="text-lg font-medium text-blue-600 mb-2">Comments</h3>

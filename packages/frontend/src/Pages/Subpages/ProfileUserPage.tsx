@@ -429,7 +429,7 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleAddtoOrg}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-white transition duration-200"
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
   >
               Add to an Organization
             </button>
@@ -442,7 +442,7 @@ const UserProfile: React.FC = () => {
             </button>
             <button
               onClick={handleAddtoProject}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-white transition duration-200"
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
             >
               Add to a Project
             </button>
@@ -452,7 +452,7 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleUpdate}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-blue-400 transition duration-200"
+              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
             >
               Update Profile
             </button>
@@ -466,7 +466,7 @@ const UserProfile: React.FC = () => {
           )}
         </div>
         <div className="w-full md:w-2/3 flex flex-col space-y-6 p-4 md:p-8">
-          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-blue-400 shadow-lg">
+          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
             <h3 className="text-lg md:text-xl font-bold text-white mb-4">Organizations</h3>
             <ul className="space-y-3">
             {organizations.map((organization: any, index: number) => (
@@ -483,7 +483,7 @@ const UserProfile: React.FC = () => {
             )}
           </ul>
         </div>
-          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-blue-400 shadow-lg">
+          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
             <h3 className="text-lg md:text-xl font-bold text-white mb-4">Projects</h3>
             <ul className="space-y-3">
               {projects.map((project: any, index: number) => (
