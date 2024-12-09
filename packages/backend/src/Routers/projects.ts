@@ -132,6 +132,12 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
       res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
       return;
     }
+    // Check if the user is already in the project
+    const isUserInProject = projectResult.result.users.find((userEntry: any) => userEntry.user.toString() === user.toString());
+    if (isUserInProject) {
+      res.status(403).send(createResponseFormat(true, 'User is already in the project'));
+      return;
+    }
     // Add the user to the project
     const userToAdd = { user, role };
     const userAdded = await projectLogic.addUserToProject(project, userToAdd);
@@ -563,6 +569,45 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     res.status(200).send(sprintDelete);
+  } catch (error: any) {
+    res.status(500).send(createResponseFormat(true, error.message));
+  }
+});
+
+/**
+ * @brief This endpoint is used leave a project
+ * @param req The request object
+ * @param res The response object
+ * @returns void
+ */
+projectsRouter.delete('/leave/:project', jwtMiddleware, async (req, res) => {
+  try {
+    const { project } = req.params;
+    // We need search the project
+    const projectResult = await projectLogic.searchProjectById(project);
+    if (projectResult.error || !projectResult.result) {
+      res.status(404).send(createResponseFormat(true, 'Project not found'));
+      return;
+    }
+    // Obtain the user from the JWT
+    const user: any = await getUserFromHeader(req);
+    if (!user) {
+      res.status(401).send(createResponseFormat(true, 'User not found'));
+      return;
+    }
+    // Check if the user is in the project
+    const userInProject = projectResult.result.users.find((userEntry: any) => userEntry.user.toString() === user._id.toString());
+    if (!userInProject) {
+      res.status(403).send(createResponseFormat(true, 'User is not in the project'));
+      return;
+    }
+    // Delete the user from the project
+    const projectDelete = await projectLogic.deleteUserFromProject(project, user._id);
+    if (projectDelete.error) {
+      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
+      return;
+    }
+    res.status(200).send(projectDelete);
   } catch (error: any) {
     res.status(500).send(createResponseFormat(true, error.message));
   }
