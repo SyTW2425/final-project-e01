@@ -582,9 +582,8 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
  */
 projectsRouter.delete('/leave/:project', jwtMiddleware, async (req, res) => {
   try {
-    const { project } = req.params;
     // We need search the project
-    const projectResult = await projectLogic.searchProjectById(project);
+    const projectResult = await projectLogic.searchProjectById(req.params.project);
     if (projectResult.error || !projectResult.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
@@ -596,13 +595,13 @@ projectsRouter.delete('/leave/:project', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is in the project
-    const userInProject = projectResult.result.users.find((userEntry: any) => userEntry.user.toString() === user._id.toString());
+    const userInProject = projectResult.result.users.find((userEntry: any) => userEntry.user._id.toString() === user._id.toString());
     if (!userInProject) {
       res.status(403).send(createResponseFormat(true, 'User is not in the project'));
       return;
     }
     // Delete the user from the project
-    const projectDelete = await projectLogic.deleteUserFromProject(project, user._id);
+    const projectDelete = await projectLogic.deleteUserFromProject(req.params.project, user._id.toString());
     if (projectDelete.error) {
       res.status(404).send(createResponseFormat(true, 'User not found in the project'));
       return;
