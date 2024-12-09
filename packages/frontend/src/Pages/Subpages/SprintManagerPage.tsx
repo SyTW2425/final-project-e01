@@ -3,9 +3,8 @@ import { RootState } from "../../store/store";
 import { useSelector, useDispatch } from "react-redux";
 import Modal from "../../Components/Information/Modal";
 import React, { useRef, useState, useEffect } from "react";
-import { addSprint, deleteSprint, updateSprint, setCurrentProject, addTask, updateTask, deleteTask } from "../../slices/sessionSlice";
-import { da } from 'date-fns/locale';
 import { errorNotification, successNotification } from '../../Components/Information/Notification';
+import { addSprint, deleteSprint, updateSprint, setCurrentProject, addTask } from "../../slices/sessionSlice";
 
 enum Priority {
   LOW = "low",
@@ -84,12 +83,10 @@ const ProjectSprintsPage: React.FC = () => {
    */
     useEffect(() => {
       const fetchTasksUsers = async () => {
-        console.log("currentTask", currentTask?.users);
         if (currentTask?.users) {
           const users: string[] = [];
           try {
             for (const user of currentTask?.users) {
-              console.log("user", user);
               const response = await fetch(
                 `${import.meta.env.VITE_BACKEND_URL}/user/id/${user}`,
                 {
@@ -153,7 +150,7 @@ const ProjectSprintsPage: React.FC = () => {
           Add Sprint
         </button>
   
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mt-8">
           {Array.isArray(sprints) &&
             sprints.map((sprint) => (
               <div

@@ -26,7 +26,7 @@ const DashboardPage: React.FC = () => {
     <>
       <Navbar onToggleSidebar={toggleSidebar} />
 
-      <div className="relative h-screen flex bg-gray-50">
+      <div className="relative min-h-screen h-auto flex bg-gray-50">
         {/* Sidebar */}
         <div
           className={`fixed top-0 left-0 h-full bg-gray-200 shadow-lg z-40 transform transition-transform duration-300
@@ -77,7 +77,7 @@ const DashboardPage: React.FC = () => {
       draggable
       pauseOnHover
       theme="colored"/>
-       <FooterDashboard currentUser={currentUser} />
+      <FooterDashboard currentUser={currentUser} />
     </>
   );
 };

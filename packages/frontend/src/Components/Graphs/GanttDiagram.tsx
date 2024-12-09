@@ -49,8 +49,9 @@ const GanttDiagram: React.FC = () => {
 
     fetchTasks();
   }, [currentProject]);
+  
   return (
-    <div className="flex items-center justify-center h-screen w-[87vw] bg-gray-100">
+    <div className="bg-gray-100">
       {tasks.length > 0 ? (
         <Gantt tasks={tasks} />
       ) : (

@@ -141,7 +141,10 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
                 <Link
                   to="/login"
                   className="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100 hover:text-red-600"
-                  onClick={() => localStorage.removeItem('token')}
+                  onClick={() => {
+                    localStorage.removeItem('persist:project');
+                    localStorage.removeItem('token');
+                  }}
                 >
                   Logout
                 </Link>
@@ -234,9 +237,13 @@ const Navbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) 
             })
               .then((res) => res.json())
               .then((data) => {
-                setShowCreateProjectPopup(false);
-                dispatch(addProject(data.result));
-                successNotification(`Project "${data.result.name}" created successfully`);
+                if (!data.error) {
+                  setShowCreateProjectPopup(false);
+                  dispatch(addOrganization(data.result));
+                  successNotification(`Project "${data.result.name}" created successfully`);
+                } else {
+                  errorNotification(data.result);
+                }
               })
               .catch((err) => errorNotification(err));
           }}

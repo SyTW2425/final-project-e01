@@ -70,7 +70,7 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
     // Add the user that creates the project as OWNER
     usersWithRoles.push({
       user: user._id,
-      role: Role.OWNER // Asignar el rol de OWNER
+      role: Role.OWNER
     });
     // Create the project
     const project_saved = await projectLogic.createProject(

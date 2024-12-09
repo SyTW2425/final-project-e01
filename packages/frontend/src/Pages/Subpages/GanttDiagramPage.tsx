@@ -3,7 +3,7 @@ import GanttDiagram from '../../Components/Graphs/GanttDiagram';
 
 const GanttDiagramPage: React.FC = () => {
   return (
-    <div className="flex flex-col h-screen bg-gray-50 z-10 "> 
+    <div className="max-h-screen max-w-[86vw] bg-gray-50 z-10 "> 
       <GanttDiagram />
     </div>
   );
