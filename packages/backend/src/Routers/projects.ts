@@ -133,7 +133,7 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is already in the project
-    const isUserInProject = projectResult.result.users.find((userEntry: any) => userEntry.user.toString() === user.toString());
+    const isUserInProject = projectResult.result.users.find((userEntry: any) => userEntry.user._id.toString() === user.toString());
     if (isUserInProject) {
       res.status(403).send(createResponseFormat(true, 'User is already in the project'));
       return;
