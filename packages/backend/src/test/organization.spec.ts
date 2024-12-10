@@ -74,7 +74,14 @@ describe('Organization', () => {
   after(async () => {
     await dbAdapter.deleteMany(User, { username: "test_user3" });
     await dbAdapter.deleteMany(User, { username: "test_user4" });
-    await dbAdapter.deleteMany(Organization, {})
+    await dbAdapter.deleteMany(Organization, { name: "OrganizationExample_3" })
+    await dbAdapter.deleteMany(Organization, { name: "OrganizationExample_6" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Member_Test" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Search_By_ID" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Get_Test" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Search_By_Name" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Search_By_User" })
+    await dbAdapter.deleteMany(Organization, { name: "Organization_Delete_Member_Test" })
   });
 
   describe('POST /Organization', () => {
