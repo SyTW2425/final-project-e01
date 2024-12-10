@@ -19,7 +19,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18 # Fija una versión para garantizar consistencia
+          node-version: 18
 
       # Step 3: Start MongoDB
       - name: Start MongoDB
@@ -38,17 +38,16 @@ jobs:
           echo "MONGODB_URL=mongodb://localhost:27017/test" >> $GITHUB_ENV
           echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
 
-      # Step 6: Run Coverage and Upload to Coveralls
-      - name: Run Coverage and Upload to Coveralls
+      # Step 6: Run Coverage
+      - name: Run Coverage
         env:
           MONGODB_URL: ${{ env.MONGODB_URL }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: npm run coverage
         working-directory: packages/backend
 
-      # Step 7: Upload coverage report to Coveralls
+      # Step 7: Upload to Coveralls
       - name: Upload to Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: packages/backend
+          path-to-lcov: packages/backend/coverage/lcov.info
