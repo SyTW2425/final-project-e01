@@ -218,6 +218,23 @@ export default class TasksLogic implements TasksAPI {
     }
   }
 
+  async deleteUserFromTask(taskId: string, user: string): Promise<APIResponseFormat> {
+    try {
+      const task_modified = await this.dbAdapter.updateOne(
+        Task,
+        { _id: taskId },
+        { $pull: { users: user } }
+      );      
+      if (!task_modified) {
+        return createResponseFormat(true, 'Failed to remove user from task');
+      }
+      return createResponseFormat(false, 'User successfully removed from task');
+    }
+    catch (error) {
+      return createResponseFormat(true, `Error deleting user: ${(error as Error).message}`);
+    }
+  }
+
   private buildSearchQuery(name: string | null, projectID: string): any {
     let query: { [key: string]: any } = {};
     // We need an regex to search by name

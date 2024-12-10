@@ -17,6 +17,7 @@ import { APIResponseFormat, ProjectsAPI, databaseAdapter } from '../types/APITyp
 import { organizationLogic } from '../Routers/organizations.js';
 import Project from '../Models/Project.js';
 import { LIMIT } from './DBAdapter.js';
+import { taskLogic } from '../Routers/tasks.js';
 
 /**
  * Class that contains the logic of the projects
@@ -178,7 +179,7 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, project);
   }
 
-  public async deleteUserFromProject(projectID: string, users: string): Promise<APIResponseFormat> {
+  public async deleteUserFromProject(projectID: string, userID: string): Promise<APIResponseFormat> {
     const query = { _id: projectID };
     /// Obtener el proyecto 
     const project = await this.dbAdapter.findOne(Project, query, {});
@@ -186,7 +187,7 @@ export default class ProjectLogic implements ProjectsAPI {
       return createResponseFormat(true, 'Project not found');
     }
     const usersProject = project.users;
-    const newUsers = usersProject.filter((user: any) => user.user != users);
+    const newUsers = usersProject.filter((user: any) => user.user != userID);
     const data = {
       users: newUsers
     };
@@ -194,9 +195,20 @@ export default class ProjectLogic implements ProjectsAPI {
     if (!projectUpdated) {
       return createResponseFormat(true, 'Cannot update project');
     }
+    /// Eliminar las asignaciones de tareas de ese usuario
+    const sprints = project.sprints;
+    for (let i = 0; i < sprints.length; i++) {
+      const tasks = sprints[i].tasks;
+      for (let j = 0; j < tasks.length; j++) {
+        const task = await taskLogic.deleteUserFromTask(tasks[j], userID);
+        if (task.error) {
+          return createResponseFormat(true, 'Cannot update task');
+        }
+      }
+    }
     return createResponseFormat(false, projectUpdated);
   }
-
+  
   public async deleteSprintFromProject(projectID: string, sprintID: string): Promise<APIResponseFormat> {
     const query = { _id: projectID };
     const project = await this.dbAdapter.findOne(Project, query, {});
