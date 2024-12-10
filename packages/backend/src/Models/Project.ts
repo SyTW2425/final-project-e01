@@ -44,7 +44,6 @@ export type Users = {
   role: Role;
 };
 
-
 /**
  * Interface of Project
  */
@@ -101,8 +100,8 @@ const ProjectSchema = new Schema<ProjectInterface>({
           ref: 'Users',
         },
         role: {
-          type: String, 
-          enum: Object.values(Role)
+          type: String,
+          enum: Object.values(Role),
         },
       },
     ],
@@ -140,7 +139,7 @@ const ProjectSchema = new Schema<ProjectInterface>({
       },
     ],
     required: true,
-  }
+  },
 });
 
 const Project = model<ProjectInterface>('Projects', ProjectSchema);

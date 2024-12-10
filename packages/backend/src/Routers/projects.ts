@@ -8,7 +8,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief projects.ts - Projects Router 
+ * @brief projects.ts - Projects Router
  */
 
 import 'dotenv/config';
@@ -18,7 +18,12 @@ import MongoDB from '../Class/DBAdapter.js';
 import ProjectLogic from '../Class/ProjectLogic.js';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
 import { Role } from '../Models/Project.js';
-import { getUserFromHeader, isAdminOfOrganization, isAdminOrOwnerOfProject, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
+import {
+  getUserFromHeader,
+  isAdminOfOrganization,
+  isAdminOrOwnerOfProject,
+  isMemberOfOrganization,
+} from '../Utils/CRUD-util-functions.js';
 import { organizationLogic } from './organizations.js';
 import { userLogic } from './users.js';
 
@@ -41,36 +46,49 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const { organization, name, description, startDate, endDate, users } = req.body;
+    const { organization, name, description, startDate, endDate, users } =
+      req.body;
 
     // We need search the organization
-    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    const organizationResult =
+      await organizationLogic.searchOrganizationByName(organization);
     if (organizationResult.length === 0) {
-      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Organization not found'));
       return;
     }
     const organizationId = organizationResult._id;
     // Check if the user is an Admin of the organization
     const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin of the organization',
+          ),
+        );
       return;
     }
     // Obtain the users with their roles
-    const usersWithRoles = await Promise.all(users.map(async (userEntry: any) => {
-      const userResult = await userLogic.searchUser(userEntry.user) as any;
-      if (!userResult) {
-        throw new Error(`User ${userEntry.user} not found`);
-      }
-      return {
-        user: userResult._id,
-        role: userEntry.role
-      };
-    }));
+    const usersWithRoles = await Promise.all(
+      users.map(async (userEntry: any) => {
+        const userResult = (await userLogic.searchUser(userEntry.user)) as any;
+        if (!userResult) {
+          throw new Error(`User ${userEntry.user} not found`);
+        }
+        return {
+          user: userResult._id,
+          role: userEntry.role,
+        };
+      }),
+    );
     // Add the user that creates the project as OWNER
     usersWithRoles.push({
       user: user._id,
-      role: Role.OWNER
+      role: Role.OWNER,
     });
     // Create the project
     const project_saved = await projectLogic.createProject(
@@ -79,7 +97,7 @@ projectsRouter.post('/', jwtMiddleware, async (req, res) => {
       description,
       startDate,
       endDate,
-      usersWithRoles
+      usersWithRoles,
     );
 
     res.status(201).send(project_saved);
@@ -98,7 +116,9 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
   try {
     const { project, user, role } = req.body;
     // We need search the project
-    const projectResult = await projectLogic.searchProjectById(project as string);
+    const projectResult = await projectLogic.searchProjectById(
+      project as string,
+    );
     if (projectResult.error) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
@@ -109,40 +129,64 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const userFromHeader = await getUserFromHeader(req) as any;
+    const userFromHeader = (await getUserFromHeader(req)) as any;
     if (!userFromHeader) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      userFromHeader._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
-    // Obtain the organization of the project 
-    const organizationResult = await organizationLogic.searchOrganizationByProject(project);
+    // Obtain the organization of the project
+    const organizationResult =
+      await organizationLogic.searchOrganizationByProject(project);
     if (!organizationResult) {
-      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Organization not found'));
       return;
     }
     // Check if the user is in the organization
-    const isUserInOrganization = await isMemberOfOrganization(organizationResult, user);
+    const isUserInOrganization = await isMemberOfOrganization(
+      organizationResult,
+      user,
+    );
     if (!isUserInOrganization) {
-      res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
+      res
+        .status(403)
+        .send(createResponseFormat(true, 'User is not in the organization'));
       return;
     }
     // Check if the user is already in the project
-    const isUserInProject = projectResult.result.users.find((userEntry: any) => userEntry.user._id.toString() === user.toString());
+    const isUserInProject = projectResult.result.users.find(
+      (userEntry: any) => userEntry.user._id.toString() === user.toString(),
+    );
     if (isUserInProject) {
-      res.status(403).send(createResponseFormat(true, 'User is already in the project'));
+      res
+        .status(403)
+        .send(createResponseFormat(true, 'User is already in the project'));
       return;
     }
     // Add the user to the project
     const userToAdd = { user, role };
     const userAdded = await projectLogic.addUserToProject(project, userToAdd);
     if (!userAdded.result) {
-      res.status(404).send(createResponseFormat(true, 'User not added to the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'User not added to the project'));
       return;
     }
     res.status(201).send(userAdded);
@@ -150,7 +194,6 @@ projectsRouter.post('/user', jwtMiddleware, async (req, res) => {
     res.status(500).send(createResponseFormat(true, error.message));
   }
 });
-
 
 /**
  * @brief This endpoint is used to add a sprint to a project
@@ -174,15 +217,27 @@ projectsRouter.post('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      user._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
     // Add the sprint to the project
     const sprintAdded = await projectLogic.addSprintToProject(project, sprint);
     if (!sprintAdded.result) {
-      res.status(404).send(createResponseFormat(true, 'Sprint not added to the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Sprint not added to the project'));
       return;
     }
     res.status(201).send(sprintAdded);
@@ -201,9 +256,13 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
     let { organization, name, page } = req.query;
     // We need search the organization
-    const organizationResult = await organizationLogic.searchOrganizationByName(organization as string);
+    const organizationResult = await organizationLogic.searchOrganizationByName(
+      organization as string,
+    );
     if (!organizationResult) {
-      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Organization not found'));
       return;
     }
     // Check if the user is on the organization
@@ -212,16 +271,24 @@ projectsRouter.get('/', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const isUserInOrganization = organizationResult.members.find((member: any) => member.user.toString() === user._id.toString());
+    const isUserInOrganization = organizationResult.members.find(
+      (member: any) => member.user.toString() === user._id.toString(),
+    );
     if (!isUserInOrganization) {
-      res.status(403).send(createResponseFormat(true, 'User is not in the organization'));
+      res
+        .status(403)
+        .send(createResponseFormat(true, 'User is not in the organization'));
       return;
     }
     let pageSelected: number = parseInt(page as string);
     if (isNaN(parseInt(page as string)) || parseInt(page as string) < 1) {
       pageSelected = 1;
     }
-    const response = await projectLogic.searchProjects(organizationResult._id.toString(), name as string, pageSelected);
+    const response = await projectLogic.searchProjects(
+      organizationResult._id.toString(),
+      name as string,
+      pageSelected,
+    );
     if (response.error) {
       res.status(404).send(response);
       return;
@@ -303,19 +370,25 @@ projectsRouter.get('/id/:id', jwtMiddleware, async (req, res) => {
  * @param res The response object
  * @returns void
  */
-projectsRouter.get('/searchprojects/:username', jwtMiddleware, async (req, res) => {
-  try {
-    const user = await userLogic.searchUsersByUsername(req.params.username);
-    if (user.error || !user.result) {
-      res.status(404).send(createResponseFormat(true, 'User not found'));
-      return;
+projectsRouter.get(
+  '/searchprojects/:username',
+  jwtMiddleware,
+  async (req, res) => {
+    try {
+      const user = await userLogic.searchUsersByUsername(req.params.username);
+      if (user.error || !user.result) {
+        res.status(404).send(createResponseFormat(true, 'User not found'));
+        return;
+      }
+      const response = await projectLogic.searchProjectsFromUser(
+        user.result._id,
+      );
+      res.status(200).send(response);
+    } catch (error: any) {
+      res.status(500).send(createResponseFormat(true, error.message));
     }
-    const response = await projectLogic.searchProjectsFromUser(user.result._id);
-    res.status(200).send(response);
-  } catch (error: any) {
-    res.status(500).send(createResponseFormat(true, error.message));
-  }
-})
+  },
+);
 
 /**
  * @brief This endpoint is used to update a project
@@ -325,11 +398,22 @@ projectsRouter.get('/searchprojects/:username', jwtMiddleware, async (req, res) 
  */
 projectsRouter.put('/', jwtMiddleware, async (req, res) => {
   try {
-    const { organization, name, description, startDate, endDate, users, sprints } = req.body;
+    const {
+      organization,
+      name,
+      description,
+      startDate,
+      endDate,
+      users,
+      sprints,
+    } = req.body;
     // We need search the organization
-    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    const organizationResult =
+      await organizationLogic.searchOrganizationByName(organization);
     if (!organizationResult) {
-      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Organization not found'));
       return;
     }
     // Obtain the user from the JWT
@@ -341,22 +425,38 @@ projectsRouter.put('/', jwtMiddleware, async (req, res) => {
     // Check if the user is an Admin of the organization
     const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin of the organization',
+          ),
+        );
       return;
     }
     // Obtain the users with their roles
-    const usersWithRoles = await Promise.all(users.map(async (userEntry: any) => {
-      const userResult = await userLogic.searchUser(userEntry.user) as any;
-      if (!userResult) {
-        throw new Error(`User ${userEntry.user} not found`);
-      }
-      return {
-        user: userResult._id,
-        role: userEntry.role
-      };
-    }));
+    const usersWithRoles = await Promise.all(
+      users.map(async (userEntry: any) => {
+        const userResult = (await userLogic.searchUser(userEntry.user)) as any;
+        if (!userResult) {
+          throw new Error(`User ${userEntry.user} not found`);
+        }
+        return {
+          user: userResult._id,
+          role: userEntry.role,
+        };
+      }),
+    );
     // Update the project
-    const projectUpdate = await projectLogic.updateProject(name, description, startDate, endDate, usersWithRoles, sprints);
+    const projectUpdate = await projectLogic.updateProject(
+      name,
+      description,
+      startDate,
+      endDate,
+      usersWithRoles,
+      sprints,
+    );
     if (projectUpdate.error || !projectUpdate.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
     }
@@ -382,15 +482,25 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Obtain the user from the JWT
-    const userFromHeader = await getUserFromHeader(req) as any;
+    const userFromHeader = (await getUserFromHeader(req)) as any;
     if (!userFromHeader) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      userFromHeader._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
     // Check if the user is in the project
@@ -400,9 +510,15 @@ projectsRouter.put('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Update the role of the user in the project
-    const userUpdate = await projectLogic.updateRoleOfUserInProject(project, user, role);
+    const userUpdate = await projectLogic.updateRoleOfUserInProject(
+      project,
+      user,
+      role,
+    );
     if (userUpdate.error) {
-      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
     res.status(200).send(userUpdate);
@@ -433,15 +549,31 @@ projectsRouter.put('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      user._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
     // Update the sprint of the project
-    const sprintUpdate = await projectLogic.updateSprintOfProject(project, sprintID, sprint);
+    const sprintUpdate = await projectLogic.updateSprintOfProject(
+      project,
+      sprintID,
+      sprint,
+    );
     if (sprintUpdate.error) {
-      res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Sprint not found in the project'));
       return;
     }
     res.status(200).send(sprintUpdate);
@@ -461,9 +593,12 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const { organization, project } = req.body;
 
     // We need search the organization
-    const organizationResult = await organizationLogic.searchOrganizationByName(organization);
+    const organizationResult =
+      await organizationLogic.searchOrganizationByName(organization);
     if (!organizationResult) {
-      res.status(404).send(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Organization not found'));
       return;
     }
     // Obtain the user from the JWT
@@ -475,11 +610,21 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
     // Check if the user is an Admin of the organization
     const isAdmin = isAdminOfOrganization(organizationResult, user._id);
     if (!isAdmin) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin of the organization'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin of the organization',
+          ),
+        );
       return;
     }
     // Delete the project
-    const projectDelete = await projectLogic.deleteProject(organizationResult._id.toString(), project);
+    const projectDelete = await projectLogic.deleteProject(
+      organizationResult._id.toString(),
+      project,
+    );
     if (projectDelete.error || !projectDelete.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
@@ -499,7 +644,7 @@ projectsRouter.delete('/', jwtMiddleware, async (req, res) => {
 projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
   try {
     const { project, user } = req.body;
-    // We need search the project 
+    // We need search the project
     const projectResult = await projectLogic.searchProjectById(project);
     if (projectResult.error || !projectResult.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
@@ -512,21 +657,36 @@ projectsRouter.delete('/user', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const userFromHeader = await getUserFromHeader(req) as any;
+    const userFromHeader = (await getUserFromHeader(req)) as any;
     if (!userFromHeader) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, userFromHeader._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      userFromHeader._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
     // Delete the user from the project
-    const projectDelete = await projectLogic.deleteUserFromProject(project, user); 
+    const projectDelete = await projectLogic.deleteUserFromProject(
+      project,
+      user,
+    );
     if (projectDelete.error) {
-      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
     res.status(200).send(projectDelete);
@@ -557,15 +717,30 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is an Admin or Owner of the project
-    const isAdminOrOwner = isAdminOrOwnerOfProject(projectResult.result, user._id);
+    const isAdminOrOwner = isAdminOrOwnerOfProject(
+      projectResult.result,
+      user._id,
+    );
     if (!isAdminOrOwner) {
-      res.status(403).send(createResponseFormat(true, 'User is not an admin or owner of the project'));
+      res
+        .status(403)
+        .send(
+          createResponseFormat(
+            true,
+            'User is not an admin or owner of the project',
+          ),
+        );
       return;
     }
     // Delete the sprint from the project
-    const sprintDelete = await projectLogic.deleteSprintFromProject(project, sprintID);
+    const sprintDelete = await projectLogic.deleteSprintFromProject(
+      project,
+      sprintID,
+    );
     if (sprintDelete.error || !sprintDelete.result) {
-      res.status(404).send(createResponseFormat(true, 'Sprint not found in the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'Sprint not found in the project'));
       return;
     }
     res.status(200).send(sprintDelete);
@@ -583,7 +758,9 @@ projectsRouter.delete('/sprint', jwtMiddleware, async (req, res) => {
 projectsRouter.delete('/leave/:project', jwtMiddleware, async (req, res) => {
   try {
     // We need search the project
-    const projectResult = await projectLogic.searchProjectById(req.params.project);
+    const projectResult = await projectLogic.searchProjectById(
+      req.params.project,
+    );
     if (projectResult.error || !projectResult.result) {
       res.status(404).send(createResponseFormat(true, 'Project not found'));
       return;
@@ -595,15 +772,24 @@ projectsRouter.delete('/leave/:project', jwtMiddleware, async (req, res) => {
       return;
     }
     // Check if the user is in the project
-    const userInProject = projectResult.result.users.find((userEntry: any) => userEntry.user._id.toString() === user._id.toString());
+    const userInProject = projectResult.result.users.find(
+      (userEntry: any) => userEntry.user._id.toString() === user._id.toString(),
+    );
     if (!userInProject) {
-      res.status(403).send(createResponseFormat(true, 'User is not in the project'));
+      res
+        .status(403)
+        .send(createResponseFormat(true, 'User is not in the project'));
       return;
     }
     // Delete the user from the project
-    const projectDelete = await projectLogic.deleteUserFromProject(req.params.project, user._id.toString());
+    const projectDelete = await projectLogic.deleteUserFromProject(
+      req.params.project,
+      user._id.toString(),
+    );
     if (projectDelete.error) {
-      res.status(404).send(createResponseFormat(true, 'User not found in the project'));
+      res
+        .status(404)
+        .send(createResponseFormat(true, 'User not found in the project'));
       return;
     }
     res.status(200).send(projectDelete);

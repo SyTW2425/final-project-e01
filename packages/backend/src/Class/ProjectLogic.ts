@@ -13,7 +13,11 @@
  */
 
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
-import { APIResponseFormat, ProjectsAPI, databaseAdapter } from '../types/APITypes.js';
+import {
+  APIResponseFormat,
+  ProjectsAPI,
+  databaseAdapter,
+} from '../types/APITypes.js';
 import { organizationLogic } from '../Routers/organizations.js';
 import Project from '../Models/Project.js';
 import { LIMIT } from './DBAdapter.js';
@@ -30,31 +34,52 @@ export default class ProjectLogic implements ProjectsAPI {
   constructor(dbAdapter: databaseAdapter) {
     this.dbAdapter = dbAdapter;
   }
-  
-  async searchProjectsFromUser(userId : any) : Promise<APIResponseFormat> {
+
+  async searchProjectsFromUser(userId: any): Promise<APIResponseFormat> {
     try {
-      const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {__v: 0});
+      const projects = await this.dbAdapter.find(
+        Project,
+        { 'users.user': userId },
+        { __v: 0 },
+      );
       return createResponseFormat(false, projects);
     } catch (error) {
       return createResponseFormat(true, error);
     }
   }
 
-  async searchSprintsFromUser(userId : any) : Promise<APIResponseFormat> {
+  async searchSprintsFromUser(userId: any): Promise<APIResponseFormat> {
     try {
-      const projects = await this.dbAdapter.find(Project, { 'users.user': userId }, {__v: 0}, undefined, undefined, ['sprints']);
+      const projects = await this.dbAdapter.find(
+        Project,
+        { 'users.user': userId },
+        { __v: 0 },
+        undefined,
+        undefined,
+        ['sprints'],
+      );
       return createResponseFormat(false, projects);
     } catch (error) {
       return createResponseFormat(true, error);
     }
   }
 
-  async searchProjects(orgID: string, projectName: string, page: number = 1): Promise<APIResponseFormat> {
-    try { 
+  async searchProjects(
+    orgID: string,
+    projectName: string,
+    page: number = 1,
+  ): Promise<APIResponseFormat> {
+    try {
       const query = this.buildSearchQuery(orgID, projectName);
       const limit = LIMIT;
       const skip = (page - 1) * limit;
-      const projects = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0}, skip, limit);
+      const projects = await this.dbAdapter.find(
+        Project,
+        query,
+        { _id: 0, __v: 0 },
+        skip,
+        limit,
+      );
       const total = await this.dbAdapter.countDocuments(Project, query);
       const totalPages = Math.ceil(total / limit);
       if (page > totalPages) {
@@ -68,22 +93,31 @@ export default class ProjectLogic implements ProjectsAPI {
 
   async searchProjectById(id: string): Promise<APIResponseFormat> {
     try {
-      const project = await this.dbAdapter.findOne(Project, { _id: id }, {__v: 0}, [{
-        path: 'users.user',
-        model: 'Users',
-        select: 'username email img_path '},
-        {
-          path: 'sprints.tasks',
-          model: 'Tasks'
-        }
-      ]);
+      const project = await this.dbAdapter.findOne(
+        Project,
+        { _id: id },
+        { __v: 0 },
+        [
+          {
+            path: 'users.user',
+            model: 'Users',
+            select: 'username email img_path ',
+          },
+          {
+            path: 'sprints.tasks',
+            model: 'Tasks',
+          },
+        ],
+      );
       if (!project) {
         return createResponseFormat(true, 'Project not found!');
       }
       if (project.users && Array.isArray(project.users)) {
         project.users = project.users.map((user: any) => {
           if (user.user && typeof user.user === 'object') {
-            const userObj = user.user.toObject ? user.user.toObject() : user.user;
+            const userObj = user.user.toObject
+              ? user.user.toObject()
+              : user.user;
             const { password, ...restOfUser } = userObj;
             return {
               ...user,
@@ -99,21 +133,31 @@ export default class ProjectLogic implements ProjectsAPI {
     }
   }
 
-  async createProject(organization: string, nameProject: string, description: string, stardDate: string, endDate: string, users: any) : Promise<APIResponseFormat> {
+  async createProject(
+    organization: string,
+    nameProject: string,
+    description: string,
+    stardDate: string,
+    endDate: string,
+    users: any,
+  ): Promise<APIResponseFormat> {
     const project_saved = await this.dbAdapter.create(Project, {
       organization,
       name: nameProject,
       description,
       startDate: stardDate,
       endDate,
-      users
+      users,
     });
     if (!project_saved) {
       return createResponseFormat(true, 'Cannot save project');
     }
     // console.log('Project saved: ', project_saved);
     /// Add the project to the organization
-    const organizationObj = await organizationLogic.addProjectToOrganization(organization, project_saved._id);
+    const organizationObj = await organizationLogic.addProjectToOrganization(
+      organization,
+      project_saved._id,
+    );
     if (organizationObj.error) {
       return createResponseFormat(true, 'Cannot save project');
     }
@@ -121,13 +165,24 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, project_saved);
   }
 
-  async searchProjectByName(orgID: string, projectName: string) : Promise<any> {
-    return this.dbAdapter.findOne(Project, this.buildSearchQuery(orgID, projectName), {});
+  async searchProjectByName(orgID: string, projectName: string): Promise<any> {
+    return this.dbAdapter.findOne(
+      Project,
+      this.buildSearchQuery(orgID, projectName),
+      {},
+    );
   }
 
-  public async checkifUserIsOnProject(organizationID: string, projectName: string, userID: string): Promise<boolean> {
+  public async checkifUserIsOnProject(
+    organizationID: string,
+    projectName: string,
+    userID: string,
+  ): Promise<boolean> {
     const query = this.buildSearchQuery(organizationID, projectName);
-    const project = await this.dbAdapter.find(Project, query, {_id: 0, __v: 0});
+    const project = await this.dbAdapter.find(Project, query, {
+      _id: 0,
+      __v: 0,
+    });
     const users = project[0].users;
     for (let i = 0; i < users.length; i++) {
       if (users[i].user == userID) {
@@ -137,7 +192,10 @@ export default class ProjectLogic implements ProjectsAPI {
     return false;
   }
 
-  public async addUserToProject(projectID: string, user: any): Promise<APIResponseFormat> {
+  public async addUserToProject(
+    projectID: string,
+    user: any,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID };
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
@@ -146,7 +204,7 @@ export default class ProjectLogic implements ProjectsAPI {
     const usersProject = project.users;
     usersProject.push(user);
     const data = {
-      users: usersProject
+      users: usersProject,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -155,7 +213,10 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, projectUpdated);
   }
 
-  public async addSprintToProject(projectID: string, sprint: any): Promise<APIResponseFormat> {
+  public async addSprintToProject(
+    projectID: string,
+    sprint: any,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID };
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
@@ -164,7 +225,7 @@ export default class ProjectLogic implements ProjectsAPI {
     const sprints = project.sprints;
     sprints.push(sprint);
     const data = {
-      sprints
+      sprints,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -173,15 +234,21 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, projectUpdated);
   }
 
-  public async deleteProject(nameOrg: string, projectToDelete: string): Promise<APIResponseFormat> {
+  public async deleteProject(
+    nameOrg: string,
+    projectToDelete: string,
+  ): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(nameOrg, projectToDelete);
     const project = await this.dbAdapter.deleteOne(Project, query);
     return createResponseFormat(false, project);
   }
 
-  public async deleteUserFromProject(projectID: string, userID: string): Promise<APIResponseFormat> {
+  public async deleteUserFromProject(
+    projectID: string,
+    userID: string,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID };
-    /// Obtener el proyecto 
+    /// Obtener el proyecto
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
       return createResponseFormat(true, 'Project not found');
@@ -189,7 +256,7 @@ export default class ProjectLogic implements ProjectsAPI {
     const usersProject = project.users;
     const newUsers = usersProject.filter((user: any) => user.user != userID);
     const data = {
-      users: newUsers
+      users: newUsers,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -208,8 +275,11 @@ export default class ProjectLogic implements ProjectsAPI {
     }
     return createResponseFormat(false, projectUpdated);
   }
-  
-  public async deleteSprintFromProject(projectID: string, sprintID: string): Promise<APIResponseFormat> {
+
+  public async deleteSprintFromProject(
+    projectID: string,
+    sprintID: string,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID };
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
@@ -218,7 +288,7 @@ export default class ProjectLogic implements ProjectsAPI {
     const sprints = project.sprints;
     const newSprints = sprints.filter((sprint: any) => sprint._id != sprintID);
     const data = {
-      sprints: newSprints
+      sprints: newSprints,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -227,20 +297,31 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, projectUpdated);
   }
 
-  public async updateProject(nameProject: string, description: string, startDate: string, endDate: string, users: string[], sprints: any): Promise<APIResponseFormat> {
+  public async updateProject(
+    nameProject: string,
+    description: string,
+    startDate: string,
+    endDate: string,
+    users: string[],
+    sprints: any,
+  ): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery('', nameProject);
     const data = {
       description,
       startDate,
       endDate,
       users,
-      sprints
+      sprints,
     };
     const project = await this.dbAdapter.updateOne(Project, query, data);
     return createResponseFormat(false, project);
   }
 
-  public async updateRoleOfUserInProject(projectID: string, userID: string, role: string): Promise<APIResponseFormat> {
+  public async updateRoleOfUserInProject(
+    projectID: string,
+    userID: string,
+    role: string,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID, 'users.user': userID };
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
@@ -250,7 +331,7 @@ export default class ProjectLogic implements ProjectsAPI {
     const userIndex = users.findIndex((user: any) => user.user == userID);
     users[userIndex].role = role;
     const data = {
-      users
+      users,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -259,17 +340,23 @@ export default class ProjectLogic implements ProjectsAPI {
     return createResponseFormat(false, projectUpdated);
   }
 
-  public async updateSprintOfProject(projectID: string, sprintID: string, sprint: any): Promise<APIResponseFormat> {
+  public async updateSprintOfProject(
+    projectID: string,
+    sprintID: string,
+    sprint: any,
+  ): Promise<APIResponseFormat> {
     const query = { _id: projectID, 'sprints._id': sprintID };
     const project = await this.dbAdapter.findOne(Project, query, {});
     if (!project) {
       return createResponseFormat(true, 'Project not found');
     }
     const sprints = project.sprints;
-    const sprintIndex = sprints.findIndex((sprint: any) => sprint._id == sprintID);
+    const sprintIndex = sprints.findIndex(
+      (sprint: any) => sprint._id == sprintID,
+    );
     sprints[sprintIndex] = sprint;
     const data = {
-      sprints
+      sprints,
     };
     const projectUpdated = await this.dbAdapter.updateOne(Project, query, data);
     if (!projectUpdated) {
@@ -285,7 +372,7 @@ export default class ProjectLogic implements ProjectsAPI {
       query.organization = orgID;
     }
     if (projectName) {
-      query.name =  { $regex: projectName, $options: 'i' };
+      query.name = { $regex: projectName, $options: 'i' };
     }
     return query;
   }

@@ -13,7 +13,11 @@
  */
 
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
-import { APIResponseFormat, OrganizationsAPI, databaseAdapter } from '../types/APITypes.js';
+import {
+  APIResponseFormat,
+  OrganizationsAPI,
+  databaseAdapter,
+} from '../types/APITypes.js';
 import Organization from '../Models/Organization.js';
 import User from '../Models/User.js';
 import { userLogic } from '../Routers/users.js';
@@ -33,23 +37,34 @@ export default class OrganizationLogic implements OrganizationsAPI {
 
   async searchOrganizationByUser(username: string): Promise<APIResponseFormat> {
     const user = await this.dbAdapter.findOne(User, { username }, {});
-    const organizations = await this.dbAdapter.find(Organization, { 'members.user': user._id }, { _id: 0, __v: 0, members: 0, projects: 0 });
+    const organizations = await this.dbAdapter.find(
+      Organization,
+      { 'members.user': user._id },
+      { _id: 0, __v: 0, members: 0, projects: 0 },
+    );
     return createResponseFormat(false, organizations);
   }
 
-  async searchOrganizationById(id: string) : Promise<APIResponseFormat> { 
-    let organization = await this.dbAdapter.findOne(Organization, { _id: id }, {_id: 0, __v: 0}, ['members.user', 'projects']);
+  async searchOrganizationById(id: string): Promise<APIResponseFormat> {
+    let organization = await this.dbAdapter.findOne(
+      Organization,
+      { _id: id },
+      { _id: 0, __v: 0 },
+      ['members.user', 'projects'],
+    );
     if (!organization) {
-      return createResponseFormat(true, "Organization not found");
+      return createResponseFormat(true, 'Organization not found');
     }
     if (organization.members && Array.isArray(organization.members)) {
       organization.members = organization.members.map((member: any) => {
-        if (member.user && typeof member.user === "object") {
-          const userObj = member.user.toObject ? member.user.toObject() : member.user;
+        if (member.user && typeof member.user === 'object') {
+          const userObj = member.user.toObject
+            ? member.user.toObject()
+            : member.user;
           const { password, ...restOfUser } = userObj;
           return {
             ...member,
-            user: restOfUser, 
+            user: restOfUser,
           };
         }
         return member;
@@ -58,58 +73,84 @@ export default class OrganizationLogic implements OrganizationsAPI {
     return createResponseFormat(false, organization);
   }
 
-  async searchOrganizations(name: string | null) : Promise<APIResponseFormat> {
+  async searchOrganizations(name: string | null): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(name);
-    let organizations = await this.dbAdapter.find(Organization, query, {_id: 0, __v: 0, members: 0, projects: 0});
+    let organizations = await this.dbAdapter.find(Organization, query, {
+      _id: 0,
+      __v: 0,
+      members: 0,
+      projects: 0,
+    });
     return createResponseFormat(false, organizations);
   }
 
-  async searchOrganizationsByName(name: string) : Promise<APIResponseFormat> {
+  async searchOrganizationsByName(name: string): Promise<APIResponseFormat> {
     const query = { name };
     let organization = await this.dbAdapter.findOne(Organization, query);
     return createResponseFormat(false, organization);
   }
 
-  async searchOrganizationByProject(projectID: string) : Promise<any> {
+  async searchOrganizationByProject(projectID: string): Promise<any> {
     return this.dbAdapter.findOne(Organization, { projects: projectID }, {});
   }
 
-  async searchUsersFromOrganization(organizationID: string) : Promise<any> {
-    return this.dbAdapter.find(Organization, { _id: organizationID }, { members: 1 });
+  async searchUsersFromOrganization(organizationID: string): Promise<any> {
+    return this.dbAdapter.find(
+      Organization,
+      { _id: organizationID },
+      { members: 1 },
+    );
   }
 
-  async createOrganization(name: string, members: any): Promise<APIResponseFormat> {
+  async createOrganization(
+    name: string,
+    members: any,
+  ): Promise<APIResponseFormat> {
     try {
       const organization_saved = await this.dbAdapter.create(Organization, {
         name,
-        members
+        members,
       });
-  
-      const organization = await this.dbAdapter.findOne(Organization, { name }, {});
+
+      const organization = await this.dbAdapter.findOne(
+        Organization,
+        { name },
+        {},
+      );
       if (!organization) {
-        throw new Error("Organization not found after creation.");
+        throw new Error('Organization not found after creation.');
       }
-  
+
       await Promise.all(
         members.map(async (member: any) => {
           if (member.user) {
-            await userLogic.addOrganizationToUser(member.user, organization._id);
+            await userLogic.addOrganizationToUser(
+              member.user,
+              organization._id,
+            );
           } else {
             // console.warn(`Member ${JSON.stringify(member)} has no user field`);
           }
-        })
+        }),
       );
-  
+
       return createResponseFormat(false, organization_saved);
     } catch (error) {
-      return createResponseFormat(true, "Cannot create organization");
+      return createResponseFormat(true, 'Cannot create organization');
     }
   }
 
-  async addMemberToOrganization(idOrg: string, member: any): Promise<APIResponseFormat> {
+  async addMemberToOrganization(
+    idOrg: string,
+    member: any,
+  ): Promise<APIResponseFormat> {
     try {
       const query = { _id: idOrg };
-      const organization = await this.dbAdapter.findOne(Organization, query, {});
+      const organization = await this.dbAdapter.findOne(
+        Organization,
+        query,
+        {},
+      );
       if (!organization) {
         throw new Error(`Organization with ID "${idOrg}" not found.`);
       }
@@ -120,150 +161,210 @@ export default class OrganizationLogic implements OrganizationsAPI {
       const members = organization.members || [];
       const membertoAdd = {
         user: member,
-        role: "member"
-      }
-      
+        role: 'member',
+      };
+
       members.push(membertoAdd);
-      const data = {members};
-      const organization_updated = await this.dbAdapter.updateOne(Organization, query, data);
+      const data = { members };
+      const organization_updated = await this.dbAdapter.updateOne(
+        Organization,
+        query,
+        data,
+      );
       if (!organization_updated) {
         throw new Error(`Failed to update organization with ID "${idOrg}".`);
       }
       await userLogic.addOrganizationToUser(member, organization._id);
       return createResponseFormat(false, organization_updated);
     } catch (error) {
-      return createResponseFormat(true, "Cannot add member to organization");
+      return createResponseFormat(true, 'Cannot add member to organization');
     }
   }
 
   async updateOrganization(
     nameOrg: string,
     members: any,
-    newName: string | null
+    newName: string | null,
   ): Promise<APIResponseFormat> {
     try {
       const query = { name: nameOrg };
-  
-      const organizationToUpdate = await this.dbAdapter.findOne(Organization, query, {});
+
+      const organizationToUpdate = await this.dbAdapter.findOne(
+        Organization,
+        query,
+        {},
+      );
       if (!organizationToUpdate) {
         throw new Error(`Organization with name "${nameOrg}" not found.`);
       }
-  
+
       if (newName && newName.length > 0) {
         organizationToUpdate.name = newName;
       }
       if (members) {
         organizationToUpdate.members = members;
       }
-  
-      const organization_updated = await this.dbAdapter.updateOne(Organization, query, organizationToUpdate);
+
+      const organization_updated = await this.dbAdapter.updateOne(
+        Organization,
+        query,
+        organizationToUpdate,
+      );
       if (!organization_updated) {
-        throw new Error(`Failed to update organization with name "${nameOrg}".`);
+        throw new Error(
+          `Failed to update organization with name "${nameOrg}".`,
+        );
       }
-  
+
       if (members) {
         const oldMembers = organizationToUpdate.members || [];
         const newMembers = members;
         const membersToAdd = newMembers.filter(
-          (newMember: any) => !oldMembers.some((oldMember: any) => oldMember.user === newMember.user)
+          (newMember: any) =>
+            !oldMembers.some(
+              (oldMember: any) => oldMember.user === newMember.user,
+            ),
         );
         const membersToRemove = oldMembers.filter(
-          (oldMember: any) => !newMembers.some((newMember: any) => newMember.user === oldMember.user)
+          (oldMember: any) =>
+            !newMembers.some(
+              (newMember: any) => newMember.user === oldMember.user,
+            ),
         );
         await Promise.all(
           membersToAdd.map(async (member: any) => {
             if (member.user) {
-              await userLogic.addOrganizationToUser(member.user, organizationToUpdate._id);
+              await userLogic.addOrganizationToUser(
+                member.user,
+                organizationToUpdate._id,
+              );
             } else {
               // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
-          })
+          }),
         );
         await Promise.all(
           membersToRemove.map(async (member: any) => {
             if (member.user) {
-              await userLogic.removeOrganizationFromUser(member.user, organizationToUpdate._id);
+              await userLogic.removeOrganizationFromUser(
+                member.user,
+                organizationToUpdate._id,
+              );
             } else {
               // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
-          })
+          }),
         );
       }
       return createResponseFormat(false, organizationToUpdate);
     } catch (error) {
-      return createResponseFormat(true, "Unknown error occurred");
+      return createResponseFormat(true, 'Unknown error occurred');
     }
   }
 
-  public async addProjectToOrganization(idOrg: string, projectID: string): Promise<any> {
+  public async addProjectToOrganization(
+    idOrg: string,
+    projectID: string,
+  ): Promise<any> {
     const query = { _id: idOrg };
     const organization = await this.dbAdapter.findOne(Organization, query, {});
     if (!organization) {
-      return createResponseFormat(true, "Organization not found");
+      return createResponseFormat(true, 'Organization not found');
     }
     const projects = organization.projects || [];
     projects.push(projectID);
     const data = {
-      projects
+      projects,
     };
-    const organizationUpdated = await this.dbAdapter.updateOne(Organization, query, data);
+    const organizationUpdated = await this.dbAdapter.updateOne(
+      Organization,
+      query,
+      data,
+    );
     if (!organizationUpdated) {
-      return createResponseFormat(true, "Cannot update organization");
+      return createResponseFormat(true, 'Cannot update organization');
     }
     return createResponseFormat(false, organizationUpdated);
   }
-  
+
   async deleteOrganization(nameOrg: string): Promise<APIResponseFormat> {
     try {
       const query = { name: nameOrg };
-        const organization = await this.dbAdapter.findOne(Organization, query, {});
+      const organization = await this.dbAdapter.findOne(
+        Organization,
+        query,
+        {},
+      );
       if (!organization) {
         throw new Error(`Organization with name "${nameOrg}" not found.`);
       }
-  
-      const organization_deleted = await this.dbAdapter.deleteOne(Organization, query);
+
+      const organization_deleted = await this.dbAdapter.deleteOne(
+        Organization,
+        query,
+      );
       if (!organization_deleted) {
-        throw new Error(`Failed to delete organization with name "${nameOrg}".`);
+        throw new Error(
+          `Failed to delete organization with name "${nameOrg}".`,
+        );
       }
-  
+
       if (organization.members && Array.isArray(organization.members)) {
         await Promise.all(
           organization.members.map(async (member: any) => {
             if (member.user) {
-              await userLogic.removeOrganizationFromUser(member.user, organization._id);
+              await userLogic.removeOrganizationFromUser(
+                member.user,
+                organization._id,
+              );
             } else {
               // console.warn(`Member ${JSON.stringify(member)} has no user field`);
             }
-          })
+          }),
         );
       } else {
         // console.warn(`Organization "${nameOrg}" has no members or members is not an array.`);
       }
       return createResponseFormat(false, organization_deleted);
     } catch (error) {
-      return createResponseFormat(true, "Unknown error occurred");
+      return createResponseFormat(true, 'Unknown error occurred');
     }
   }
 
-  async deleteMember(orgId: string, member_user: any): Promise<APIResponseFormat> {
+  async deleteMember(
+    orgId: string,
+    member_user: any,
+  ): Promise<APIResponseFormat> {
     try {
       const query = { _id: orgId };
-      const organization = await this.dbAdapter.findOne(Organization, query, {});
+      const organization = await this.dbAdapter.findOne(
+        Organization,
+        query,
+        {},
+      );
       if (!organization) {
         throw new Error(`Organization with ID "${orgId}" not found.`);
       }
       const members = organization.members || [];
       // @ts-ignore: Ignorar el error de código no retorna un valor
-      const memberIndex = members.findIndex((member: any) => member.user.toString() === member_user._id.toString());
+      const memberIndex = members.findIndex(
+        (member: any) => member.user.toString() === member_user._id.toString(),
+      );
       if (memberIndex === -1) {
-        throw new Error(`Member with ID "${member_user._id}" not found in organization with ID "${orgId}".`);
+        throw new Error(
+          `Member with ID "${member_user._id}" not found in organization with ID "${orgId}".`,
+        );
       }
       const member = members[memberIndex];
       members.splice(memberIndex, 1);
       const data = {
-        members
+        members,
       };
-      const organization_updated = await this.dbAdapter.updateOne(Organization, query, data);
+      const organization_updated = await this.dbAdapter.updateOne(
+        Organization,
+        query,
+        data,
+      );
       if (!organization_updated) {
         throw new Error(`Failed to update organization with ID "${orgId}".`);
       }
@@ -277,25 +378,28 @@ export default class OrganizationLogic implements OrganizationsAPI {
               // console.warn(`Project with ID "${projectID}" not found.`);
               return;
             }
-            const project_updated = await projectLogic.deleteUserFromProject(projectID, member.user._id);
+            const project_updated = await projectLogic.deleteUserFromProject(
+              projectID,
+              member.user._id,
+            );
             if (project_updated.error) {
               // console.warn(`Failed to update project with ID "${projectID}".`);
-            }            
-          })
+            }
+          }),
         );
       }
       return createResponseFormat(false, organization_updated);
     } catch (error) {
-      return createResponseFormat(true, "Unknown error occurred");
+      return createResponseFormat(true, 'Unknown error occurred');
     }
   }
-  
-  public searchOrganizationByName(nameOrg: string) : Promise<any> {
-    return this.dbAdapter.findOne(Organization, { name: nameOrg }, {} );
+
+  public searchOrganizationByName(nameOrg: string): Promise<any> {
+    return this.dbAdapter.findOne(Organization, { name: nameOrg }, {});
   }
 
-  private buildSearchQuery(name: string | null) : any {
-    let query : any = {};
+  private buildSearchQuery(name: string | null): any {
+    let query: any = {};
     if (name) query['name'] = name;
     return query;
   }

@@ -34,66 +34,86 @@ describe('Projects API Endpoints', () => {
 
   before(async () => {
     // Crear y autenticar usuario para obtener token
-    const registerResponse = await request.post('/user/register')
-      .send({ username: 'testUser', email: 'test@example.com', password: 'Password123' });
+    const registerResponse = await request.post('/user/register').send({
+      username: 'testUser',
+      email: 'test@example.com',
+      password: 'Password123',
+    });
     expect(registerResponse.status).to.equal(201);
-    userId = registerResponse.body.result._id
+    userId = registerResponse.body.result._id;
 
-    const registerResponse2 = await request.post('/user/register')
-      .send({ username: 'testUser2', email: 'testUser2@example.com', password: 'Password123' });
+    const registerResponse2 = await request.post('/user/register').send({
+      username: 'testUser2',
+      email: 'testUser2@example.com',
+      password: 'Password123',
+    });
     expect(registerResponse2.status).to.equal(201);
-    user2Id = registerResponse2.body.result._id
+    user2Id = registerResponse2.body.result._id;
 
-    const registerResponse3 = await request.post('/user/register')
-      .send({ username: 'testUser3', email: 'testUser3@example.com', password: 'Password123' });
+    const registerResponse3 = await request.post('/user/register').send({
+      username: 'testUser3',
+      email: 'testUser3@example.com',
+      password: 'Password123',
+    });
     expect(registerResponse3.status).to.equal(201);
-    user3Id = registerResponse3.body.result._id
+    user3Id = registerResponse3.body.result._id;
 
-    const loginResponse = await request.post('/user/login')
+    const loginResponse = await request
+      .post('/user/login')
       .send({ email: 'test@example.com', password: 'Password123' });
     expect(loginResponse.status).to.equal(200);
     token = loginResponse.body.result.token;
 
-    const loginResponse2 = await request.post('/user/login')
+    const loginResponse2 = await request
+      .post('/user/login')
       .send({ email: 'testUser2@example.com', password: 'Password123' });
     expect(loginResponse2.status).to.equal(200);
     token2 = loginResponse2.body.result.token;
 
     // Crear una organización para asociar proyectos
-    const createOrganizationResponse = await request.post('/organization')
+    const createOrganizationResponse = await request
+      .post('/organization')
       .set('Authorization', `${token}`)
-      .send({ name: organizationName, 
-              description: 'Organization for testing',
-              users: [] });
+      .send({
+        name: organizationName,
+        description: 'Organization for testing',
+        users: [],
+      });
     expect(createOrganizationResponse.status).to.equal(201);
-    orgId = createOrganizationResponse.body.result._id
+    orgId = createOrganizationResponse.body.result._id;
   });
 
   after(async () => {
-    await request.delete('/project')
+    await request
+      .delete('/project')
       .set('Authorization', `${token}`)
       .send({ organization: organizationName, name: projectName });
-    
-    await request.delete('/organization')
+
+    await request
+      .delete('/organization')
       .set('Authorization', `${token}`)
       .send({ name: organizationName });
 
-    await request.delete('/user/delete')
+    await request
+      .delete('/user/delete')
       .set('Authorization', `${token}`)
       .send({ email: 'test@example.com' });
-    
-    await request.delete('/user/delete')
+
+    await request
+      .delete('/user/delete')
       .set('Authorization', `${token}`)
       .send({ email: 'testUser2@example.com' });
 
-    await request.delete('/user/delete')
+    await request
+      .delete('/user/delete')
       .set('Authorization', `${token}`)
-      .send({ email: 'testUser3@example.com' }); 
+      .send({ email: 'testUser3@example.com' });
   });
 
   describe('POST /projects', () => {
     it('should create a new project successfully', async () => {
-      const response = await request.post('/project')
+      const response = await request
+        .post('/project')
         .set('Authorization', `${token}`)
         .send({
           organization: organizationName,
@@ -101,13 +121,14 @@ describe('Projects API Endpoints', () => {
           description: 'Test project description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'admin' }]
+          users: [{ user: 'testUser', role: 'admin' }],
         });
       expect(response.status).to.equal(201);
     });
 
     it('should return 404 if the organization not exist', async () => {
-      const response = await request.post('/projects')
+      const response = await request
+        .post('/projects')
         .set('Authorization', `${token}`)
         .send({
           organization: 'NonAdminOrg',
@@ -115,13 +136,14 @@ describe('Projects API Endpoints', () => {
           description: 'Test project description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'admin' }]
+          users: [{ user: 'testUser', role: 'admin' }],
         });
       expect(response.status).to.equal(404);
     });
 
     it('should return 403 if the user is not an admin of the organization', async () => {
-      const response = await request.post('/project')
+      const response = await request
+        .post('/project')
         .set('Authorization', `${token2}`)
         .send({
           organization: organizationName,
@@ -129,13 +151,14 @@ describe('Projects API Endpoints', () => {
           description: 'Test project description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser2', role: 'developer' }]
+          users: [{ user: 'testUser2', role: 'developer' }],
         });
       expect(response.status).to.equal(403);
     });
 
     it('should return 500 if the project already exists', async () => {
-      const response = await request.post('/project')
+      const response = await request
+        .post('/project')
         .set('Authorization', `${token}`)
         .send({
           organization: organizationName,
@@ -143,7 +166,7 @@ describe('Projects API Endpoints', () => {
           description: 'Test project description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'admin' }]
+          users: [{ user: 'testUser', role: 'admin' }],
         });
       expect(response.status).to.equal(500);
     });
@@ -151,7 +174,7 @@ describe('Projects API Endpoints', () => {
 
   describe('POST /project/user', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -174,11 +197,11 @@ describe('Projects API Endpoints', () => {
         .set('Authorization', `${token}`)
         .send({
           organization: orgId,
-          member: user2Id
+          member: user2Id,
         });
       expect(addUserToOrgResponse.status).to.equal(200);
     });
-  
+
     it('should add a user to a project successfully', async () => {
       const response = await request
         .post('/project/user')
@@ -188,11 +211,11 @@ describe('Projects API Endpoints', () => {
           user: `${user2Id}`,
           role: 'developer',
         });
-        userId;
+      userId;
       expect(response.status).to.equal(201);
       expect(response.body.error).to.equal(false);
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const response = await request
         .post('/project/user')
@@ -204,7 +227,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(404);
     });
-  
+
     it('should return 404 if user does not exist', async () => {
       const response = await request
         .post('/project/user')
@@ -216,7 +239,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(404);
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const response = await request
         .post('/project/user')
@@ -228,7 +251,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
     });
-  
+
     it('should return 403 if user is not in the organization', async () => {
       const response = await request
         .post('/project/user')
@@ -240,22 +263,20 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
-      const response = await request
-        .post('/project/user')
-        .send({
-          project: projectId,
-          user: 'testUser2',
-          role: 'developer',
-        });
+      const response = await request.post('/project/user').send({
+        project: projectId,
+        user: 'testUser2',
+        role: 'developer',
+      });
       expect(response.status).to.equal(401);
     });
   });
 
   describe('POST /project/sprint', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto para añadir sprints
       const projectResponse = await request
@@ -284,7 +305,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should add a sprint to a project successfully', async () => {
       const sprint = {
         name: 'Sprint 1',
@@ -293,7 +314,7 @@ describe('Projects API Endpoints', () => {
         endDate: '2024-12-15T00:00:00Z',
         tasks: [],
       };
-  
+
       const response = await request
         .post('/project/sprint')
         .set('Authorization', `${token}`)
@@ -304,7 +325,7 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(201);
       expect(response.body.error).to.equal(false);
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const sprint = {
         name: 'Sprint 2',
@@ -313,7 +334,7 @@ describe('Projects API Endpoints', () => {
         endDate: '2024-12-31T00:00:00Z',
         tasks: [],
       };
-  
+
       const response = await request
         .post('/project/sprint')
         .set('Authorization', `${token}`)
@@ -324,7 +345,7 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(404);
       expect(response.body.error).to.equal(true);
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const sprint = {
         name: 'Sprint 3',
@@ -333,7 +354,7 @@ describe('Projects API Endpoints', () => {
         endDate: '2025-01-15T00:00:00Z',
         tasks: [],
       };
-  
+
       const response = await request
         .post('/project/sprint')
         .set('Authorization', `${token2}`) // Usuario sin permisos
@@ -344,7 +365,7 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(403);
       expect(response.body.error).to.equal(true);
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const sprint = {
         name: 'Sprint 4',
@@ -353,20 +374,19 @@ describe('Projects API Endpoints', () => {
         endDate: '2025-01-30T00:00:00Z',
         tasks: [],
       };
-  
-      const response = await request
-        .post('/project/sprint')
-        .send({
-          project: projectId,
-          sprint: sprint,
-        });
+
+      const response = await request.post('/project/sprint').send({
+        project: projectId,
+        sprint: sprint,
+      });
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('GET /projects', () => {
     it('should retrieve projects by organization', async () => {
-      const response = await request.get('/project')
+      const response = await request
+        .get('/project')
         .set('Authorization', `${token}`)
         .query({ organization: organizationName });
 
@@ -375,7 +395,8 @@ describe('Projects API Endpoints', () => {
     });
 
     it('should return 404 if organization is not found', async () => {
-      const response = await request.get('/project')
+      const response = await request
+        .get('/project')
         .set('Authorization', `${token}`)
         .query({ organization: 'NonExistentOrg' });
 
@@ -383,7 +404,8 @@ describe('Projects API Endpoints', () => {
     });
 
     it('should retrieve a project by organization and name', async () => {
-      const response = await request.get('/project')
+      const response = await request
+        .get('/project')
         .set('Authorization', `${token}`)
         .query({ organization: organizationName, name: projectName });
 
@@ -395,7 +417,7 @@ describe('Projects API Endpoints', () => {
 
   describe('GET /project/user', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto con el usuario actual
       const projectResponse = await request
@@ -412,7 +434,7 @@ describe('Projects API Endpoints', () => {
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto después de las pruebas
       const deleteResponse = await request
@@ -424,7 +446,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should retrieve all projects for the authenticated user', async () => {
       const response = await request
         .get('/project/user')
@@ -432,18 +454,20 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(200);
       expect(response.body.error).to.equal(false);
       expect(response.body.result).to.be.an('array');
-      expect(response.body.result.some((project: any) => project._id === projectId)).to.be.true;
+      expect(
+        response.body.result.some((project: any) => project._id === projectId),
+      ).to.be.true;
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const response = await request.get('/project/user');
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('GET /project/id/:id', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -460,7 +484,7 @@ describe('Projects API Endpoints', () => {
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto al finalizar las pruebas
       const deleteResponse = await request
@@ -472,7 +496,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should retrieve a project by its ID successfully', async () => {
       const response = await request
         .get(`/project/id/${projectId}`)
@@ -482,7 +506,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.result).to.have.property('_id', projectId);
       expect(response.body.result).to.have.property('name', 'ProjectWithID');
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const nonExistentId = '61a5f2118dfe0b1a98765432';
       const response = await request
@@ -492,17 +516,17 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found!');
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const response = await request.get(`/project/id/${projectId}`);
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('GET /project/sprints', () => {
     let projectId: string;
     let sprintId: string;
-  
+
     before(async () => {
       // Crear un proyecto y un sprint
       const projectResponse = await request
@@ -518,7 +542,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
-  
+
       const sprintResponse = await request
         .post('/project/sprint')
         .set('Authorization', `${token}`)
@@ -535,7 +559,7 @@ describe('Projects API Endpoints', () => {
       expect(sprintResponse.status).to.equal(201);
       sprintId = sprintResponse.body.result._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto después de las pruebas
       const deleteResponse = await request
@@ -547,7 +571,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should retrieve sprints for a project successfully using body parameter', async () => {
       const response = await request
         .get('/project/sprints')
@@ -558,9 +582,11 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(200);
       expect(response.body.error).to.equal(false);
       expect(response.body.result).to.be.an('array');
-      expect(response.body.result.some((sprint: any) => sprint._id === sprintId)).to.be.true;
+      expect(
+        response.body.result.some((sprint: any) => sprint._id === sprintId),
+      ).to.be.true;
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const response = await request
         .get('/project/sprints')
@@ -572,7 +598,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found!');
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const response = await request.get('/project/sprints').send({
         id: projectId,
@@ -580,11 +606,10 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(401);
     });
   });
-  
 
   describe('GET /searchprojects/:username', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto para el usuario
       const projectResponse = await request
@@ -601,7 +626,7 @@ describe('Projects API Endpoints', () => {
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto después de las pruebas
       const deleteResponse = await request
@@ -613,7 +638,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should retrieve projects for a given username', async () => {
       const response = await request
         .get(`/project/searchprojects/testUser`)
@@ -621,9 +646,11 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(200);
       expect(response.body.error).to.equal(false);
       expect(response.body.result).to.be.an('array');
-      expect(response.body.result.some((project: any) => project._id === projectId)).to.be.true;
+      expect(
+        response.body.result.some((project: any) => project._id === projectId),
+      ).to.be.true;
     });
-  
+
     it('should return 404 if user does not exist', async () => {
       const response = await request
         .get('/project/searchprojects/nonexistentuser')
@@ -632,16 +659,17 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('User not found');
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const response = await request.get(`/project/searchprojects/testUser`);
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('PUT /projects', () => {
     it('should update a project successfully', async () => {
-      const response = await request.put('/project')
+      const response = await request
+        .put('/project')
         .set('Authorization', `${token}`)
         .send({
           organization: organizationName,
@@ -649,14 +677,15 @@ describe('Projects API Endpoints', () => {
           description: 'Updated description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'scrum_master' }]
+          users: [{ user: 'testUser', role: 'scrum_master' }],
         });
 
       expect(response.status).to.equal(200);
     });
 
     it('should return 404 if organization is not found', async () => {
-      const response = await request.put('/project')
+      const response = await request
+        .put('/project')
         .set('Authorization', `${token}`)
         .send({
           organization: 'NonExistentOrg',
@@ -664,14 +693,15 @@ describe('Projects API Endpoints', () => {
           description: 'Updated description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'scrum_master' }]
+          users: [{ user: 'testUser', role: 'scrum_master' }],
         });
 
       expect(response.status).to.equal(404);
     });
 
     it('should return 404 if project is not found', async () => {
-      const response = await request.put('/project')
+      const response = await request
+        .put('/project')
         .set('Authorization', `${token}`)
         .send({
           organization: organizationName,
@@ -679,13 +709,14 @@ describe('Projects API Endpoints', () => {
           description: 'Updated description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'scrum_master' }]
+          users: [{ user: 'testUser', role: 'scrum_master' }],
         });
       expect(response.status).to.equal(404);
     });
 
     it('should return 403 if the user is not an admin of the organization', async () => {
-      const response = await request.put('/project')
+      const response = await request
+        .put('/project')
         .set('Authorization', `${token2}`)
         .send({
           organization: organizationName,
@@ -693,7 +724,7 @@ describe('Projects API Endpoints', () => {
           description: 'Updated description',
           startDate: '2024-11-30T00:00:00Z',
           endDate: '2025-01-30T00:00:00Z',
-          users: [{ user: 'testUser', role: 'scrum_master' }]
+          users: [{ user: 'testUser', role: 'scrum_master' }],
         });
       expect(response.status).to.equal(403);
     });
@@ -702,7 +733,7 @@ describe('Projects API Endpoints', () => {
   describe('PUT /project/user', () => {
     let projectId: string;
     let userToUpdateId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -718,7 +749,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
-  
+
       const addUserToProjectResponse = await request
         .post('/project/user')
         .set('Authorization', `${token}`)
@@ -728,10 +759,10 @@ describe('Projects API Endpoints', () => {
           role: 'developer',
         });
       expect(addUserToProjectResponse.status).to.equal(201);
-  
+
       userToUpdateId = user2Id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto al finalizar las pruebas
       const deleteResponse = await request
@@ -745,7 +776,7 @@ describe('Projects API Endpoints', () => {
       // BORRAR
       userToUpdateId;
     });
-  
+
     it('should update the role of a user in a project successfully', async () => {
       const response = await request
         .put('/project/user')
@@ -762,7 +793,7 @@ describe('Projects API Endpoints', () => {
         role: 'scrum_master',
       });
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const response = await request
         .put('/project/user')
@@ -776,7 +807,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found');
     });
-  
+
     it('should return 404 if user is not found in the project', async () => {
       const response = await request
         .put('/project/user')
@@ -790,7 +821,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('User not found');
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const response = await request
         .put('/project/user')
@@ -802,25 +833,25 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
       expect(response.body.error).to.equal(true);
-      expect(response.body.result).to.equal('User is not an admin or owner of the project');
+      expect(response.body.result).to.equal(
+        'User is not an admin or owner of the project',
+      );
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
-      const response = await request
-        .put('/project/user')
-        .send({
-          project: projectId,
-          user: userToUpdateId,
-          role: 'scrum_master',
-        });
+      const response = await request.put('/project/user').send({
+        project: projectId,
+        user: userToUpdateId,
+        role: 'scrum_master',
+      });
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('PUT /project/sprint', () => {
     let projectId: string;
     let sprintId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -836,7 +867,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
-  
+
       // Crear un sprint inicial para el proyecto
       const sprintResponse = await request
         .post('/project/sprint')
@@ -854,7 +885,7 @@ describe('Projects API Endpoints', () => {
       expect(sprintResponse.status).to.equal(201);
       sprintId = sprintResponse.body.result.sprints[0]._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto al finalizar las pruebas
       const deleteResponse = await request
@@ -866,7 +897,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should update a sprint in a project successfully', async () => {
       const updatedSprint = {
         name: 'Updated Sprint',
@@ -874,7 +905,7 @@ describe('Projects API Endpoints', () => {
         startDate: '2024-12-01T00:00:00Z',
         endDate: '2024-12-20T00:00:00Z',
       };
-  
+
       const response = await request
         .put('/project/sprint')
         .set('Authorization', `${token}`)
@@ -886,7 +917,7 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(200);
       expect(response.body.error).to.equal(false);
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const updatedSprint = {
         name: 'Updated Sprint',
@@ -894,7 +925,7 @@ describe('Projects API Endpoints', () => {
         startDate: '2024-12-01T00:00:00Z',
         endDate: '2024-12-20T00:00:00Z',
       };
-  
+
       const response = await request
         .put('/project/sprint')
         .set('Authorization', `${token}`)
@@ -907,7 +938,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found');
     });
-  
+
     it('should return 404 if sprint does not exist', async () => {
       const updatedSprint = {
         name: 'Updated Sprint',
@@ -915,7 +946,7 @@ describe('Projects API Endpoints', () => {
         startDate: '2024-12-01T00:00:00Z',
         endDate: '2024-12-20T00:00:00Z',
       };
-  
+
       const response = await request
         .put('/project/sprint')
         .set('Authorization', `${token}`)
@@ -927,7 +958,7 @@ describe('Projects API Endpoints', () => {
       expect(response.status).to.equal(404);
       expect(response.body.error).to.equal(true);
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const updatedSprint = {
         name: 'Updated Sprint',
@@ -935,7 +966,7 @@ describe('Projects API Endpoints', () => {
         startDate: '2024-12-01T00:00:00Z',
         endDate: '2024-12-20T00:00:00Z',
       };
-  
+
       const response = await request
         .put('/project/sprint')
         .set('Authorization', `${token2}`) // Usuario sin permisos
@@ -946,9 +977,11 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
       expect(response.body.error).to.equal(true);
-      expect(response.body.result).to.equal('User is not an admin or owner of the project');
+      expect(response.body.result).to.equal(
+        'User is not an admin or owner of the project',
+      );
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
       const updatedSprint = {
         name: 'Updated Sprint',
@@ -956,21 +989,20 @@ describe('Projects API Endpoints', () => {
         startDate: '2024-12-01T00:00:00Z',
         endDate: '2024-12-20T00:00:00Z',
       };
-  
-      const response = await request
-        .put('/project/sprint')
-        .send({
-          project: projectId,
-          sprintID: sprintId,
-          sprint: updatedSprint,
-        });
+
+      const response = await request.put('/project/sprint').send({
+        project: projectId,
+        sprintID: sprintId,
+        sprint: updatedSprint,
+      });
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 
   describe('DELETE /projects', () => {
     it('should delete a project successfully', async () => {
-      const response = await request.delete('/project')
+      const response = await request
+        .delete('/project')
         .set('Authorization', `${token}`)
         .send({ organization: organizationName, project: projectName });
 
@@ -978,14 +1010,19 @@ describe('Projects API Endpoints', () => {
     });
 
     it('should return 404 if project is not found', async () => {
-      const response = await request.delete('/project')
+      const response = await request
+        .delete('/project')
         .set('Authorization', `${token}`)
-        .send({ organization: organizationName, project: 'NonExistentProject' });
+        .send({
+          organization: organizationName,
+          project: 'NonExistentProject',
+        });
       expect(response.status).to.equal(404);
     });
 
     it('should return 404 if organization is not found', async () => {
-      const response = await request.delete('/project')
+      const response = await request
+        .delete('/project')
         .set('Authorization', `${token}`)
         .send({ organization: 'NonExistentOrg', project: projectName });
       expect(response.status).to.equal(404);
@@ -994,7 +1031,7 @@ describe('Projects API Endpoints', () => {
 
   describe('DELETE /project/user', () => {
     let projectId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -1010,7 +1047,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
-  
+
       // Asegurar que el usuario esté en el proyecto
       const addUserToProjectResponse = await request
         .post('/project/user')
@@ -1022,7 +1059,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(addUserToProjectResponse.status).to.equal(201);
     });
-  
+
     after(async () => {
       // Eliminar el proyecto al finalizar las pruebas
       const deleteResponse = await request
@@ -1034,7 +1071,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should delete a user from a project successfully', async () => {
       const response = await request
         .delete('/project/user')
@@ -1049,7 +1086,7 @@ describe('Projects API Endpoints', () => {
         user: user2Id,
       });
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const response = await request
         .delete('/project/user')
@@ -1062,7 +1099,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found');
     });
-  
+
     it('should return 404 if user is not found in the project', async () => {
       const response = await request
         .delete('/project/user')
@@ -1075,7 +1112,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('User not found');
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const response = await request
         .delete('/project/user')
@@ -1086,16 +1123,16 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
       expect(response.body.error).to.equal(true);
-      expect(response.body.result).to.equal('User is not an admin or owner of the project');
+      expect(response.body.result).to.equal(
+        'User is not an admin or owner of the project',
+      );
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
-      const response = await request
-        .delete('/project/user')
-        .send({
-          project: projectId,
-          user: user2Id,
-        });
+      const response = await request.delete('/project/user').send({
+        project: projectId,
+        user: user2Id,
+      });
       expect(response.status).to.equal(401);
     });
   });
@@ -1103,7 +1140,7 @@ describe('Projects API Endpoints', () => {
   describe('DELETE /project/sprint', () => {
     let projectId: string;
     let sprintId: string;
-  
+
     before(async () => {
       // Crear un proyecto para las pruebas
       const projectResponse = await request
@@ -1119,7 +1156,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(projectResponse.status).to.equal(201);
       projectId = projectResponse.body.result._id;
-  
+
       // Crear un sprint inicial para el proyecto
       const sprintResponse = await request
         .post('/project/sprint')
@@ -1137,7 +1174,7 @@ describe('Projects API Endpoints', () => {
       expect(sprintResponse.status).to.equal(201);
       sprintId = sprintResponse.body.result._id;
     });
-  
+
     after(async () => {
       // Eliminar el proyecto al finalizar las pruebas
       const deleteResponse = await request
@@ -1149,7 +1186,7 @@ describe('Projects API Endpoints', () => {
         });
       expect(deleteResponse.status).to.equal(200);
     });
-  
+
     it('should delete a sprint from a project successfully', async () => {
       const response = await request
         .delete('/project/sprint')
@@ -1164,7 +1201,7 @@ describe('Projects API Endpoints', () => {
         _id: sprintId,
       });
     });
-  
+
     it('should return 404 if project does not exist', async () => {
       const response = await request
         .delete('/project/sprint')
@@ -1177,7 +1214,7 @@ describe('Projects API Endpoints', () => {
       expect(response.body.error).to.equal(true);
       expect(response.body.result).to.equal('Project not found');
     });
-  
+
     it('should return 403 if user is not admin or owner of the project', async () => {
       const response = await request
         .delete('/project/sprint')
@@ -1188,17 +1225,17 @@ describe('Projects API Endpoints', () => {
         });
       expect(response.status).to.equal(403);
       expect(response.body.error).to.equal(true);
-      expect(response.body.result).to.equal('User is not an admin or owner of the project');
+      expect(response.body.result).to.equal(
+        'User is not an admin or owner of the project',
+      );
     });
-  
+
     it('should return 401 if user is not authenticated', async () => {
-      const response = await request
-        .delete('/project/sprint')
-        .send({
-          project: projectId,
-          sprintID: sprintId,
-        });
+      const response = await request.delete('/project/sprint').send({
+        project: projectId,
+        sprintID: sprintId,
+      });
       expect(response.status).to.equal(401);
     });
-  });  
+  });
 });

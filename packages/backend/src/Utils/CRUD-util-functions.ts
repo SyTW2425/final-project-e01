@@ -69,11 +69,14 @@ export async function getUserofJWT(token: string) {
  * @param result The result of the request
  * @returns APIResponseFormat
  */
-export function createResponseFormat(error: boolean, result: any) : APIResponseFormat {
+export function createResponseFormat(
+  error: boolean,
+  result: any,
+): APIResponseFormat {
   return {
     error,
-    result
-  }
+    result,
+  };
 }
 
 /**
@@ -81,7 +84,9 @@ export function createResponseFormat(error: boolean, result: any) : APIResponseF
  * @param name The name of the organization
  * @returns the organization if it exists, null otherwise
  */
-export async function checkIfOrganizationExists(name: string) : Promise<OrganizationInterface | null> {
+export async function checkIfOrganizationExists(
+  name: string,
+): Promise<OrganizationInterface | null> {
   return Organization.findOne({ name: name });
 }
 
@@ -91,7 +96,9 @@ export async function checkIfOrganizationExists(name: string) : Promise<Organiza
  * @returns The user object or null if unauthorized
  */
 export async function getAuthenticatedUser(req: any, res: any) {
-  const user = await getUserFromHeader(req) as unknown as { _id: string } | null;
+  const user = (await getUserFromHeader(req)) as unknown as {
+    _id: string;
+  } | null;
   if (!user) {
     res.status(401).json(createResponseFormat(true, 'Unauthorized'));
     return null;
@@ -110,7 +117,7 @@ export function isAdminOfOrganization(organization: any, userId: string) {
     const user = m.user?._id || m.user;
     return user && user.toString() === userId.toString();
   });
-  return member?.role === 'admin'; 
+  return member?.role === 'admin';
 }
 
 /**
@@ -133,9 +140,10 @@ export function isMemberOfOrganization(organization: any, userId: string) {
  * @returns Boolean indicating if the user is a member
  */
 export function isAdminOrOwnerOfProject(project: any, userId: string): boolean {
-  return project.users.some((user: any) => 
-    user.user._id.toString() === userId.toString() && 
-    (user.role === 'admin' || user.role === 'owner')
+  return project.users.some(
+    (user: any) =>
+      user.user._id.toString() === userId.toString() &&
+      (user.role === 'admin' || user.role === 'owner'),
   );
 }
 
@@ -145,14 +153,16 @@ export function isAdminOrOwnerOfProject(project: any, userId: string): boolean {
  * @returns Array of mapped members with ObjectIds
  */
 export async function mapMembersToObjectIds(members: any[]) {
-  return await Promise.all(members.map(async (member: any) => {
-    const foundUser = await userLogic.searchUser(member.user) as any;
-    if (!foundUser) throw new Error(`User ${member.user} not found`);
-    return {
-      user: foundUser._id,
-      role: member.role,
-    };
-  }));
+  return await Promise.all(
+    members.map(async (member: any) => {
+      const foundUser = (await userLogic.searchUser(member.user)) as any;
+      if (!foundUser) throw new Error(`User ${member.user} not found`);
+      return {
+        user: foundUser._id,
+        role: member.role,
+      };
+    }),
+  );
 }
 
 /**
@@ -162,20 +172,33 @@ export async function mapMembersToObjectIds(members: any[]) {
  * @returns Boolean indicating if the user is a member
  */
 export async function mapUsersToObjectIds(users: any[]) {
-  return await Promise.all(users.map(async (user: any) => {
-    const foundUser = await userLogic.searchUser(user) as any;
-    if (!foundUser) throw new Error(`User ${user} not found`);
-    return foundUser._id;
-  }));
+  return await Promise.all(
+    users.map(async (user: any) => {
+      const foundUser = (await userLogic.searchUser(user)) as any;
+      if (!foundUser) throw new Error(`User ${user} not found`);
+      return foundUser._id;
+    }),
+  );
 }
 
 /**
  * Helper to validate required fields in request body
  */
-export function validateRequiredFields(body: any, requiredFields: string[], res: any) {
+export function validateRequiredFields(
+  body: any,
+  requiredFields: string[],
+  res: any,
+) {
   for (const field of requiredFields) {
     if (!body[field]) {
-      res.status(400).send(createResponseFormat(true, `You must provide the ${field} to proceed`));
+      res
+        .status(400)
+        .send(
+          createResponseFormat(
+            true,
+            `You must provide the ${field} to proceed`,
+          ),
+        );
       return false;
     }
   }
@@ -185,18 +208,41 @@ export function validateRequiredFields(body: any, requiredFields: string[], res:
 /**
  * Helper to authenticate user and check project membership
  */
-export async function authenticateAndAuthorizeUser(req: any, projectName: string, organizationName: string) {
-  const user = await getUserFromHeader(req) as any;
+export async function authenticateAndAuthorizeUser(
+  req: any,
+  projectName: string,
+  organizationName: string,
+) {
+  const user = (await getUserFromHeader(req)) as any;
   if (!user) return { status: 401, message: 'Unauthorized' };
 
-  const organizationResult = await organizationLogic.searchOrganizationByName(organizationName) as any;
-  if (!organizationResult) return { status: 404, message: 'Organization not found' };
+  const organizationResult = (await organizationLogic.searchOrganizationByName(
+    organizationName,
+  )) as any;
+  if (!organizationResult)
+    return { status: 404, message: 'Organization not found' };
 
-  const project = await projectLogic.searchProjectByName(organizationResult._id, projectName) as any;
+  const project = (await projectLogic.searchProjectByName(
+    organizationResult._id,
+    projectName,
+  )) as any;
   if (!project) return { status: 404, message: 'Project not found' };
 
-  const isMember = await projectLogic.checkifUserIsOnProject(organizationResult._id, projectName, user._id.toString());
-  if (!isMember) return { status: 403, message: 'Forbidden: You are not a member of the project' };
+  const isMember = await projectLogic.checkifUserIsOnProject(
+    organizationResult._id,
+    projectName,
+    user._id.toString(),
+  );
+  if (!isMember)
+    return {
+      status: 403,
+      message: 'Forbidden: You are not a member of the project',
+    };
 
-  return { status: 200, user, organizationId: organizationResult._id, projectId: project._id };
+  return {
+    status: 200,
+    user,
+    organizationId: organizationResult._id,
+    projectId: project._id,
+  };
 }

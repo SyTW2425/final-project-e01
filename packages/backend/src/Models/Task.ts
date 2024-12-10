@@ -42,7 +42,7 @@ export interface TaskInterface extends Document {
   startDate: Date;
   endDate: Date;
   name: string;
-  progress: number; // 
+  progress: number; //
   description: string;
   priority: priority;
   dependenciesTasks: Schema.Types.ObjectId[];

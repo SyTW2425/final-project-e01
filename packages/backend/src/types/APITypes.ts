@@ -12,25 +12,25 @@
  * @brief API Types file, contains the interfaces of the API
  */
 
-import { Model, PopulateOptions } from "mongoose";
+import { Model, PopulateOptions } from 'mongoose';
 
 /**
  * APIResponseFormat
  * @description API response format
  */
 export interface APIResponseFormat {
-  error : boolean;
-  result : any;
+  error: boolean;
+  result: any;
 }
 
 /**
  * ApplicationAdapter
  */
 export interface ApplicationAdapter {
-  usersAPI : UsersAPI;
-  tasksAPI : TasksAPI;
-  projectsAPI : ProjectsAPI;
-  organizationsAPI : OrganizationsAPI;
+  usersAPI: UsersAPI;
+  tasksAPI: TasksAPI;
+  projectsAPI: ProjectsAPI;
+  organizationsAPI: OrganizationsAPI;
 }
 
 /**
@@ -38,13 +38,27 @@ export interface ApplicationAdapter {
  * @description Users API
  */
 export interface UsersAPI {
-  searchUserById(userId : any) : Promise<APIResponseFormat>;
-  searchUsersByUsername(username : string) : Promise<APIResponseFormat>;
-  searchUsers(username : string | null, email : string | null, page? : number) : Promise<APIResponseFormat>;
-  registerUser(username : string, email : string, password : string) : Promise<APIResponseFormat>;
-  loginUser(email : string, password : string) : Promise<APIResponseFormat>;
-  deleteUser(userToDelete : string, userId : any) : Promise<APIResponseFormat>;
-  updateUser(email : string, username : string | null, password : string | null, role : string | null, userId : any) : Promise<APIResponseFormat>;
+  searchUserById(userId: any): Promise<APIResponseFormat>;
+  searchUsersByUsername(username: string): Promise<APIResponseFormat>;
+  searchUsers(
+    username: string | null,
+    email: string | null,
+    page?: number,
+  ): Promise<APIResponseFormat>;
+  registerUser(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<APIResponseFormat>;
+  loginUser(email: string, password: string): Promise<APIResponseFormat>;
+  deleteUser(userToDelete: string, userId: any): Promise<APIResponseFormat>;
+  updateUser(
+    email: string,
+    username: string | null,
+    password: string | null,
+    role: string | null,
+    userId: any,
+  ): Promise<APIResponseFormat>;
 }
 
 /**
@@ -53,11 +67,50 @@ export interface UsersAPI {
  * @brief This interface is used to define the methods that the organization API must implement
  */
 export interface TasksAPI {
-  searchTasks(name : string, project: string, page?: number) : Promise<APIResponseFormat>;
-  createTask(name : string, startDate : string, endDate : string, description : string, priority : string, dependenciesTasks : string[], status : string, comments : string[], users : string[], project : string) : Promise<APIResponseFormat>;
-  createTaskForSprint(name : string, startDate : string, endDate : string, description : string, priority : string, dependenciesTasks : string[], status : string, comments : string[], users : string[], project : string, sprint : string) : Promise<APIResponseFormat>;
-  deleteTask(taskToDelete : string, projectTask: string) : Promise<APIResponseFormat>;
-  updateTask(name : string, description : string | null, deadline : string | null, priority : string | null, state : string | null, project : string, Organization: string, assignedTo : string | null) : Promise<APIResponseFormat>;
+  searchTasks(
+    name: string,
+    project: string,
+    page?: number,
+  ): Promise<APIResponseFormat>;
+  createTask(
+    name: string,
+    startDate: string,
+    endDate: string,
+    description: string,
+    priority: string,
+    dependenciesTasks: string[],
+    status: string,
+    comments: string[],
+    users: string[],
+    project: string,
+  ): Promise<APIResponseFormat>;
+  createTaskForSprint(
+    name: string,
+    startDate: string,
+    endDate: string,
+    description: string,
+    priority: string,
+    dependenciesTasks: string[],
+    status: string,
+    comments: string[],
+    users: string[],
+    project: string,
+    sprint: string,
+  ): Promise<APIResponseFormat>;
+  deleteTask(
+    taskToDelete: string,
+    projectTask: string,
+  ): Promise<APIResponseFormat>;
+  updateTask(
+    name: string,
+    description: string | null,
+    deadline: string | null,
+    priority: string | null,
+    state: string | null,
+    project: string,
+    Organization: string,
+    assignedTo: string | null,
+  ): Promise<APIResponseFormat>;
 }
 
 /**
@@ -65,11 +118,32 @@ export interface TasksAPI {
  * @description Projects API
  */
 export interface ProjectsAPI {
-  searchProjects(nameOrg : string, nameProject : string, page?: number) : Promise<APIResponseFormat>;
-  searchProjectsFromUser(userId : any) : Promise<APIResponseFormat>;
-  createProject(organization : string, name : string, description : string, startDate : string, endDate : string, users : any) : Promise<APIResponseFormat>;
-  deleteProject(nameOrg: string, projectToDelete : string) : Promise<APIResponseFormat>;
-  updateProject(nameProject : string, description : string, startDate : string, endDate : string, users : string[], sprints : any) : Promise<APIResponseFormat>;
+  searchProjects(
+    nameOrg: string,
+    nameProject: string,
+    page?: number,
+  ): Promise<APIResponseFormat>;
+  searchProjectsFromUser(userId: any): Promise<APIResponseFormat>;
+  createProject(
+    organization: string,
+    name: string,
+    description: string,
+    startDate: string,
+    endDate: string,
+    users: any,
+  ): Promise<APIResponseFormat>;
+  deleteProject(
+    nameOrg: string,
+    projectToDelete: string,
+  ): Promise<APIResponseFormat>;
+  updateProject(
+    nameProject: string,
+    description: string,
+    startDate: string,
+    endDate: string,
+    users: string[],
+    sprints: any,
+  ): Promise<APIResponseFormat>;
 }
 
 /**
@@ -77,13 +151,17 @@ export interface ProjectsAPI {
  * @description Organizations API
  */
 export interface OrganizationsAPI {
-  searchOrganizationById(organizationId : any) : Promise<APIResponseFormat>;
-  searchOrganizationByUser(username : string) : Promise<APIResponseFormat>;
-  searchOrganizationsByName(name : string) : Promise<APIResponseFormat>;
-  searchOrganizations(name : string) : Promise<APIResponseFormat>;
-  createOrganization(name : string, members : any) : Promise<APIResponseFormat>;
-  deleteOrganization(organizationToDelete : string) : Promise<APIResponseFormat>;
-  updateOrganization(name : string, newName:string, members : any) : Promise<APIResponseFormat>;
+  searchOrganizationById(organizationId: any): Promise<APIResponseFormat>;
+  searchOrganizationByUser(username: string): Promise<APIResponseFormat>;
+  searchOrganizationsByName(name: string): Promise<APIResponseFormat>;
+  searchOrganizations(name: string): Promise<APIResponseFormat>;
+  createOrganization(name: string, members: any): Promise<APIResponseFormat>;
+  deleteOrganization(organizationToDelete: string): Promise<APIResponseFormat>;
+  updateOrganization(
+    name: string,
+    newName: string,
+    members: any,
+  ): Promise<APIResponseFormat>;
 }
 
 /**
@@ -91,12 +169,27 @@ export interface OrganizationsAPI {
  * @description Database adapter
  */
 export interface databaseAdapter {
-  findOne(model : Model<any>, query : any, filter? : object, populateFields?: null | PopulateOptions | (string | PopulateOptions | object)[]) : Promise<any>;
-  find(model : Model<any>, query : any, filter : object, skip? : number, limit? : number, populateFields?: null | PopulateOptions | (string | PopulateOptions)[]) : Promise<any>;
-  create : (model : Model<any>, data : any) => Promise<any>;
-  updateOne : (model : Model<any>, query : any, data : any) => Promise<any>;
+  findOne(
+    model: Model<any>,
+    query: any,
+    filter?: object,
+    populateFields?:
+      | null
+      | PopulateOptions
+      | (string | PopulateOptions | object)[],
+  ): Promise<any>;
+  find(
+    model: Model<any>,
+    query: any,
+    filter: object,
+    skip?: number,
+    limit?: number,
+    populateFields?: null | PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<any>;
+  create: (model: Model<any>, data: any) => Promise<any>;
+  updateOne: (model: Model<any>, query: any, data: any) => Promise<any>;
   updateMany: (model: Model<any>, query: any, data: any) => Promise<any>;
-  deleteOne : (model : Model<any>, query : any) => Promise<any>;
-  deleteMany : (model : Model<any>, query : any) => Promise<any>;
-  countDocuments : (model : Model<any>, query : any) => Promise<number>;
+  deleteOne: (model: Model<any>, query: any) => Promise<any>;
+  deleteMany: (model: Model<any>, query: any) => Promise<any>;
+  countDocuments: (model: Model<any>, query: any) => Promise<number>;
 }

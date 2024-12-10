@@ -9,7 +9,7 @@
  * @author Omar Suárez Doro
  * @version 1.0
  * @date 28/10/2024
- * @brief Declare the global namespace for Express 
+ * @brief Declare the global namespace for Express
  */
 
 // src/types/express.d.ts
@@ -18,7 +18,7 @@ import { Request } from 'express';
 declare global {
   namespace Express {
     interface Request {
-      userId?: any;
+      userId?: string;
     }
   }
 }

@@ -21,7 +21,9 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "@types/mocha": "^10.0.9"
+    "@types/mocha": "^10.0.9",
+    "coveralls": "^3.1.1",
+    "nyc": "^17.1.0"
   },
   "dependencies": {
     "@types/chai-http": "^3.0.5",

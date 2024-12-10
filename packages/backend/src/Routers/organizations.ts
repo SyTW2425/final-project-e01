@@ -17,7 +17,14 @@ import jwtMiddleware from '../Middleware/authMiddleware.js';
 import MongoDB from '../Class/DBAdapter.js';
 import OrganizationLogic from '../Class/OrganizationLogic.js';
 import User from '../Models/User.js';
-import { createResponseFormat, mapMembersToObjectIds, getAuthenticatedUser, isAdminOfOrganization, getUserFromHeader, isMemberOfOrganization } from '../Utils/CRUD-util-functions.js';
+import {
+  createResponseFormat,
+  mapMembersToObjectIds,
+  getAuthenticatedUser,
+  isAdminOfOrganization,
+  getUserFromHeader,
+  isMemberOfOrganization,
+} from '../Utils/CRUD-util-functions.js';
 
 export const organizationsRouter = Express.Router();
 
@@ -33,11 +40,15 @@ export const organizationLogic = new OrganizationLogic(dbAdapter);
 organizationsRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
     const { name } = req.query;
-    const response = await organizationLogic.searchOrganizations(name as string);
+    const response = await organizationLogic.searchOrganizations(
+      name as string,
+    );
     res.status(200).send(response);
   } catch (error) {
     // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
+    res
+      .status(500)
+      .json(createResponseFormat(true, 'Error to search organizations'));
   }
 });
 
@@ -58,26 +69,34 @@ organizationsRouter.get('/:id', jwtMiddleware, async (req, res) => {
     res.status(200).send(response);
   } catch (error) {
     // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organization'));
+    res
+      .status(500)
+      .json(createResponseFormat(true, 'Error to search organization'));
   }
 });
 
 /**
- * @brief This endpoint is used to get an organization by its id 
+ * @brief This endpoint is used to get an organization by its id
  * @param req The request object
  * @param res The response object
  * @returns void
  */
-organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const response = await organizationLogic.searchOrganizations(id);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
+organizationsRouter.get(
+  '/searchorganizations/:id',
+  jwtMiddleware,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const response = await organizationLogic.searchOrganizations(id);
+      res.status(200).send(response);
+    } catch (error) {
+      // console.error(error);
+      res
+        .status(500)
+        .json(createResponseFormat(true, 'Error to search organizations'));
+    }
+  },
+);
 
 /**
  * @brief This endpoint is used to search organizations by name
@@ -85,16 +104,22 @@ organizationsRouter.get('/searchorganizations/:id', jwtMiddleware, async (req, r
  * @param res The response object
  * @returns void
  */
-organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async (req, res) => {
-  try {
-    const { name } = req.params;
-    const response = await organizationLogic.searchOrganizationsByName(name);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
+organizationsRouter.get(
+  '/searchorganizations/name/:name',
+  jwtMiddleware,
+  async (req, res) => {
+    try {
+      const { name } = req.params;
+      const response = await organizationLogic.searchOrganizationsByName(name);
+      res.status(200).send(response);
+    } catch (error) {
+      // console.error(error);
+      res
+        .status(500)
+        .json(createResponseFormat(true, 'Error to search organizations'));
+    }
+  },
+);
 
 /**
  * @brief This endpoint is used search the organization by user
@@ -102,16 +127,23 @@ organizationsRouter.get('/searchorganizations/name/:name', jwtMiddleware, async 
  * @param res The response object
  * @returns void
  */
-organizationsRouter.get('/searchorganizations/user/:username', jwtMiddleware, async (req, res) => {
-  try {
-    const { username } = req.params;
-    const response = await organizationLogic.searchOrganizationByUser(username);
-    res.status(200).send(response);
-  } catch (error) {
-    // console.error(error);
-    res.status(500).json(createResponseFormat(true, 'Error to search organizations'));
-  }
-})
+organizationsRouter.get(
+  '/searchorganizations/user/:username',
+  jwtMiddleware,
+  async (req, res) => {
+    try {
+      const { username } = req.params;
+      const response =
+        await organizationLogic.searchOrganizationByUser(username);
+      res.status(200).send(response);
+    } catch (error) {
+      // console.error(error);
+      res
+        .status(500)
+        .json(createResponseFormat(true, 'Error to search organizations'));
+    }
+  },
+);
 
 /**
  * @brief This endpoint is used create a new organization
@@ -123,9 +155,13 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, members } = req.body;
     // Check if organization already exists
-    const organization = await organizationLogic.searchOrganizations(name) as any;
+    const organization = (await organizationLogic.searchOrganizations(
+      name,
+    )) as any;
     if (organization.result.length !== 0) {
-      res.status(409).json(createResponseFormat(true, 'Organization already exists'));
+      res
+        .status(409)
+        .json(createResponseFormat(true, 'Organization already exists'));
       return;
     }
     // Map members to ObjectIds and add the creator as an admin
@@ -141,10 +177,15 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
     const user = await getAuthenticatedUser(req, res);
     if (!user) return;
     membersWithObjectIds.push({ user: user._id, role: 'admin' });
-    const organization_saved = await organizationLogic.createOrganization(name, membersWithObjectIds);
+    const organization_saved = await organizationLogic.createOrganization(
+      name,
+      membersWithObjectIds,
+    );
     res.status(201).send(organization_saved);
   } catch (error) {
-    res.status(500).send(createResponseFormat(true, 'Cannot create organization'));
+    res
+      .status(500)
+      .send(createResponseFormat(true, 'Cannot create organization'));
   }
 });
 
@@ -157,32 +198,48 @@ organizationsRouter.post('/', jwtMiddleware, async (req, res) => {
 organizationsRouter.post('/member', jwtMiddleware, async (req, res) => {
   try {
     const { organization, member } = req.body;
-    const user = await getUserFromHeader(req) as any;
+    const user = (await getUserFromHeader(req)) as any;
     if (!user) {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-    const organizationResult = await organizationLogic.searchOrganizationById(organization) as any;
+    const organizationResult = (await organizationLogic.searchOrganizationById(
+      organization,
+    )) as any;
     if (organizationResult.error) {
-      res.status(404).json(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .json(createResponseFormat(true, 'Organization not found'));
       return;
     }
     if (isMemberOfOrganization(organizationResult.result, member)) {
-      res.status(403).json(createResponseFormat(true, 'The user is already a member of the organization'));
+      res
+        .status(403)
+        .json(
+          createResponseFormat(
+            true,
+            'The user is already a member of the organization',
+          ),
+        );
       return;
     }
     if (!isAdminOfOrganization(organizationResult.result, user._id)) {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-    const response = await organizationLogic.addMemberToOrganization(organization, member);
+    const response = await organizationLogic.addMemberToOrganization(
+      organization,
+      member,
+    );
     res.status(200).send(response);
   } catch (error) {
-    res.status(500).send(createResponseFormat(true, 'Cannot add member to organization'));
+    res
+      .status(500)
+      .send(createResponseFormat(true, 'Cannot add member to organization'));
   }
 });
 
-/** 
+/**
  * @brief This endpoint is used to update an organization
  * @param req The request object
  * @param res The response object
@@ -197,9 +254,13 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
       res.status(403).json(createResponseFormat(true, 'Forbidden'));
       return;
     }
-    const organization = await organizationLogic.searchOrganizationByName(name as string) as any;
+    const organization = (await organizationLogic.searchOrganizationByName(
+      name as string,
+    )) as any;
     if (!organization) {
-      res.status(404).json(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .json(createResponseFormat(true, 'Organization not found'));
       return;
     }
     if (!isAdminOfOrganization(organization, user._id)) {
@@ -215,13 +276,22 @@ organizationsRouter.put('/', jwtMiddleware, async (req, res) => {
         return;
       }
     }
-    if (membersWithObjectIds.length === 0 || !membersWithObjectIds.some((m: any) => m.role === 'admin')) {
+    if (
+      membersWithObjectIds.length === 0 ||
+      !membersWithObjectIds.some((m: any) => m.role === 'admin')
+    ) {
       membersWithObjectIds.push({ user: user._id, role: 'admin' });
     }
-    const response = await organizationLogic.updateOrganization(name as string, membersWithObjectIds, newName);
+    const response = await organizationLogic.updateOrganization(
+      name as string,
+      membersWithObjectIds,
+      newName,
+    );
     res.status(200).send(response);
   } catch (error) {
-    res.status(500).send(createResponseFormat(true, 'Cannot update organization'));
+    res
+      .status(500)
+      .send(createResponseFormat(true, 'Cannot update organization'));
   }
 });
 
@@ -237,9 +307,13 @@ organizationsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const user = await getAuthenticatedUser(req, res);
     if (!user) return;
 
-    const organization = await organizationLogic.searchOrganizationByName(name) as any;
+    const organization = (await organizationLogic.searchOrganizationByName(
+      name,
+    )) as any;
     if (!organization) {
-      res.status(404).json(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .json(createResponseFormat(true, 'Organization not found'));
       return;
     }
 
@@ -251,7 +325,9 @@ organizationsRouter.delete('/', jwtMiddleware, async (req, res) => {
     const response = await organizationLogic.deleteOrganization(name);
     res.status(200).send(response);
   } catch (error) {
-    res.status(500).send(createResponseFormat(true, 'Cannot delete organization'));
+    res
+      .status(500)
+      .send(createResponseFormat(true, 'Cannot delete organization'));
   }
 });
 
@@ -264,10 +340,14 @@ organizationsRouter.delete('/', jwtMiddleware, async (req, res) => {
 organizationsRouter.delete('/member', jwtMiddleware, async (req, res) => {
   try {
     const { id, member } = req.body;
-    const user = await getUserFromHeader(req) as any;
-    const organizationResult = await organizationLogic.searchOrganizationById(id) as any;
+    const user = (await getUserFromHeader(req)) as any;
+    const organizationResult = (await organizationLogic.searchOrganizationById(
+      id,
+    )) as any;
     if (organizationResult.error) {
-      res.status(404).json(createResponseFormat(true, 'Organization not found'));
+      res
+        .status(404)
+        .json(createResponseFormat(true, 'Organization not found'));
       return;
     }
     if (!isAdminOfOrganization(organizationResult.result, user._id)) {
@@ -282,6 +362,10 @@ organizationsRouter.delete('/member', jwtMiddleware, async (req, res) => {
     }
     res.status(200).send(response);
   } catch (error) {
-    res.status(500).send(createResponseFormat(true, 'Cannot delete member from organization'));
+    res
+      .status(500)
+      .send(
+        createResponseFormat(true, 'Cannot delete member from organization'),
+      );
   }
 });
