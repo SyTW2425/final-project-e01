@@ -15,65 +15,88 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User, { Role } from "../Models/User.js";
-import { createResponseFormat } from "../Utils/CRUD-util-functions.js";
-import { APIResponseFormat, UsersAPI, databaseAdapter } from "../types/APITypes.js";
+import User, { Role } from '../Models/User.js';
+import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
+import {
+  APIResponseFormat,
+  UsersAPI,
+  databaseAdapter,
+} from '../types/APITypes.js';
 import { LIMIT } from './DBAdapter.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHILINDRINA';
 
-/** 
+/**
  * Class that contains the logic of the users
  * @class
  * @implements UsersAPI
  */
 export default class UserLogic implements UsersAPI {
-  private dbAdapter : databaseAdapter;
-  
-  constructor(dbAdapter : databaseAdapter) {
+  private dbAdapter: databaseAdapter;
+
+  constructor(dbAdapter: databaseAdapter) {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchUsersByUsername(username : string) : Promise<APIResponseFormat> {
+  async searchUsersByUsername(username: string): Promise<APIResponseFormat> {
     const user = await this.dbAdapter.findOne(User, { username }, {});
     return createResponseFormat(false, user);
   }
 
-  async searchUsers(username : string | null, email : string | null, page : number = 1) : Promise<APIResponseFormat> {
+  async searchUsers(
+    username: string | null,
+    email: string | null,
+    page: number = 1,
+  ): Promise<APIResponseFormat> {
     try {
       const limit = LIMIT;
       const skip = (page - 1) * limit;
       const query = this.buildSearchQuery(username, email);
-      const users = await this.dbAdapter.find(User, query, {password: 0, _id:0, __v: 0}, skip, limit);
+      const users = await this.dbAdapter.find(
+        User,
+        query,
+        { password: 0, _id: 0, __v: 0 },
+        skip,
+        limit,
+      );
       const totalUsers = await this.dbAdapter.countDocuments(User, query);
       const totalPages = Math.ceil(totalUsers / limit);
       if (page > totalPages) {
         return createResponseFormat(true, 'Page out of range');
       }
       return createResponseFormat(false, { users, totalPages });
-    } catch (error : unknown) {
+    } catch (error: unknown) {
       return createResponseFormat(true, (error as Error).message);
     }
   }
 
-  async registerUser(username : string, email : string, password : string, profilePicPath?: string) : Promise<APIResponseFormat> {
+  async registerUser(
+    username: string,
+    email: string,
+    password: string,
+    profilePicPath?: string,
+  ): Promise<APIResponseFormat> {
     let user_saved = await this.dbAdapter.create(User, {
       username,
       email,
       role: Role.User,
       password: await bcrypt.hash(password, 10),
-      ...(profilePicPath && { img_path: profilePicPath })
+      ...(profilePicPath && { img_path: profilePicPath }),
     });
-    return createResponseFormat(false, user_saved);    
+    return createResponseFormat(false, user_saved);
   }
-  
-  async loginUser(email : string, password : string) : Promise<APIResponseFormat> {
+
+  async loginUser(email: string, password: string): Promise<APIResponseFormat> {
     const query = { email };
-    const user = await this.dbAdapter.findOne(User, query, {}, ['organizations']);
+    const user = await this.dbAdapter.findOne(User, query, {}, [
+      'organizations',
+    ]);
     if (!user) throw new Error('User not found');
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new Error('Authentication failed by password');
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h'});
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: '1h',
+    });
     const userObject = { ...user.toObject() };
     delete userObject.password;
     delete userObject._id;
@@ -81,28 +104,45 @@ export default class UserLogic implements UsersAPI {
     return createResponseFormat(false, { token, userObject });
   }
 
-  async deleteUser(userToDelete : string, userID : any) : Promise<APIResponseFormat> {
+  async deleteUser(
+    userToDelete: string,
+    userID: any,
+  ): Promise<APIResponseFormat> {
     const isAdminUser = await this.isAdmin(userID);
     userToDelete = !isAdminUser ? userToDelete : userToDelete;
-    const userDelete = await this.dbAdapter.deleteOne(User, { email: userToDelete });
+    const userDelete = await this.dbAdapter.deleteOne(User, {
+      email: userToDelete,
+    });
     return createResponseFormat(false, userDelete);
   }
 
-  async updateUser(email : string, username : string | null, password : string | null,  role : string | null, userID : any, profilePicPath?: string) : Promise<APIResponseFormat>{
+  async updateUser(
+    email: string,
+    username: string | null,
+    password: string | null,
+    role: string | null,
+    userID: any,
+    profilePicPath?: string,
+  ): Promise<APIResponseFormat> {
     const isAdminUser = await this.isAdmin(userID);
-    const modifierUser = await this.dbAdapter.findOne(User, { _id: userID }, {});
-    if (!modifierUser || (modifierUser.length === 0)) throw new Error('User not found');
+    const modifierUser = await this.dbAdapter.findOne(
+      User,
+      { _id: userID },
+      {},
+    );
+    if (!modifierUser || modifierUser.length === 0)
+      throw new Error('User not found');
     const isModifyingItself = modifierUser.email === email;
 
     if (!isAdminUser && !isModifyingItself) {
       throw new Error('You do not have permission to update this user');
     }
 
-    let obj : any = {};
+    let obj: any = {};
     if (username) obj['username'] = username;
     if (email) obj['email'] = email;
     if (password) obj['password'] = await bcrypt.hash(password, 10);
-    if (isAdminUser && role) obj['role'] = role; 
+    if (isAdminUser && role) obj['role'] = role;
     if (profilePicPath) obj['img_path'] = profilePicPath;
     const user = await this.dbAdapter.updateOne(User, { email }, obj);
     if (!user) {
@@ -110,42 +150,68 @@ export default class UserLogic implements UsersAPI {
     }
     return createResponseFormat(false, user);
   }
-  
-  public async isAdmin(userId : any): Promise<boolean> {
+
+  public async isAdmin(userId: any): Promise<boolean> {
     const user = await this.dbAdapter.findOne(User, { _id: userId }, {});
     if (!user) return false;
     return user?.role === Role.Admin;
   }
 
-  public async searchUserById(userId : any) : Promise<APIResponseFormat> {
-    const user = await this.dbAdapter.findOne(User, { _id: userId }, {}, ['organizations']);
+  public async searchUserById(userId: any): Promise<APIResponseFormat> {
+    const user = await this.dbAdapter.findOne(User, { _id: userId }, {}, [
+      'organizations',
+    ]);
     return user;
   }
 
-  public async searchUser(name : string) : Promise<APIResponseFormat> {
+  public async searchUser(name: string): Promise<APIResponseFormat> {
     const user = await this.dbAdapter.findOne(User, { username: name }, {});
     return user;
   }
 
-  public async addOrganizationToUser(userId : any, organizationId : any) : Promise<boolean> {
-    const user = await this.dbAdapter.findOne(User, { _id : userId.toString() }, {});
+  public async addOrganizationToUser(
+    userId: any,
+    organizationId: any,
+  ): Promise<boolean> {
+    const user = await this.dbAdapter.findOne(
+      User,
+      { _id: userId.toString() },
+      {},
+    );
     if (!user) throw new Error('User not found');
     user.organizations.push(organizationId);
-    const userUpdated = await this.dbAdapter.updateOne(User, { _id: userId }, { organizations: user.organizations });
+    const userUpdated = await this.dbAdapter.updateOne(
+      User,
+      { _id: userId },
+      { organizations: user.organizations },
+    );
     if (!userUpdated) throw new Error('User not updated');
     return true;
   }
 
-  public async removeOrganizationFromUser(userId : any, organizationId : any) : Promise<boolean> {
-    const user = await this.dbAdapter.findOne(User, { _id : userId.toString() }, {});
+  public async removeOrganizationFromUser(
+    userId: any,
+    organizationId: any,
+  ): Promise<boolean> {
+    const user = await this.dbAdapter.findOne(
+      User,
+      { _id: userId.toString() },
+      {},
+    );
     if (!user) throw new Error('User not found');
-    user.organizations = user.organizations.filter((org : any) => org.toString() !== organizationId.toString());
-    const userUpdated = await this.dbAdapter.updateOne(User, { _id: userId }, { organizations: user.organizations });
+    user.organizations = user.organizations.filter(
+      (org: any) => org.toString() !== organizationId.toString(),
+    );
+    const userUpdated = await this.dbAdapter.updateOne(
+      User,
+      { _id: userId },
+      { organizations: user.organizations },
+    );
     if (!userUpdated) throw new Error('User not updated');
     return true;
   }
 
-  private buildSearchQuery(username : string | null, email : string | null) : any {
+  private buildSearchQuery(username: string | null, email: string | null): any {
     const query: any = {};
     // TODO: Implement validations
     if (username) {

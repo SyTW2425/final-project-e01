@@ -23,45 +23,66 @@ export const LIMIT: number = 10;
  * @implements databaseAdapter
  */
 export default class MongoDB implements databaseAdapter {
-  async findOne(model : Model<any>, query : any, filter : object = {}, populateFields?: PopulateOptions | (string | PopulateOptions)[]) : Promise<any> {
+  async findOne(
+    model: Model<any>,
+    query: any,
+    filter: object = {},
+    populateFields?: PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<any> {
     if (populateFields) {
       return await model.findOne(query, filter).populate(populateFields);
     } else {
-      return await model.findOne(query, filter)
-    }
-  }
-  
-  async find(model : Model<any>, query : any, filter : object = {}, skip : number = 0, limit : number = 0, populateFields?: PopulateOptions | (string | PopulateOptions)[]) : Promise<any> {
-    if (skip === 0 && limit === 0) {
-      if (populateFields) {
-        return await model.find(query, filter, { password: 0, __v: 0}).populate(populateFields);
-      }
-      return await model.find(query, filter, { password: 0, __v: 0});
-    } else {
-      if (populateFields) {
-        return await model.find(query, filter, { password: 0, __v: 0}).skip(skip).limit(limit).populate(populateFields);
-      }
-      return await model.find(query, filter, { password: 0, __v: 0}).skip(skip).limit(limit);
+      return await model.findOne(query, filter);
     }
   }
 
-  async create(model : Model<any>, data : any) : Promise<any> {
+  async find(
+    model: Model<any>,
+    query: any,
+    filter: object = {},
+    skip: number = 0,
+    limit: number = 0,
+    populateFields?: PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<any> {
+    if (skip === 0 && limit === 0) {
+      if (populateFields) {
+        return await model
+          .find(query, filter, { password: 0, __v: 0 })
+          .populate(populateFields);
+      }
+      return await model.find(query, filter, { password: 0, __v: 0 });
+    } else {
+      if (populateFields) {
+        return await model
+          .find(query, filter, { password: 0, __v: 0 })
+          .skip(skip)
+          .limit(limit)
+          .populate(populateFields);
+      }
+      return await model
+        .find(query, filter, { password: 0, __v: 0 })
+        .skip(skip)
+        .limit(limit);
+    }
+  }
+
+  async create(model: Model<any>, data: any): Promise<any> {
     return await new model(data).save();
   }
 
-  async updateOne(model : Model<any>, query : any, data : any) : Promise<any> {
+  async updateOne(model: Model<any>, query: any, data: any): Promise<any> {
     return await model.findOneAndUpdate(query, data, { new: true });
   }
-  
-  async updateMany(model : Model<any>, query : any, data : any) : Promise<any> {
+
+  async updateMany(model: Model<any>, query: any, data: any): Promise<any> {
     return await model.updateMany(query, data);
   }
 
-  async deleteOne(model : Model<any>, query : any) : Promise<any> {
+  async deleteOne(model: Model<any>, query: any): Promise<any> {
     return await model.findOneAndDelete(query);
   }
 
-  async deleteMany(model : Model<any>, query : any) : Promise<any> {
+  async deleteMany(model: Model<any>, query: any): Promise<any> {
     return await model.deleteMany(query);
   }
 

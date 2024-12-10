@@ -14,7 +14,11 @@
 
 import 'dotenv/config';
 import { createResponseFormat } from '../Utils/CRUD-util-functions.js';
-import { APIResponseFormat, TasksAPI, databaseAdapter } from '../types/APITypes.js';
+import {
+  APIResponseFormat,
+  TasksAPI,
+  databaseAdapter,
+} from '../types/APITypes.js';
 import Task from '../Models/Task.js';
 import { LIMIT } from './DBAdapter.js';
 import Organization from '../Models/Organization.js';
@@ -33,11 +37,21 @@ export default class TasksLogic implements TasksAPI {
     this.dbAdapter = dbAdapter;
   }
 
-  async searchTasks(name: string | null, projectID: string, page: number = 1): Promise<APIResponseFormat> {
+  async searchTasks(
+    name: string | null,
+    projectID: string,
+    page: number = 1,
+  ): Promise<APIResponseFormat> {
     const query = this.buildSearchQuery(name, projectID);
     const limit = LIMIT;
     const skip = (page - 1) * limit;
-    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, skip, limit);
+    const tasks = await this.dbAdapter.find(
+      Task,
+      query,
+      { _id: 0, __v: 0 },
+      skip,
+      limit,
+    );
     const totalTasks = await this.dbAdapter.countDocuments(Task, query);
     const totalPages = Math.ceil(totalTasks / limit);
     if (page > totalPages) {
@@ -47,7 +61,12 @@ export default class TasksLogic implements TasksAPI {
   }
 
   async getTaskById(id: string): Promise<APIResponseFormat> {
-    const task = await this.dbAdapter.findOne(Task, { _id: id }, { _id: 0, __v: 0 }, ['users', 'project']);
+    const task = await this.dbAdapter.findOne(
+      Task,
+      { _id: id },
+      { _id: 0, __v: 0 },
+      ['users', 'project'],
+    );
     if (!task) {
       return createResponseFormat(true, 'Task not found');
     }
@@ -67,18 +86,37 @@ export default class TasksLogic implements TasksAPI {
     return createResponseFormat(false, task);
   }
 
-  async getTasksProjectFromUser(id: string, userId: string): Promise<APIResponseFormat> {
+  async getTasksProjectFromUser(
+    id: string,
+    userId: string,
+  ): Promise<APIResponseFormat> {
     const query = { users: userId, project: id };
-    const tasks = await this.dbAdapter.find(Task, query, { _id: 0, __v: 0 }, undefined, undefined, ['users', 'project']);
+    const tasks = await this.dbAdapter.find(
+      Task,
+      query,
+      { _id: 0, __v: 0 },
+      undefined,
+      undefined,
+      ['users', 'project'],
+    );
     if (!tasks) {
       return createResponseFormat(true, 'Tasks not found');
     }
     return createResponseFormat(false, tasks);
   }
 
-  async getTasksProjectFromUserNotCompleted(id: string): Promise<APIResponseFormat> {
+  async getTasksProjectFromUserNotCompleted(
+    id: string,
+  ): Promise<APIResponseFormat> {
     const query = { project: id, status: { $ne: 'done' } };
-    const tasks = await this.dbAdapter.find(Task, query, { __v: 0 }, undefined, undefined, ['users', 'project']);
+    const tasks = await this.dbAdapter.find(
+      Task,
+      query,
+      { __v: 0 },
+      undefined,
+      undefined,
+      ['users', 'project'],
+    );
     if (!tasks) {
       return createResponseFormat(true, 'Tasks not found');
     }
@@ -87,38 +125,34 @@ export default class TasksLogic implements TasksAPI {
 
   async getAllTasksProject(id: string): Promise<APIResponseFormat> {
     const query = { project: id };
-    const tasks = await this.dbAdapter.find(Task, query, { __v: 0 }, undefined, undefined, ['users', 'project']);
+    const tasks = await this.dbAdapter.find(
+      Task,
+      query,
+      { __v: 0 },
+      undefined,
+      undefined,
+      ['users', 'project'],
+    );
     if (!tasks) {
       return createResponseFormat(true, 'Tasks not found');
     }
     return createResponseFormat(false, tasks);
   }
 
-
-  async createTask(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string): Promise<APIResponseFormat> {
+  async createTask(
+    startDate: string,
+    endDate: string,
+    name: string,
+    description: string,
+    priority: string,
+    dependenciesTasks: string[],
+    status: string,
+    comments: string[],
+    users: string[],
+    project: string,
+  ): Promise<APIResponseFormat> {
     const actualDate = new Date();
-    const progress : number = 0.0;
-    let task_saved = await this.dbAdapter.create(Task, {
-      startDate,
-      endDate,
-      name,
-      progress,
-      description,
-      priority,
-      dependenciesTasks,
-      createdAt: actualDate.toString(),
-      updatedAt: actualDate.toString(),
-      status,
-      comments,
-      users,
-      project
-    });
-    return createResponseFormat(false, task_saved); 
-  }
-
-  async createTaskForSprint(startDate: string, endDate: string, name: string, description: string, priority: string, dependenciesTasks: string[], status: string, comments: string[], users: string[], project: string, sprint: string) : Promise<APIResponseFormat> {
-    const actualDate = new Date();
-    const progress : number = 0.0;
+    const progress: number = 0.0;
     let task_saved = await this.dbAdapter.create(Task, {
       startDate,
       endDate,
@@ -133,7 +167,40 @@ export default class TasksLogic implements TasksAPI {
       comments,
       users,
       project,
-      sprint
+    });
+    return createResponseFormat(false, task_saved);
+  }
+
+  async createTaskForSprint(
+    startDate: string,
+    endDate: string,
+    name: string,
+    description: string,
+    priority: string,
+    dependenciesTasks: string[],
+    status: string,
+    comments: string[],
+    users: string[],
+    project: string,
+    sprint: string,
+  ): Promise<APIResponseFormat> {
+    const actualDate = new Date();
+    const progress: number = 0.0;
+    let task_saved = await this.dbAdapter.create(Task, {
+      startDate,
+      endDate,
+      name,
+      progress,
+      description,
+      priority,
+      dependenciesTasks,
+      createdAt: actualDate.toString(),
+      updatedAt: actualDate.toString(),
+      status,
+      comments,
+      users,
+      project,
+      sprint,
     });
     if (!task_saved) {
       return createResponseFormat(true, 'Task not saved');
@@ -141,97 +208,155 @@ export default class TasksLogic implements TasksAPI {
     const sprintId = new mongoose.Types.ObjectId(sprint);
     const sprintUpdateResult = await this.dbAdapter.updateOne(
       Project,
-      { _id: project, "sprints._id": sprintId },
-      { $push: { "sprints.$.tasks": task_saved._id } }
+      { _id: project, 'sprints._id': sprintId },
+      { $push: { 'sprints.$.tasks': task_saved._id } },
     );
     if (!sprintUpdateResult) {
       return createResponseFormat(true, 'Task not added to sprint of project');
     }
-    return createResponseFormat(false, task_saved); 
+    return createResponseFormat(false, task_saved);
   }
 
-  async updateTask(name: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, project: string, organization: string, assignedTo: string | null): Promise<APIResponseFormat> {
-    const orgObject = await this.dbAdapter.findOne(Organization, { name: organization }, {});
+  async updateTask(
+    name: string,
+    description: string | null,
+    endDate: string | null,
+    priority: string | null,
+    status: string | null,
+    project: string,
+    organization: string,
+    assignedTo: string | null,
+  ): Promise<APIResponseFormat> {
+    const orgObject = await this.dbAdapter.findOne(
+      Organization,
+      { name: organization },
+      {},
+    );
     if (!orgObject) {
       throw new Error('Organization not found');
     }
-    const projectObject = await this.dbAdapter.findOne(Project, { name: project, organization: orgObject._id }, {});
+    const projectObject = await this.dbAdapter.findOne(
+      Project,
+      { name: project, organization: orgObject._id },
+      {},
+    );
     if (!projectObject) {
       throw new Error('Project not found');
     }
-    const taskToUpdate = await this.dbAdapter.findOne(Task, { name, project: projectObject._id }, {});
+    const taskToUpdate = await this.dbAdapter.findOne(
+      Task,
+      { name, project: projectObject._id },
+      {},
+    );
     if (!taskToUpdate) {
       throw new Error('Task not found');
     }
     let obj: any = {};
     if (description) obj['description'] = description;
     if (endDate) obj['endDate'] = new Date(endDate);
-    if (priority) obj['priority'] = priority ;
+    if (priority) obj['priority'] = priority;
     if (status) obj['status'] = status;
     if (assignedTo) obj['assignedTo'] = assignedTo;
-    const task = await this.dbAdapter.updateOne(Task, { _id: taskToUpdate._id }, obj);
+    const task = await this.dbAdapter.updateOne(
+      Task,
+      { _id: taskToUpdate._id },
+      obj,
+    );
     return createResponseFormat(false, task);
   }
 
-  async updateTaskById(taskId: string, description: string | null, endDate: string | null, priority: string | null, status: string | null, assignedTo: string | null): Promise<APIResponseFormat> {
+  async updateTaskById(
+    taskId: string,
+    description: string | null,
+    endDate: string | null,
+    priority: string | null,
+    status: string | null,
+    assignedTo: string | null,
+  ): Promise<APIResponseFormat> {
     let obj: any = {};
     if (description) obj['description'] = description;
     if (endDate) obj['endDate'] = new Date(endDate);
-    if (priority) obj['priority'] = priority ;
+    if (priority) obj['priority'] = priority;
     if (status) obj['status'] = status;
     if (assignedTo) obj['assignedTo'] = assignedTo;
     const task = await this.dbAdapter.updateOne(Task, { _id: taskId }, obj);
     return createResponseFormat(false, task);
   }
 
-  async deleteTask(taskToDelete: string, projectTask: string): Promise<APIResponseFormat> {
-    const taskDelete = await this.dbAdapter.deleteOne(Task, { name: taskToDelete, project: projectTask });
+  async deleteTask(
+    taskToDelete: string,
+    projectTask: string,
+  ): Promise<APIResponseFormat> {
+    const taskDelete = await this.dbAdapter.deleteOne(Task, {
+      name: taskToDelete,
+      project: projectTask,
+    });
     return createResponseFormat(false, taskDelete);
   }
 
   async deleteTaskById(taskId: string): Promise<APIResponseFormat> {
     try {
       // Search the task to delete
-      const taskToDelete = await this.dbAdapter.findOne(Task, { _id: taskId }, { sprint: 1, project: 1 });
+      const taskToDelete = await this.dbAdapter.findOne(
+        Task,
+        { _id: taskId },
+        { sprint: 1, project: 1 },
+      );
       if (!taskToDelete) {
         return createResponseFormat(true, 'Task not found');
       }
       // Delete the task
-      const taskDeleteResult = await this.dbAdapter.deleteOne(Task, { _id: taskId });
+      const taskDeleteResult = await this.dbAdapter.deleteOne(Task, {
+        _id: taskId,
+      });
       if (!taskDeleteResult) {
         return createResponseFormat(true, 'Failed to delete the task');
-      }  
+      }
       // Delete the task from the sprint if it exists
       if (taskToDelete.sprint) {
         const sprintUpdateResult = await this.dbAdapter.updateOne(
           Project,
-          { _id: taskToDelete.project, "sprints._id": taskToDelete.sprint },
-          { $pull: { "sprints.$.tasks": taskId } }
+          { _id: taskToDelete.project, 'sprints._id': taskToDelete.sprint },
+          { $pull: { 'sprints.$.tasks': taskId } },
         );
         if (!sprintUpdateResult) {
-          return createResponseFormat(true, 'Failed to remove task ID from sprint');
+          return createResponseFormat(
+            true,
+            'Failed to remove task ID from sprint',
+          );
         }
       }
-      return createResponseFormat(false, 'Task successfully deleted and removed from sprint');
+      return createResponseFormat(
+        false,
+        'Task successfully deleted and removed from sprint',
+      );
     } catch (error) {
-      return createResponseFormat(true, `Error deleting task: ${(error as Error).message}`);
+      return createResponseFormat(
+        true,
+        `Error deleting task: ${(error as Error).message}`,
+      );
     }
   }
 
-  async deleteUserFromTask(taskId: string, user: string): Promise<APIResponseFormat> {
+  async deleteUserFromTask(
+    taskId: string,
+    user: string,
+  ): Promise<APIResponseFormat> {
     try {
       const task_modified = await this.dbAdapter.updateOne(
         Task,
         { _id: taskId },
-        { $pull: { users: user } }
-      );      
+        { $pull: { users: user } },
+      );
       if (!task_modified) {
         return createResponseFormat(true, 'Failed to remove user from task');
       }
       return createResponseFormat(false, 'User successfully removed from task');
-    }
-    catch (error) {
-      return createResponseFormat(true, `Error deleting user: ${(error as Error).message}`);
+    } catch (error) {
+      return createResponseFormat(
+        true,
+        `Error deleting user: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -242,6 +367,6 @@ export default class TasksLogic implements TasksAPI {
       query['name'] = { $regex: name, $options: 'i' };
     }
     query['project'] = projectID;
-    return query; 
+    return query;
   }
 }
