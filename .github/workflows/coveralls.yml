@@ -38,12 +38,7 @@ jobs:
           echo "MONGODB_URL=mongodb://localhost:27017/test" >> $GITHUB_ENV
           echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
 
-      # Step 6: Verify MongoDB Connection (opcional)
-      - name: Verify MongoDB Connection
-        run: |
-          mongo --eval 'db.runCommand({ connectionStatus: 1 })'
-
-      # Step 7: Run Coverage and Upload to Coveralls
+      # Step 6: Run Coverage and Upload to Coveralls
       - name: Run Coverage and Upload to Coveralls
         env:
           MONGODB_URL: ${{ env.MONGODB_URL }}
