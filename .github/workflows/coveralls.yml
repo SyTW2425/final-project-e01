@@ -47,7 +47,8 @@ jobs:
         working-directory: packages/backend
 
       # Step 7: Upload coverage report to Coveralls
-      - name: Coveralls GitHub Action
+      - name: Upload to Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: packages/backend/coverage/lcov.info
