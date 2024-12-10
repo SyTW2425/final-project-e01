@@ -45,3 +45,10 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: npm run coverage
         working-directory: packages/backend
+
+      # Step 7: Upload coverage report to Coveralls
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: packages/backend
