@@ -11,10 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v2
       # Step 1: Checkout the code
-      - uses: actions/checkout@v4
+      - name: Clone repository
+        uses: actions/checkout@v4
 
       # Step 2: Set up Node.js version
       - name: Use Node.js
@@ -22,18 +21,32 @@ jobs:
         with:
           node-version: 18 # Fija una versión para garantizar consistencia
 
-      # Step 3: Install dependencies
+      # Step 3: Start MongoDB
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: '5.0'
+
+      # Step 4: Install dependencies
       - name: Install Dependencies
         run: npm install
         working-directory: packages/backend
 
-      # Step 4: Set environment variables
+      # Step 5: Set environment variables
       - name: Set Environment Variables
-        run: echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
+        run: |
+          echo "MONGODB_URL=mongodb://localhost:27017/test" >> $GITHUB_ENV
+          echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
 
-      # Step 5: Run Coverage and Upload to Coveralls
+      # Step 6: Verify MongoDB Connection (opcional)
+      - name: Verify MongoDB Connection
+        run: |
+          mongo --eval 'db.runCommand({ connectionStatus: 1 })'
+
+      # Step 7: Run Coverage and Upload to Coveralls
       - name: Run Coverage and Upload to Coveralls
         env:
+          MONGODB_URL: ${{ env.MONGODB_URL }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: npm run coverage
         working-directory: packages/backend
