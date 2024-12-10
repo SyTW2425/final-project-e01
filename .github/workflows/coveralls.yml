@@ -1,0 +1,39 @@
+name: Backend Coverage
+
+on:
+  push:
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "dev", "main" ]
+
+jobs:
+  backend-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      # Step 1: Checkout the code
+      - uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js version
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # Fija una versión para garantizar consistencia
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: npm install
+        working-directory: packages/backend
+
+      # Step 4: Set environment variables
+      - name: Set Environment Variables
+        run: echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
+
+      # Step 5: Run Coverage and Upload to Coveralls
+      - name: Run Coverage and Upload to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: npm run coverage
+        working-directory: packages/backend
