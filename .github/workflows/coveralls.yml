@@ -46,7 +46,8 @@ jobs:
         working-directory: packages/backend
 
       # Step 7: Upload to Coveralls
-      - name: Upload Coverage
-        run: cat packages/backend/coverage/lcov.info | npx coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2.2.3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+      file: ./packages/backend/coverage/lcov.info
