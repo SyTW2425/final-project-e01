@@ -11,43 +11,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Clone repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js version
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # Step 3: Start MongoDB
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
           mongodb-version: '5.0'
 
-      # Step 4: Install dependencies
       - name: Install Dependencies
         run: npm install
         working-directory: packages/backend
 
-      # Step 5: Set environment variables
       - name: Set Environment Variables
         run: |
           echo "MONGODB_URL=mongodb://localhost:27017/test" >> $GITHUB_ENV
           echo "COVERALLS_REPO_TOKEN=${{ secrets.COVERALLS_REPO_TOKEN }}" >> $GITHUB_ENV
 
-      # Step 6: Run Coverage
       - name: Run Coverage
         env:
           MONGODB_URL: ${{ env.MONGODB_URL }}
         run: npm run coverage
         working-directory: packages/backend
 
-      # Step 7: Upload to Coveralls
+      - name: Verify coverage files
+        run: ls -al ./packages/backend/coverage
+        working-directory: packages/backend
+
       - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v2.2.3
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-      file: ./packages/backend/coverage/lcov.info
+        uses: coverallsapp/github-action@v2.2.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./packages/backend/coverage/lcov.info
