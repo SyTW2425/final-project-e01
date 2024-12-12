@@ -11,6 +11,7 @@
  * @date 28/10/2024
  * @brief Entrypoint of the backend server
  */
+/// <reference path="./types/express.d.ts" />
 
 import 'dotenv/config';
 import express from 'express';
@@ -28,7 +29,7 @@ const MONGODB_URL = process.env.MONGODB_URL;
 /**
  * Function to start the database connection
  * @returns void
- */ 
+ */
 function startDB(): void {
   connect(MONGODB_URL!)
     .then(() => {

@@ -16,7 +16,13 @@ import Express from 'express';
 import MongoDB from '../Class/DBAdapter.js';
 import TasksLogic from '../Class/TasksLogic.js';
 import jwtMiddleware from '../Middleware/authMiddleware.js';
-import { createResponseFormat, mapUsersToObjectIds, validateRequiredFields, authenticateAndAuthorizeUser, getUserFromHeader } from '../Utils/CRUD-util-functions.js';
+import {
+  createResponseFormat,
+  mapUsersToObjectIds,
+  validateRequiredFields,
+  authenticateAndAuthorizeUser,
+  getUserFromHeader,
+} from '../Utils/CRUD-util-functions.js';
 import { projectLogic } from './projects.js';
 
 export const tasksRouter = Express.Router();
@@ -32,17 +38,34 @@ export const taskLogic = new TasksLogic(dbAdapter);
 tasksRouter.get('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, projectName, organizationName, page } = req.query;
-    if (!validateRequiredFields(req.query, ['name', 'projectName', 'organizationName'], res)) return;
-    const authResult = await authenticateAndAuthorizeUser(req, projectName as string, organizationName as string);
+    if (
+      !validateRequiredFields(
+        req.query,
+        ['name', 'projectName', 'organizationName'],
+        res,
+      )
+    )
+      return;
+    const authResult = await authenticateAndAuthorizeUser(
+      req,
+      projectName as string,
+      organizationName as string,
+    );
     if (authResult.status !== 200) {
-      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      res
+        .status(authResult.status)
+        .send(createResponseFormat(true, authResult.message));
       return;
     }
     let pageSelected: number = parseInt(page as string);
     if (isNaN(pageSelected) || pageSelected < 1) {
       pageSelected = 1;
     }
-    const response = await taskLogic.searchTasks(name as string, authResult.projectId.toString(), pageSelected);
+    const response = await taskLogic.searchTasks(
+      name as string,
+      authResult.projectId.toString(),
+      pageSelected,
+    );
     if (response.error) {
       res.status(404).send(response);
       return;
@@ -66,7 +89,9 @@ tasksRouter.get('/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      res
+        .status(400)
+        .send(createResponseFormat(true, 'The task id is required'));
       return;
     }
     const response = await taskLogic.getTaskById(id);
@@ -172,7 +197,7 @@ tasksRouter.get('/project/tasks/:id', jwtMiddleware, async (req, res) => {
     const errorParsed = error as Error;
     res.status(500).send(createResponseFormat(true, errorParsed.message));
   }
-})
+});
 
 /**
  * @brief This endpoint is used to create a task
@@ -182,11 +207,47 @@ tasksRouter.get('/project/tasks/:id', jwtMiddleware, async (req, res) => {
  */
 tasksRouter.post('/', jwtMiddleware, async (req, res) => {
   try {
-    const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, projectName, organizationName } = req.body;
-    if (!validateRequiredFields(req.body, ['startDate', 'endDate', 'name', 'description', 'priority', 'status', 'comments', 'users', 'projectName', 'organizationName'], res)) return;
-    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+    const {
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      users,
+      projectName,
+      organizationName,
+    } = req.body;
+    if (
+      !validateRequiredFields(
+        req.body,
+        [
+          'startDate',
+          'endDate',
+          'name',
+          'description',
+          'priority',
+          'status',
+          'comments',
+          'users',
+          'projectName',
+          'organizationName',
+        ],
+        res,
+      )
+    )
+      return;
+    const authResult = await authenticateAndAuthorizeUser(
+      req,
+      projectName,
+      organizationName,
+    );
     if (authResult.status !== 200) {
-      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      res
+        .status(authResult.status)
+        .send(createResponseFormat(true, authResult.message));
       return;
     }
     let usersIds: any[] = [];
@@ -198,7 +259,18 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
         return;
       }
     }
-    const response = await taskLogic.createTask(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, usersIds, authResult.projectId.toString());
+    const response = await taskLogic.createTask(
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      usersIds,
+      authResult.projectId.toString(),
+    );
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -214,8 +286,35 @@ tasksRouter.post('/', jwtMiddleware, async (req, res) => {
  */
 tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
   try {
-    const { startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprint } = req.body;
-    if (!validateRequiredFields(req.body, ['startDate', 'endDate', 'name', 'description', 'priority', 'status', 'comments', 'users'], res)) return;
+    const {
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      users,
+      sprint,
+    } = req.body;
+    if (
+      !validateRequiredFields(
+        req.body,
+        [
+          'startDate',
+          'endDate',
+          'name',
+          'description',
+          'priority',
+          'status',
+          'comments',
+          'users',
+        ],
+        res,
+      )
+    )
+      return;
     const projectResponse = await projectLogic.searchProjectById(req.params.id);
     if (projectResponse.error || !projectResponse.result) {
       res.status(404).send(projectResponse);
@@ -226,7 +325,19 @@ tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
       res.status(401).send(createResponseFormat(true, 'User not found'));
       return;
     }
-    const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprint);
+    const response = await taskLogic.createTaskForSprint(
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      users,
+      req.params.id,
+      sprint,
+    );
     res.status(201).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -242,8 +353,26 @@ tasksRouter.post('/project/:id', jwtMiddleware, async (req, res) => {
  */
 tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
   try {
-    const {  startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, sprintID } = req.body;
-    if (!validateRequiredFields(req.body, ['name', 'description', 'startDate', 'endDate', 'users'], res)) return;
+    const {
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      users,
+      sprintID,
+    } = req.body;
+    if (
+      !validateRequiredFields(
+        req.body,
+        ['name', 'description', 'startDate', 'endDate', 'users'],
+        res,
+      )
+    )
+      return;
     const user: any = await getUserFromHeader(req);
     if (!user) {
       res.status(401).send(createResponseFormat(true, 'User not found'));
@@ -254,7 +383,19 @@ tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
       res.status(404).send(projectResponse);
       return;
     }
-    const response = await taskLogic.createTaskForSprint(startDate, endDate, name, description, priority, dependenciesTasks, status, comments, users, req.params.id, sprintID);
+    const response = await taskLogic.createTaskForSprint(
+      startDate,
+      endDate,
+      name,
+      description,
+      priority,
+      dependenciesTasks,
+      status,
+      comments,
+      users,
+      req.params.id,
+      sprintID,
+    );
     if (response.error || !response.result) {
       res.status(404).send(response);
       return;
@@ -275,13 +416,29 @@ tasksRouter.post('/project/sprints/:id', jwtMiddleware, async (req, res) => {
 tasksRouter.delete('/', jwtMiddleware, async (req, res) => {
   try {
     const { name, projectName, organizationName } = req.body;
-    if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
-    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+    if (
+      !validateRequiredFields(
+        req.body,
+        ['name', 'projectName', 'organizationName'],
+        res,
+      )
+    )
+      return;
+    const authResult = await authenticateAndAuthorizeUser(
+      req,
+      projectName,
+      organizationName,
+    );
     if (authResult.status !== 200) {
-      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      res
+        .status(authResult.status)
+        .send(createResponseFormat(true, authResult.message));
       return;
     }
-    const response = await taskLogic.deleteTask(name, authResult.projectId.toString());
+    const response = await taskLogic.deleteTask(
+      name,
+      authResult.projectId.toString(),
+    );
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -299,7 +456,9 @@ tasksRouter.delete('/:id', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      res
+        .status(400)
+        .send(createResponseFormat(true, 'The task id is required'));
       return;
     }
     const response = await taskLogic.deleteTaskById(id);
@@ -321,15 +480,46 @@ tasksRouter.delete('/:id', jwtMiddleware, async (req, res) => {
  * @returns void
  */
 tasksRouter.put('/', jwtMiddleware, async (req, res) => {
-  try { 
-    const { name, description, endDate, priority, status, projectName, organizationName, assignedTo } = req.body;
-    if (!validateRequiredFields(req.body, ['name', 'projectName', 'organizationName'], res)) return;
-    const authResult = await authenticateAndAuthorizeUser(req, projectName, organizationName);
+  try {
+    const {
+      name,
+      description,
+      endDate,
+      priority,
+      status,
+      projectName,
+      organizationName,
+      assignedTo,
+    } = req.body;
+    if (
+      !validateRequiredFields(
+        req.body,
+        ['name', 'projectName', 'organizationName'],
+        res,
+      )
+    )
+      return;
+    const authResult = await authenticateAndAuthorizeUser(
+      req,
+      projectName,
+      organizationName,
+    );
     if (authResult.status !== 200) {
-      res.status(authResult.status).send(createResponseFormat(true, authResult.message));
+      res
+        .status(authResult.status)
+        .send(createResponseFormat(true, authResult.message));
       return;
     }
-    const response = await taskLogic.updateTask(name, description, endDate, priority, status, projectName, organizationName, assignedTo);
+    const response = await taskLogic.updateTask(
+      name,
+      description,
+      endDate,
+      priority,
+      status,
+      projectName,
+      organizationName,
+      assignedTo,
+    );
     res.status(200).send(response);
   } catch (error: unknown) {
     const errorParsed = error as Error;
@@ -348,10 +538,19 @@ tasksRouter.put('/update/:id', jwtMiddleware, async (req, res) => {
     const { id } = req.params;
     const { description, endDate, priority, status, assignedTo } = req.body;
     if (!id) {
-      res.status(400).send(createResponseFormat(true, 'The task id is required'));
+      res
+        .status(400)
+        .send(createResponseFormat(true, 'The task id is required'));
       return;
     }
-    const response = await taskLogic.updateTaskById(id, description, endDate, priority, status, assignedTo);
+    const response = await taskLogic.updateTaskById(
+      id,
+      description,
+      endDate,
+      priority,
+      status,
+      assignedTo,
+    );
     if (response.error || !response.result) {
       res.status(404).send(createResponseFormat(true, 'Task not found'));
       return;
