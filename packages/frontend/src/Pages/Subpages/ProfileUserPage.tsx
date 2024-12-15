@@ -420,7 +420,7 @@ const UserProfile: React.FC = () => {
             <img
               src={isLoggedUser ? imageSRC : `${import.meta.env.VITE_BACKEND_URL}/userImg/${searchedUser?.img_path}`}
               alt="Profile"
-              className="w-64 h-64 md:w-60 md:h-60 rounded-full mx-auto border-4 md:border-4 border-blue-900 shadow-lg"
+              className="w-64 h-64 md:w-60 md:h-60 rounded-full mx-auto border-4 md:border-4 border-blue-800 shadow-lg"
             />
             <h2 className="text-xl md:text-2xl font-bold text-gray-700">{isLoggedUser ? user.username : searchedUser?.username}</h2>
             <p className="text-sm text-gray-500">{isLoggedUser ? user.email : searchedUser?.email}</p>
@@ -429,20 +429,20 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleAddtoOrg}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
+              className="w-full bg-blue-800 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-850 md:border-4 border-gray-950 transition duration-200"
   >
               Add to an Organization
             </button>
             <button
               onClick={handleRemoveToOrg}
-              className="w-full bg-white-900 text-blue-900 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-900 transition duration-200"
+              className="w-full bg-white-900 text-blue-800 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-800 transition duration-200"
 
             >
               Delete from Organization
             </button>
             <button
               onClick={handleAddtoProject}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
+              className="w-full bg-blue-800 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
             >
               Add to a Project
             </button>
@@ -452,13 +452,13 @@ const UserProfile: React.FC = () => {
           <div className="mt-6 md:mt-8 space-y-4">
             <button
               onClick={handleUpdate}
-              className="w-full bg-blue-900 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
+              className="w-full bg-blue-800 text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-950 md:border-4 border-gray-950 transition duration-200"
             >
               Update Profile
             </button>
             <button
               onClick={handleDelete}
-              className="w-full bg-white-900 text-blue-900 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-900 transition duration-200"
+              className="w-full bg-white-900 text-blue-800 font-bold py-2 md:py-3 rounded-lg hover:bg-gray-300 md:border-4 border-blue-900 transition duration-200"
             >
               Delete Account
             </button>
@@ -466,7 +466,7 @@ const UserProfile: React.FC = () => {
           )}
         </div>
         <div className="w-full md:w-2/3 flex flex-col space-y-6 p-4 md:p-8">
-          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
+          <div className="bg-blue-800 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
             <h3 className="text-lg md:text-xl font-bold text-white mb-4">Organizations</h3>
             <ul className="space-y-3">
             {organizations.map((organization: any, index: number) => (
@@ -483,7 +483,7 @@ const UserProfile: React.FC = () => {
             )}
           </ul>
         </div>
-          <div className="bg-blue-900 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
+          <div className="bg-blue-800 p-4 md:p-6 rounded-lg md:border-2 border-gray-950 shadow-lg">
             <h3 className="text-lg md:text-xl font-bold text-white mb-4">Projects</h3>
             <ul className="space-y-3">
               {projects.map((project: any, index: number) => (
@@ -502,7 +502,7 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
       {showModalAddOrg && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-800">Add to a Organization</h2>
             <form onSubmit={handleSubmitAddOrg}>
