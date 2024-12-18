@@ -17,6 +17,7 @@ import { setCurrentProject } from "../../slices/sessionSlice";
 import { setPersistedProject } from "../../slices/projectSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
+import { errorNotification,  successNotification } from '../../Components/Information/Notification';
 
 interface Project {
   _id: string;
@@ -66,9 +67,9 @@ const MyProjectsPage: React.FC = () => {
         dispatch(setCurrentProject(null));
         dispatch(setPersistedProject(null));
         setSelectedProject(null);
-        alert("You have left the project.");
+        successNotification("You left the project successfully!");
       } catch (error) {
-        console.error("Error leaving project:", error);
+        errorNotification("Failed to leave project");
       }
     }
   };
